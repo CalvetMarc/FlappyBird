@@ -88,10 +88,12 @@ export class SceneManager {
 
     // Add background behind everything
     this.app.stage.addChild(this.backgroundManager.view);
+    BackgroundManager.I.start();
   }
 
   update(dt: number): void {
     this.current?.update(dt);
+    BackgroundManager.I.update(dt);
   }
 
   fire(event: SceneEvent): void {
