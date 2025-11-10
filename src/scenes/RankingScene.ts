@@ -21,8 +21,8 @@ export class RankingScene implements IScene {
   }
 
   /** Called before scene is removed or pooled */
-  onEnd(): void {
-   
+  async onEnd(): Promise<void> {
+    
   }
 
   public onResize(width: number, height: number): void {

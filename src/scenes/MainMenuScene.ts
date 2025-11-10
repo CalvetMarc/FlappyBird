@@ -4,6 +4,7 @@ import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import logoUrl from "../assets/ui/logoFlappyBird.png";
 import playUrl from "../assets/ui/UiCozyFree.png";
+import birdUrl from "../assets/birds/AllBird1.png";
 
 export class MainMenuScene implements IScene {
   container = new Container();
@@ -11,11 +12,19 @@ export class MainMenuScene implements IScene {
   private playButton?: Sprite;
   private settingsButton?: Sprite;
   private rankingButton?: Sprite;
+  private bird?: Sprite;
+  private leftButton?: Sprite;
+  private rightButton?: Sprite;
 
   private playNormalTex?: Texture;
   private playPressedTex?: Texture;
   private rankingTex?: Texture;
   private settingsTex?: Texture;
+  private leftTex?: Texture;
+  private rightTex?: Texture;
+
+  private birdFrames: Texture[] = [];
+  private currentBirdIndex = 0;
 
   private logoBaseW = 0;
   private baseY = 0;
@@ -27,16 +36,20 @@ export class MainMenuScene implements IScene {
   }
 
   private async loadAssets() {
-    const [logoTexture, playTexture] = await Promise.all([
+    const [logoTexture, playTexture, birdTexture] = await Promise.all([
       Assets.load(logoUrl),
       Assets.load(playUrl),
+      Assets.load(birdUrl),
     ]);
 
     this.createLogo(logoTexture);
     this.createButtons(playTexture);
+    this.createBird(birdTexture);
+    this.createSideButtons(playTexture);
+
+    this.container.alpha = 0;
   }
 
-  /** Creates and positions the logo */
   private createLogo(logoTexture: Texture) {
     this.logo = new Sprite(logoTexture);
     this.logoBaseW = this.logo.texture.width;
@@ -45,36 +58,67 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgSprite = BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.view.children.find(
       c => c instanceof Sprite
-    ) as Sprite | undefined;
+    ) as Sprite)?.width ?? screenW;
 
-    const bgWidth = bgSprite?.width ?? screenW;
     const targetWidth = bgWidth / 3;
     const scale = targetWidth / this.logoBaseW;
     this.logo.scale.set(scale);
 
     this.logo.anchor.set(0.5);
-    this.logo.position.set(screenW / 2, screenH / 5);
+    this.logo.position.set(screenW / 2, screenH / 8);
     this.baseY = this.logo.position.y;
 
     this.logo.zIndex = 10;
     this.container.addChild(this.logo);
   }
 
-  /** Creates Play, Settings and Ranking buttons */
+  /** 🐦 Crea totes les variants de l’ocell i mostra la primera */
+  private createBird(originalTexture: Texture) {
+    const frameW = 16;
+    const frameH = 16;
+    const totalFrames = Math.floor(originalTexture.height / frameH);
+
+    for (let i = 0; i < totalFrames; i++) {
+      const tex = new Texture({
+        source: originalTexture.source,
+        frame: new Rectangle(0, i * frameH, frameW, frameH),
+      });
+      this.birdFrames.push(tex);
+    }
+
+    this.currentBirdIndex = 0;
+    this.bird = new Sprite(this.birdFrames[this.currentBirdIndex]);
+    this.bird.anchor.set(0.5);
+    this.bird.zIndex = 12;
+
+    const app = SceneManager.I.app;
+    const screenW = app.renderer.width;
+    const screenH = app.renderer.height;
+    const bgWidth = (BackgroundManager.I.view.children.find(
+      c => c instanceof Sprite
+    ) as Sprite)?.width ?? screenW;
+
+    const targetWidth = bgWidth / 10;
+    const scale = targetWidth / frameW;
+    this.bird.scale.set(scale * 0.7);
+
+    this.bird.position.set(screenW / 2, screenH / 1.7);
+    this.container.addChild(this.bird);
+  }
+
+  /** 🎯 Botons del menú principal */
   private createButtons(originalTexture: Texture) {
     const cropSize = 15;
     const tile = 16;
     const offsetY = 80;
 
-    // Base row for "Play"
-    const playY = offsetY + tile; // original play
+    const playY = offsetY + tile;
     const rankingY = playY + tile * 3;
     const settingsY = playY + tile * 3;
     const settingsX = tile * 2;
 
-    // --- Play button textures ---
     this.playNormalTex = new Texture({
       source: originalTexture.source,
       frame: new Rectangle(0, playY, cropSize, cropSize),
@@ -85,13 +129,11 @@ export class MainMenuScene implements IScene {
       frame: new Rectangle(16, playY, cropSize, cropSize),
     });
 
-    // --- Ranking button texture (3 tiles below) ---
     this.rankingTex = new Texture({
       source: originalTexture.source,
       frame: new Rectangle(0, rankingY, cropSize, cropSize),
     });
 
-    // --- Settings button texture (3 down, 2 right) ---
     this.settingsTex = new Texture({
       source: originalTexture.source,
       frame: new Rectangle(settingsX, settingsY, cropSize, cropSize),
@@ -101,18 +143,12 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgSprite = BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.view.children.find(
       c => c instanceof Sprite
-    ) as Sprite | undefined;
-    const bgWidth = bgSprite?.width ?? screenW;
+    ) as Sprite)?.width ?? screenW;
     const targetWidth = bgWidth / 10;
 
-    // Helper to create any button easily
-    const makeButton = (
-      x: number,
-      label: "play" | "settings" | "ranking",
-      tex: Texture
-    ): Sprite => {
+    const makeButton = (x: number, label: "play" | "settings" | "ranking", tex: Texture): Sprite => {
       const btn = new Sprite(tex);
       btn.anchor.set(0.5);
       btn.zIndex = 11;
@@ -122,18 +158,15 @@ export class MainMenuScene implements IScene {
       btn.eventMode = "static";
       btn.cursor = "pointer";
 
-      // Interactions
       btn.on("pointerdown", () => {
         btn.scale.set(scale * 0.9);
         if (label === "play") btn.texture = this.playPressedTex!;
       });
-
       btn.on("pointerup", () => {
         btn.scale.set(scale);
         if (label === "play") btn.texture = this.playNormalTex!;
         setTimeout(() => SceneManager.I.fire(label), 40);
       });
-
       btn.on("pointerupoutside", () => {
         btn.scale.set(scale);
         if (label === "play") btn.texture = this.playNormalTex!;
@@ -143,75 +176,163 @@ export class MainMenuScene implements IScene {
       return btn;
     };
 
-    // --- Create all buttons ---
     const spacing = targetWidth * 3;
     const centerX = screenW / 2;
-
     this.settingsButton = makeButton(centerX - spacing, "settings", this.settingsTex);
     this.playButton = makeButton(centerX, "play", this.playNormalTex);
     this.rankingButton = makeButton(centerX + spacing, "ranking", this.rankingTex);
+
+    if (this.bird && this.playButton)
+      this.bird.position.set(this.playButton.x, this.playButton.y - this.playButton.height * 1.7);
   }
 
-  /** Floating animation for the logo */
+  /** ⚙️ Botons per canviar l’ocell */
+  private createSideButtons(originalTexture: Texture) {
+    const cropSize = 15;
+    const tile = 16;
+    const offsetY = 80;
+
+    const leftFrame = new Rectangle(tile * 2, offsetY + tile * 3, cropSize, cropSize);
+    const rightFrame = new Rectangle(0, offsetY + tile * 2, cropSize, cropSize);
+
+    this.leftTex = new Texture({ source: originalTexture.source, frame: leftFrame });
+    this.rightTex = new Texture({ source: originalTexture.source, frame: rightFrame });
+
+    const bgWidth = (BackgroundManager.I.view.children.find(
+      c => c instanceof Sprite
+    ) as Sprite)?.width ?? SceneManager.I.app.renderer.width;
+    const targetWidth = bgWidth / 10;
+    const scale = targetWidth / cropSize;
+
+    const makeButton = (tex: Texture, onClick: () => void): Sprite => {
+      const btn = new Sprite(tex);
+      btn.anchor.set(0.5);
+      btn.zIndex = 11;
+      btn.scale.set(scale * 0.5);
+      btn.eventMode = "static";
+      btn.cursor = "pointer";
+
+      btn.on("pointerdown", () => {
+        btn.scale.set(scale * 0.4);
+        onClick();
+      });
+      btn.on("pointerup", () => btn.scale.set(scale * 0.5));
+      btn.on("pointerupoutside", () => btn.scale.set(scale * 0.5));
+
+      this.container.addChild(btn);
+      return btn;
+    };
+
+    const prevBird = () => {
+      if (!this.birdFrames.length || !this.bird) return;
+      this.currentBirdIndex = (this.currentBirdIndex - 1 + this.birdFrames.length) % this.birdFrames.length;
+      this.bird.texture = this.birdFrames[this.currentBirdIndex];
+    };
+
+    const nextBird = () => {
+      if (!this.birdFrames.length || !this.bird) return;
+      this.currentBirdIndex = (this.currentBirdIndex + 1) % this.birdFrames.length;
+      this.bird.texture = this.birdFrames[this.currentBirdIndex];
+    };
+
+    this.leftButton = makeButton(this.leftTex, prevBird);
+    this.rightButton = makeButton(this.rightTex, nextBird);
+
+    if (this.bird) {
+      const y = this.bird.y;
+      const dist = this.bird.width * 1.5;
+      this.leftButton.position.set(this.bird.x - dist, y);
+      this.rightButton.position.set(this.bird.x + dist, y);
+    }
+  }
+
   private floatAnimation(dt: number) {
     if (!this.logo) return;
-
     this.elapsed += dt / 1000;
-    const scaleFactor = window.devicePixelRatio || 1;
-    const amplitude = 15 / scaleFactor;
-    const speed = 1.2;
-
-    const offset = Math.sin(this.elapsed * Math.PI * speed) * amplitude;
+    const offset = Math.sin(this.elapsed * Math.PI * 1.2) * 15 / (window.devicePixelRatio || 1);
     this.logo.position.y = this.baseY + offset;
   }
 
-  /** Handles window resize */
-  public onResize(width: number, height: number): void {
-    const bgSprite = BackgroundManager.I.view.children.find(
+  private fade(targetAlpha: number, duration: number, onComplete?: () => void) {
+    const startAlpha = this.container.alpha;
+    const startTime = performance.now();
+
+    const animate = (now: number) => {
+      const t = Math.min((now - startTime) / duration, 1);
+      this.container.alpha = startAlpha + (targetAlpha - startAlpha) * t;
+      if (t < 1) requestAnimationFrame(animate);
+      else {
+        this.container.alpha = targetAlpha;
+        onComplete?.();
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }
+
+  onResize(width: number, height: number): void {
+    const bgWidth = (BackgroundManager.I.view.children.find(
       c => c instanceof Sprite
-    ) as Sprite | undefined;
-    const bgWidth = bgSprite?.width ?? width;
+    ) as Sprite)?.width ?? width;
     const targetWidth = bgWidth / 10;
 
-    // Logo
     if (this.logo && this.logoBaseW > 0) {
       const scale = (bgWidth / 3) / this.logoBaseW;
       this.logo.scale.set(scale);
-      this.logo.position.set(width / 2, height / 5);
+      this.logo.position.set(width / 2, height / 8);
       this.baseY = this.logo.position.y;
     }
 
-    // Buttons
     const spacing = targetWidth * 3;
     const centerX = width / 2;
     const btnY = height / 1.3;
 
-    const scaleBtns = (btn?: Sprite) => {
+    const rescale = (mult: number, btn?: Sprite) => {
       if (!btn) return;
       const s = targetWidth / btn.texture.width;
-      btn.scale.set(s);
+      btn.scale.set(s * mult);
     };
 
-    scaleBtns(this.settingsButton);
-    scaleBtns(this.playButton);
-    scaleBtns(this.rankingButton);
+    rescale(1, this.settingsButton);
+    rescale(1, this.playButton);
+    rescale(1, this.rankingButton);
+    rescale(0.7, this.bird);
+    rescale(0.5, this.leftButton);
+    rescale(0.5, this.rightButton);
 
     if (this.settingsButton) this.settingsButton.position.set(centerX - spacing, btnY);
     if (this.playButton) this.playButton.position.set(centerX, btnY);
     if (this.rankingButton) this.rankingButton.position.set(centerX + spacing, btnY);
+
+    if (this.bird && this.playButton)
+      this.bird.position.set(this.playButton.x, this.playButton.y - this.playButton.height * 1.7);
+
+    if (this.leftButton && this.bird)
+      this.leftButton.position.set(this.bird.x - this.bird.width * 1.5, this.bird.y);
+
+    if (this.rightButton && this.bird)
+      this.rightButton.position.set(this.bird.x + this.bird.width * 1.5, this.bird.y);
   }
 
-  onStart(): void {}
+  onStart(): void {
+    this.container.alpha = 0;
+    setTimeout(() => this.fade(1, 500), 800);
+  }
+
+  async onEnd(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      this.fade(0, 400, () => {
+        SceneManager.I.app.stage.removeChild(this.container);
+        resolve();
+      });
+    });
+  }
+
   update(dt: number): void {
     this.floatAnimation(dt);
   }
-  onEnd(): void {}
 
   destroy(): void {
-    this.container.destroy({
-      children: true,
-      texture: true,
-      textureSource: true,
-    });
+    this.container.destroy({ children: true, texture: true, textureSource: true });
   }
 }

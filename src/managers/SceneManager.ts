@@ -12,7 +12,7 @@ export interface IScene {
   container: Container;
   onStart(): void;
   update(dt: number): void;   // called every frame
-  onEnd(): void;              // clean up textures/listeners
+  onEnd(): Promise<void>;             // clean up textures/listeners
   destroy(): void;
   onResize(width: number, height: number): void
 }
@@ -106,11 +106,10 @@ export class SceneManager {
   }
 
   /** Change the current scene, optionally destroying the old one */
-  private setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): void {
+  private async setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): Promise<void> {
     if (this.current) {
-      this.current.onEnd();
-      this.app.stage.removeChild(this.current.container);
-
+      await this.current.onEnd();
+      this.app.stage.removeChild(this.current.container);      
       if (destroyCurrent) {
         this.current.destroy();
       } else {
