@@ -30,8 +30,11 @@ export class MainMenuScene implements IScene {
   private baseY = 0;
   private elapsed = 0;
 
+  private birdFadeOf: boolean;
+
   constructor() {
     this.container.sortableChildren = true;
+    this.birdFadeOf = true;
     this.loadAssets();
   }
 
@@ -165,6 +168,7 @@ export class MainMenuScene implements IScene {
       btn.on("pointerup", () => {
         btn.scale.set(scale);
         if (label === "play") btn.texture = this.playNormalTex!;
+        this.birdFadeOf = label !== "play";
         setTimeout(() => SceneManager.I.fire(label), 40);
       });
       btn.on("pointerupoutside", () => {
@@ -226,12 +230,14 @@ export class MainMenuScene implements IScene {
     const prevBird = () => {
       if (!this.birdFrames.length || !this.bird) return;
       this.currentBirdIndex = (this.currentBirdIndex - 1 + this.birdFrames.length) % this.birdFrames.length;
+      SceneManager.I.playerIndex = this.currentBirdIndex;
       this.bird.texture = this.birdFrames[this.currentBirdIndex];
     };
 
     const nextBird = () => {
       if (!this.birdFrames.length || !this.bird) return;
       this.currentBirdIndex = (this.currentBirdIndex + 1) % this.birdFrames.length;
+      SceneManager.I.playerIndex = this.currentBirdIndex;
       this.bird.texture = this.birdFrames[this.currentBirdIndex];
     };
 
@@ -328,17 +334,35 @@ export class MainMenuScene implements IScene {
 
   onStart(): void {
     this.container.alpha = 0;
+    this.birdFadeOf = true;
     setTimeout(() => this.fade(1, 500), 100);
   }
 
   async onEnd(): Promise<void> {
     await new Promise<void>((resolve) => {
+      // 🟩 Si birdFadeOff és false, traiem l’ocell abans del fade
+      let tempBird: Sprite | undefined;
+      if (!this.birdFadeOf && this.bird) {
+        tempBird = this.bird;
+        this.container.removeChild(this.bird);
+        SceneManager.I.app.stage.addChild(tempBird); // mantenim-lo visible a l'escenari
+      }
+
       this.fade(0, 400, () => {
+        // 🔹 Quan acaba el fade, eliminem el container
         SceneManager.I.app.stage.removeChild(this.container);
+
+        // 🔹 Si havíem separat l’ocell, el tornem a posar al container
+        if (tempBird) {
+          SceneManager.I.app.stage.removeChild(tempBird);
+          this.container.addChild(tempBird);
+        }
+
         resolve();
       });
     });
   }
+
 
   update(dt: number): void {
     this.floatAnimation(dt);

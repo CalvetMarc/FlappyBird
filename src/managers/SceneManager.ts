@@ -69,6 +69,8 @@ export class SceneManager {
 
   // Singleton
   private static _i: SceneManager;
+  public playerIndex!: number;
+
   static get I() {
     return (this._i ??= new SceneManager());
   }
@@ -76,6 +78,7 @@ export class SceneManager {
   /** Initialize the SceneManager and load the first scene */
   async start(app: Application) {
     this.app = app;
+    this.playerIndex = 0;
 
     // ✅ Initialize background once
     await this.initBackground();
