@@ -1,113 +1,212 @@
-import { Container, Sprite, Assets } from "pixi.js";
+import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
 import { IScene } from "../managers/SceneManager";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import logoUrl from "../assets/ui/logoFlappyBird.png";
+import playUrl from "../assets/ui/UiCozyFree.png";
 
 export class MainMenuScene implements IScene {
   container = new Container();
   private logo?: Sprite;
-  private logoBaseW = 0; // Original logo texture width (unscaled)
-  private baseY = 0;     // Base Y position for floating animation
-  private elapsed = 0;   // Accumulated time for smooth animation
+  private playButton?: Sprite;
+  private settingsButton?: Sprite;
+  private rankingButton?: Sprite;
+
+  private playNormalTex?: Texture;
+  private playPressedTex?: Texture;
+  private rankingTex?: Texture;
+  private settingsTex?: Texture;
+
+  private logoBaseW = 0;
+  private baseY = 0;
+  private elapsed = 0;
 
   constructor() {
     this.container.sortableChildren = true;
-    this.loadLogo();
+    this.loadAssets();
   }
 
-  /** Loads the logo and positions it on screen */
-  private async loadLogo() {
-    // Load texture
-    const logoTexture = await Assets.load(logoUrl);
-    this.logo = new Sprite(logoTexture);
+  private async loadAssets() {
+    const [logoTexture, playTexture] = await Promise.all([
+      Assets.load(logoUrl),
+      Assets.load(playUrl),
+    ]);
 
-    // Store original width (for proper scaling on resize)
+    this.createLogo(logoTexture);
+    this.createButtons(playTexture);
+  }
+
+  /** Creates and positions the logo */
+  private createLogo(logoTexture: Texture) {
+    this.logo = new Sprite(logoTexture);
     this.logoBaseW = this.logo.texture.width;
 
     const app = SceneManager.I.app;
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    // Try to match the logo scale to the background width
     const bgSprite = BackgroundManager.I.view.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
 
     const bgWidth = bgSprite?.width ?? screenW;
-
-    // Scale the logo to 1/3 of the background width
     const targetWidth = bgWidth / 3;
     const scale = targetWidth / this.logoBaseW;
     this.logo.scale.set(scale);
 
-    // Center the logo horizontally and place it slightly above the middle
     this.logo.anchor.set(0.5);
     this.logo.position.set(screenW / 2, screenH / 5);
-
-    // Save the base Y position for the float animation
     this.baseY = this.logo.position.y;
 
-    // Ensure the logo is drawn above the background
     this.logo.zIndex = 10;
-
-    // Add to the scene container
     this.container.addChild(this.logo);
   }
 
-  /** Floating animation with a smooth ease-in-out sine motion */
-  private floatAnimation(dt: number) {
-    if (!this.logo) return;
+  /** Creates Play, Settings and Ranking buttons */
+  private createButtons(originalTexture: Texture) {
+    const cropSize = 15;
+    const tile = 16;
+    const offsetY = 80;
 
-    // Accumulate time (convert dt from ms to seconds)
-    this.elapsed += dt / 1000;
+    // Base row for "Play"
+    const playY = offsetY + tile; // original play
+    const rankingY = playY + tile * 3;
+    const settingsY = playY + tile * 3;
+    const settingsX = tile * 2;
 
-    // Adjust animation amplitude for device pixel ratio (keeps motion consistent across displays)
-    const scaleFactor = window.devicePixelRatio || 1;
-    const amplitude = 15 / scaleFactor; // How far it moves up/down (in px)
-    const speed = 1.2; // How many full cycles per second
+    // --- Play button textures ---
+    this.playNormalTex = new Texture({
+      source: originalTexture.source,
+      frame: new Rectangle(0, playY, cropSize, cropSize),
+    });
 
-    // Smooth up-down movement using a sine wave (ease-in-out style)
-    const offset = Math.sin(this.elapsed * Math.PI * speed) * amplitude;
+    this.playPressedTex = new Texture({
+      source: originalTexture.source,
+      frame: new Rectangle(16, playY, cropSize, cropSize),
+    });
 
-    // Apply the offset to the base Y position
-    this.logo.position.y = this.baseY + offset;
-  }
+    // --- Ranking button texture (3 tiles below) ---
+    this.rankingTex = new Texture({
+      source: originalTexture.source,
+      frame: new Rectangle(0, rankingY, cropSize, cropSize),
+    });
 
-  /** Handles window resize: rescales and repositions the logo */
-  public onResize(width: number, height: number): void {
-    if (!this.logo || !this.logo.texture || this.logoBaseW === 0) return;
+    // --- Settings button texture (3 down, 2 right) ---
+    this.settingsTex = new Texture({
+      source: originalTexture.source,
+      frame: new Rectangle(settingsX, settingsY, cropSize, cropSize),
+    });
+
+    const app = SceneManager.I.app;
+    const screenW = app.renderer.width;
+    const screenH = app.renderer.height;
 
     const bgSprite = BackgroundManager.I.view.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
+    const bgWidth = bgSprite?.width ?? screenW;
+    const targetWidth = bgWidth / 10;
 
-    const bgWidth = bgSprite?.width ?? width;
+    // Helper to create any button easily
+    const makeButton = (
+      x: number,
+      label: "play" | "settings" | "ranking",
+      tex: Texture
+    ): Sprite => {
+      const btn = new Sprite(tex);
+      btn.anchor.set(0.5);
+      btn.zIndex = 11;
+      const scale = targetWidth / btn.width;
+      btn.scale.set(scale);
+      btn.position.set(x, screenH / 1.3);
+      btn.eventMode = "static";
+      btn.cursor = "pointer";
 
-    // Recalculate scale based on background width
-    const targetWidth = bgWidth / 3;
-    const scale = targetWidth / this.logoBaseW;
-    this.logo.scale.set(scale);
+      // Interactions
+      btn.on("pointerdown", () => {
+        btn.scale.set(scale * 0.9);
+        if (label === "play") btn.texture = this.playPressedTex!;
+      });
 
-    // Keep it horizontally centered and vertically at 1/5 of the screen height
-    this.logo.position.set(width / 2, height / 5);
+      btn.on("pointerup", () => {
+        btn.scale.set(scale);
+        if (label === "play") btn.texture = this.playNormalTex!;
+        setTimeout(() => SceneManager.I.fire(label), 40);
+      });
 
-    // Update base position for the floating animation
-    this.baseY = this.logo.position.y;
+      btn.on("pointerupoutside", () => {
+        btn.scale.set(scale);
+        if (label === "play") btn.texture = this.playNormalTex!;
+      });
+
+      this.container.addChild(btn);
+      return btn;
+    };
+
+    // --- Create all buttons ---
+    const spacing = targetWidth * 3;
+    const centerX = screenW / 2;
+
+    this.settingsButton = makeButton(centerX - spacing, "settings", this.settingsTex);
+    this.playButton = makeButton(centerX, "play", this.playNormalTex);
+    this.rankingButton = makeButton(centerX + spacing, "ranking", this.rankingTex);
   }
 
-  /** Called once when the scene starts */
-  onStart(): void {}
+  /** Floating animation for the logo */
+  private floatAnimation(dt: number) {
+    if (!this.logo) return;
 
-  /** Called every frame; drives the animation */
+    this.elapsed += dt / 1000;
+    const scaleFactor = window.devicePixelRatio || 1;
+    const amplitude = 15 / scaleFactor;
+    const speed = 1.2;
+
+    const offset = Math.sin(this.elapsed * Math.PI * speed) * amplitude;
+    this.logo.position.y = this.baseY + offset;
+  }
+
+  /** Handles window resize */
+  public onResize(width: number, height: number): void {
+    const bgSprite = BackgroundManager.I.view.children.find(
+      c => c instanceof Sprite
+    ) as Sprite | undefined;
+    const bgWidth = bgSprite?.width ?? width;
+    const targetWidth = bgWidth / 10;
+
+    // Logo
+    if (this.logo && this.logoBaseW > 0) {
+      const scale = (bgWidth / 3) / this.logoBaseW;
+      this.logo.scale.set(scale);
+      this.logo.position.set(width / 2, height / 5);
+      this.baseY = this.logo.position.y;
+    }
+
+    // Buttons
+    const spacing = targetWidth * 3;
+    const centerX = width / 2;
+    const btnY = height / 1.3;
+
+    const scaleBtns = (btn?: Sprite) => {
+      if (!btn) return;
+      const s = targetWidth / btn.texture.width;
+      btn.scale.set(s);
+    };
+
+    scaleBtns(this.settingsButton);
+    scaleBtns(this.playButton);
+    scaleBtns(this.rankingButton);
+
+    if (this.settingsButton) this.settingsButton.position.set(centerX - spacing, btnY);
+    if (this.playButton) this.playButton.position.set(centerX, btnY);
+    if (this.rankingButton) this.rankingButton.position.set(centerX + spacing, btnY);
+  }
+
+  onStart(): void {}
   update(dt: number): void {
     this.floatAnimation(dt);
   }
-
-  /** Called when the scene ends */
   onEnd(): void {}
 
-  /** Cleanly destroys the scene and its resources */
   destroy(): void {
     this.container.destroy({
       children: true,
