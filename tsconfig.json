@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    /* === Output === */
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": true,
+
+    /* === TypeScript Strictness === */
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    /* === For front-end (Pixi/Vite) === */
+    "isolatedModules": true,
+    "noEmit": true,  // Vite s’encarrega del build
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
