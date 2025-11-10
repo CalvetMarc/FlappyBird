@@ -249,9 +249,21 @@ export class MainMenuScene implements IScene {
   private floatAnimation(dt: number) {
     if (!this.logo) return;
     this.elapsed += dt / 1000;
-    const offset = Math.sin(this.elapsed * Math.PI * 1.2) * 15 / (window.devicePixelRatio || 1);
+
+    // 🟩 Alçada proporcional al background
+    const bgSprite = BackgroundManager.I.view.children.find(
+      c => c instanceof Sprite
+    ) as Sprite | undefined;
+
+    const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
+    const amplitude = bgHeight * 0.015; // 👈 3% de l'alçada del fons
+    const speed = 1.2; // freqüència de l’oscil·lació
+
+    // 🎢 Moviment sinusoidal suau
+    const offset = Math.sin(this.elapsed * Math.PI * speed) * amplitude;
     this.logo.position.y = this.baseY + offset;
   }
+
 
   private fade(targetAlpha: number, duration: number, onComplete?: () => void) {
     const startAlpha = this.container.alpha;

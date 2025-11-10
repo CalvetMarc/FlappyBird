@@ -21,7 +21,7 @@ export class BackgroundManager {
   private groundTexture?: Texture;
 
   private scrolling = false;
-  private scrollSpeed = 200; // px per second
+  private scrollSpeed = 1; // px per second
 
   // Singleton
   private static _i: BackgroundManager;
@@ -156,8 +156,8 @@ export class BackgroundManager {
   public update(dt: number) {
     if (!this.scrolling) return;
 
-    const scaleFactor = window.devicePixelRatio || 1;
-    const delta = (dt / 1000) * (this.scrollSpeed / scaleFactor);
+    const scaleFactor = (this.background?.width ?? 800) * 0.3;
+    const delta = (dt / 1000) * (this.scrollSpeed * scaleFactor);
 
     // Move the ground fragments
     for (const piece of this.groundPieces) {
