@@ -50,7 +50,7 @@ export class GameManager {
     });
 
     window.addEventListener("resize", () => this.onResize());
-  }
+  }  
 
   /** Called every frame to update the active scene */
   update(dt: number): void {

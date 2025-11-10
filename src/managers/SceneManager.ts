@@ -14,6 +14,7 @@ export interface IScene {
   update(dt: number): void;   // called every frame
   onEnd(): void;              // clean up textures/listeners
   destroy(): void;
+  onResize(width: number, height: number): void
 }
 
 /** Scene event types */
@@ -73,11 +74,11 @@ export class SceneManager {
   }
 
   /** Initialize the SceneManager and load the first scene */
-  start(app: Application) {
+  async start(app: Application) {
     this.app = app;
 
     // ✅ Initialize background once
-    this.initBackground();
+    await this.initBackground();
 
     // Start with the Main Menu
     this.setScene(MainMenuScene, false);
@@ -150,14 +151,16 @@ export class SceneManager {
 
   /** Handle window resizing */
   public onResize(width: number, height: number): void {
-    // Reposition or resize background and ground
     if (this.app) {
-      this.app.renderer.resize(width, height);
+        this.app.renderer.resize(width, height);
     }
 
-    // Notify the BackgroundManager
     if (this.backgroundManager) {
-      this.backgroundManager.rebuild(width, height);
+        this.backgroundManager.rebuild(width, height);
     }
+
+    // 👇 Notifica també a l’escena actual
+    this.current?.onResize(width, height);
   }
+
 }

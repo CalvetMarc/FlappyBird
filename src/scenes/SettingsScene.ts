@@ -25,6 +25,10 @@ export class SettingsScene implements IScene {
    
   }
 
+  public onResize(width: number, height: number): void {
+    
+  }
+
   /** Called if the SceneManager decides to fully destroy this scene */
   destroy(): void {
     this.container.destroy({

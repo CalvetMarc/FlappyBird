@@ -64,7 +64,7 @@ export class BackgroundManager {
     this.background.anchor.set(0.5, 0);
     this.background.position.set(screenW / 2, 0);
 
-    this.container.addChildAt(this.background, 0);
+    this.container.addChild(this.background);
 
     // 🟩 Create a mask so only the background area is visible
     const maskRect = new Graphics()
@@ -156,7 +156,8 @@ export class BackgroundManager {
   public update(dt: number) {
     if (!this.scrolling) return;
 
-    const delta = (dt / 1000) * this.scrollSpeed;
+    const scaleFactor = window.devicePixelRatio || 1;
+    const delta = (dt / 1000) * (this.scrollSpeed / scaleFactor);
 
     // Move the ground fragments
     for (const piece of this.groundPieces) {
