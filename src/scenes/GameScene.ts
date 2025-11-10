@@ -14,21 +14,22 @@ export class GameScene implements IScene {
   private frameInterval = 100; // temps entre canvis de frame (ms)
 
   // 🔽 Física
-  private velocityY = 0; // velocitat vertical
-  private gravity = 1500; // acceleració (px/s²)
-  private jumpForce = -700; // força del salt (px/s)
-  private groundY = 0; // posició del terra (límit inferior)
+  private velocityY = 0;
+  private gravity = 1500;
+  private jumpForce = -700;
+  private groundY = 0;
+
+  private isDead = false; // 🟥 Nou flag per saber si ha caigut massa
 
   constructor() {
     this.container.sortableChildren = true;
     this.loadAssets();
 
-    // 🎮 Controls: clic, touch i teclat
+    // 🎮 Controls
     window.addEventListener("pointerdown", this.handleInput);
     window.addEventListener("keydown", this.handleKey);
   }
 
-  /** 🧩 Carrega i crea l’ocell */
   private async loadAssets() {
     const birdTexture = await Assets.load(birdUrl);
 
@@ -59,34 +60,28 @@ export class GameScene implements IScene {
     this.bird.scale.set(scale * 0.7);
     this.bird.position.set(screenW / 2, screenH / 1.7);
 
-    // Límit del terra
     this.groundY = screenH * 0.95;
 
     SceneManager.I.app.stage.addChild(this.bird);
   }
 
-  /** 🔹 Handler per clic o touch */
   private handleInput = () => {
-    this.flap();
+    if (!this.isDead) this.flap();
   };
 
-  /** 🔹 Handler per teclat */
   private handleKey = (e: KeyboardEvent) => {
-    if (e.code === "Space") {
-      e.preventDefault(); // evita el scroll de la pàgina
+    if (e.code === "Space" && !this.isDead) {
+      e.preventDefault();
       this.flap();
     }
   };
 
-  /** 🕊️ Salta cap amunt */
   private flap() {
     if (!this.bird) return;
-
-    // Si està al terra, permet saltar de nou
     if (this.bird.y >= this.groundY) this.velocityY = 0;
 
-    this.velocityY = this.jumpForce; // impuls cap amunt
-    this.bird.rotation = -Math.PI / 6; // inclinació lleu cap amunt
+    this.velocityY = this.jumpForce;
+    this.bird.rotation = -Math.PI / 6;
   }
 
   onStart(): void {
@@ -104,7 +99,7 @@ export class GameScene implements IScene {
   }
 
   update(dt: number): void {
-    if (!this.bird) return;
+    if (!this.bird || this.isDead) return; // ⛔ No fer res si està "mort"
 
     // 🟡 Animació d’ales
     this.frameTimer += dt;
@@ -114,15 +109,32 @@ export class GameScene implements IScene {
       this.bird.texture = this.birdFrames[this.currentFrame];
     }
 
-    // 🟠 Física (caiguda)
+    // 🟠 Física
     const deltaSeconds = dt / 1000;
     this.velocityY += this.gravity * deltaSeconds;
     this.bird.y += this.velocityY * deltaSeconds;
 
-    // 🧱 Límit del terra
+    // 🔻 Límits inferiors
+    const bgSprite = BackgroundManager.I.view.children.find(
+      (c) => c instanceof Sprite
+    ) as Sprite | undefined;
+    const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
+
+    // 🧱 Toca terra
     if (this.bird.y > this.groundY) {
       this.bird.y = this.groundY;
       this.velocityY = 0;
+    }
+
+    // 💀 Si cau més avall que el fons → deixa d’animar i caure
+    if (this.bird.y > bgHeight) {
+      this.bird.y = bgHeight;
+      this.velocityY = 0;
+      this.isDead = true;
+      this.bird.rotation = Math.PI / 2; // gira cap avall com si s’hagués estavellat
+
+       BackgroundManager.I.stop();
+      return;
     }
 
     // 🔄 Rotació segons la velocitat
