@@ -2,6 +2,7 @@ import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
 import { IScene } from "../managers/SceneManager";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
+import { Pipe } from "../objects/Pipe";
 import birdUrl from "../assets/birds/AllBird1.png";
 
 export class GameScene implements IScene {
@@ -11,7 +12,7 @@ export class GameScene implements IScene {
   private birdFrames: Texture[] = [];
   private currentFrame = 0;
   private frameTimer = 0;
-  private frameInterval = 100; // temps entre canvis de frame (ms)
+  private frameInterval = 100;
 
   // 🔽 Física
   private velocityY = 0;
@@ -19,13 +20,15 @@ export class GameScene implements IScene {
   private jumpForce = -700;
   private groundY = 0;
 
-  private isDead = false; // 🟥 Nou flag per saber si ha caigut massa
+  private isDead = false;
+  private topPipe?: Pipe;
+  private bottomPipe?: Pipe;
 
   constructor() {
     this.container.sortableChildren = true;
     this.loadAssets();
 
-    // 🎮 Controls
+    // Controls
     window.addEventListener("pointerdown", this.handleInput);
     window.addEventListener("keydown", this.handleKey);
   }
@@ -53,7 +56,8 @@ export class GameScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
     const bgWidth =
-      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ?? screenW;
+      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
+      screenW;
 
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
@@ -61,9 +65,41 @@ export class GameScene implements IScene {
     this.bird.position.set(screenW / 2, screenH / 1.7);
 
     this.groundY = screenH * 0.95;
-
     SceneManager.I.app.stage.addChild(this.bird);
+
+    // Crea tubs
+    this.createPipes();
   }
+
+  /** 🟩 Genera dos tubs enganxats als límits verticals */
+private createPipes() {
+  const bgSprite = BackgroundManager.I.view.children.find(
+    (c) => c instanceof Sprite
+  ) as Sprite | undefined;
+
+  const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
+  const screenW = SceneManager.I.app.renderer.width;
+
+  // 🔹 Alçada fixa per a totes dues canonades
+  const pipeHeight = bgHeight / 3;
+
+  // 🔹 Crea la canonada inferior
+  this.bottomPipe = new Pipe(pipeHeight);
+  this.bottomPipe.x = screenW * 0.8;
+  this.bottomPipe.y = bgHeight - pipeHeight; // surt exactament del final del fons
+
+  // 🔹 Crea la canonada superior (mateixa mida)
+  this.topPipe = new Pipe(pipeHeight);
+  this.topPipe.x = screenW * 0.8;
+  this.topPipe.y = 0; // enganxada dalt de tot
+
+  // 🔹 Afegeix-les a l’escenari
+  SceneManager.I.app.stage.addChild(this.topPipe);
+  SceneManager.I.app.stage.addChild(this.bottomPipe);
+}
+
+
+
 
   private handleInput = () => {
     if (!this.isDead) this.flap();
@@ -79,7 +115,6 @@ export class GameScene implements IScene {
   private flap() {
     if (!this.bird) return;
     if (this.bird.y >= this.groundY) this.velocityY = 0;
-
     this.velocityY = this.jumpForce;
     this.bird.rotation = -Math.PI / 6;
   }
@@ -99,9 +134,9 @@ export class GameScene implements IScene {
   }
 
   update(dt: number): void {
-    if (!this.bird || this.isDead) return; // ⛔ No fer res si està "mort"
+    if (!this.bird || this.isDead) return;
 
-    // 🟡 Animació d’ales
+    // Animació d’ales
     this.frameTimer += dt;
     if (this.frameTimer >= this.frameInterval) {
       this.frameTimer = 0;
@@ -109,35 +144,30 @@ export class GameScene implements IScene {
       this.bird.texture = this.birdFrames[this.currentFrame];
     }
 
-    // 🟠 Física
+    // Física
     const deltaSeconds = dt / 1000;
     this.velocityY += this.gravity * deltaSeconds;
     this.bird.y += this.velocityY * deltaSeconds;
 
-    // 🔻 Límits inferiors
     const bgSprite = BackgroundManager.I.view.children.find(
       (c) => c instanceof Sprite
     ) as Sprite | undefined;
     const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
 
-    // 🧱 Toca terra
     if (this.bird.y > this.groundY) {
       this.bird.y = this.groundY;
       this.velocityY = 0;
     }
 
-    // 💀 Si cau més avall que el fons → deixa d’animar i caure
     if (this.bird.y > bgHeight) {
       this.bird.y = bgHeight;
       this.velocityY = 0;
       this.isDead = true;
-      this.bird.rotation = Math.PI / 2; // gira cap avall com si s’hagués estavellat
-
-       BackgroundManager.I.stop();
+      this.bird.rotation = Math.PI / 2;
+      BackgroundManager.I.stop();
       return;
     }
 
-    // 🔄 Rotació segons la velocitat
     const maxFallAngle = Math.PI / 3;
     this.bird.rotation = Math.max(-Math.PI / 6, Math.min(this.velocityY / 400, maxFallAngle));
   }
@@ -185,10 +215,6 @@ export class GameScene implements IScene {
     window.removeEventListener("keydown", this.handleKey);
 
     if (this.bird) this.bird.destroy({ texture: true, textureSource: true });
-    this.container.destroy({
-      children: true,
-      texture: true,
-      textureSource: true,
-    });
+    this.container.destroy({ children: true, texture: true, textureSource: true });
   }
 }
