@@ -9,60 +9,91 @@ export class GameScene implements IScene {
 
   private bird?: Sprite;
   private birdFrames: Texture[] = [];
-  private currentBirdIndex = 0;
+  private currentFrame = 0;
+  private frameTimer = 0;
+  private frameInterval = 100; // temps entre canvis de frame (ms)
+
+  // 🔽 Física
+  private velocityY = 0; // velocitat vertical
+  private gravity = 1500; // acceleració (px/s²)
+  private jumpForce = -700; // força del salt (px/s)
+  private groundY = 0; // posició del terra (límit inferior)
 
   constructor() {
     this.container.sortableChildren = true;
     this.loadAssets();
+
+    // 🎮 Controls: clic, touch i teclat
+    window.addEventListener("pointerdown", this.handleInput);
+    window.addEventListener("keydown", this.handleKey);
   }
 
-  /** 🧩 Carrega i crea el mateix ocell que al MainMenu */
+  /** 🧩 Carrega i crea l’ocell */
   private async loadAssets() {
     const birdTexture = await Assets.load(birdUrl);
 
-    // 🔹 Obtenim totes les variants del sprite (mateix sistema que a MainMenu)
     const frameW = 16;
     const frameH = 16;
-    const totalFrames = Math.floor(birdTexture.height / frameH);
+    const totalFrames = 4;
 
     for (let i = 0; i < totalFrames; i++) {
       const tex = new Texture({
         source: birdTexture.source,
-        frame: new Rectangle(0, i * frameH, frameW, frameH),
+        frame: new Rectangle(i * frameW, 0, frameW, frameH),
       });
       this.birdFrames.push(tex);
     }
 
-    // 🔹 Mostrem l’ocell triat des del MainMenu
-    this.currentBirdIndex = SceneManager.I.playerIndex ?? 0;
-    this.bird = new Sprite(this.birdFrames[this.currentBirdIndex]);
+    this.bird = new Sprite(this.birdFrames[0]);
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 10;
 
-    // 🔹 Escala i posició idèntiques al MainMenu
     const app = SceneManager.I.app;
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
-    const bgWidth = (BackgroundManager.I.view.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? screenW;
+    const bgWidth =
+      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ?? screenW;
 
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
     this.bird.scale.set(scale * 0.7);
     this.bird.position.set(screenW / 2, screenH / 1.7);
 
-    // ⚠️ No l’afegim al container — el posarem directament al stage
+    // Límit del terra
+    this.groundY = screenH * 0.95;
+
     SceneManager.I.app.stage.addChild(this.bird);
+  }
+
+  /** 🔹 Handler per clic o touch */
+  private handleInput = () => {
+    this.flap();
+  };
+
+  /** 🔹 Handler per teclat */
+  private handleKey = (e: KeyboardEvent) => {
+    if (e.code === "Space") {
+      e.preventDefault(); // evita el scroll de la pàgina
+      this.flap();
+    }
+  };
+
+  /** 🕊️ Salta cap amunt */
+  private flap() {
+    if (!this.bird) return;
+
+    // Si està al terra, permet saltar de nou
+    if (this.bird.y >= this.groundY) this.velocityY = 0;
+
+    this.velocityY = this.jumpForce; // impuls cap amunt
+    this.bird.rotation = -Math.PI / 6; // inclinació lleu cap amunt
   }
 
   onStart(): void {
     this.container.alpha = 0;
-
     const startTime = performance.now();
     const duration = 400;
 
-    // 🔆 Fade-in només pel container
     const fadeIn = (now: number) => {
       const t = Math.min((now - startTime) / duration, 1);
       this.container.alpha = t;
@@ -73,11 +104,36 @@ export class GameScene implements IScene {
   }
 
   update(dt: number): void {
-    // Aquí hi pots afegir moviment o gravetat més endavant
+    if (!this.bird) return;
+
+    // 🟡 Animació d’ales
+    this.frameTimer += dt;
+    if (this.frameTimer >= this.frameInterval) {
+      this.frameTimer = 0;
+      this.currentFrame = (this.currentFrame + 1) % this.birdFrames.length;
+      this.bird.texture = this.birdFrames[this.currentFrame];
+    }
+
+    // 🟠 Física (caiguda)
+    const deltaSeconds = dt / 1000;
+    this.velocityY += this.gravity * deltaSeconds;
+    this.bird.y += this.velocityY * deltaSeconds;
+
+    // 🧱 Límit del terra
+    if (this.bird.y > this.groundY) {
+      this.bird.y = this.groundY;
+      this.velocityY = 0;
+    }
+
+    // 🔄 Rotació segons la velocitat
+    const maxFallAngle = Math.PI / 3;
+    this.bird.rotation = Math.max(-Math.PI / 6, Math.min(this.velocityY / 400, maxFallAngle));
   }
 
   async onEnd(): Promise<void> {
-    // 🟩 Fade out abans de sortir (afecta només al container)
+    window.removeEventListener("pointerdown", this.handleInput);
+    window.removeEventListener("keydown", this.handleKey);
+
     await new Promise<void>((resolve) => {
       const startTime = performance.now();
       const duration = 300;
@@ -88,7 +144,6 @@ export class GameScene implements IScene {
         this.container.alpha = startAlpha * (1 - t);
         if (t < 1) requestAnimationFrame(fadeOut);
         else {
-          // 🔸 Eliminem el container i l’ocell per separat
           SceneManager.I.app.stage.removeChild(this.container);
           if (this.bird) SceneManager.I.app.stage.removeChild(this.bird);
           resolve();
@@ -102,18 +157,21 @@ export class GameScene implements IScene {
   public onResize(width: number, height: number): void {
     if (!this.bird) return;
 
-    const bgWidth = (BackgroundManager.I.view.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? width;
+    const bgWidth =
+      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ?? width;
 
     const frameW = 16;
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
     this.bird.scale.set(scale * 0.7);
     this.bird.position.set(width / 2, height / 1.7);
+    this.groundY = height * 0.95;
   }
 
   destroy(): void {
+    window.removeEventListener("pointerdown", this.handleInput);
+    window.removeEventListener("keydown", this.handleKey);
+
     if (this.bird) this.bird.destroy({ texture: true, textureSource: true });
     this.container.destroy({
       children: true,
