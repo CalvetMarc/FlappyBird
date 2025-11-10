@@ -80,6 +80,8 @@ export class SceneManager {
     // ✅ Initialize background once
     await this.initBackground();
 
+    await new Promise((resolve) => setTimeout(resolve, 700));
+
     // Start with the Main Menu
     this.setScene(MainMenuScene, false);
   }

@@ -316,7 +316,7 @@ export class MainMenuScene implements IScene {
 
   onStart(): void {
     this.container.alpha = 0;
-    setTimeout(() => this.fade(1, 500), 800);
+    setTimeout(() => this.fade(1, 500), 100);
   }
 
   async onEnd(): Promise<void> {
