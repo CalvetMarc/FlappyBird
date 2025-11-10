@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Texture, Rectangle, Assets } from "pixi.js";
+import { Application, Container, Sprite, Texture, Rectangle, Assets, Graphics } from "pixi.js";
 import { SceneManager } from "./SceneManager";
 
 // Assets
@@ -16,11 +16,12 @@ export class BackgroundManager {
   private scale = 1;
   private groundY = 0;
 
-  private startX = 0;       // 👈 punt inicial del background
-  private groundWidthPx = 0; // 👈 amplada total del terra visible
+  private startX = 0;       // 👈 starting point of the background
+  private groundWidthPx = 0; // 👈 total visible ground width
+  private groundTexture?: Texture;
 
   private scrolling = false;
-  private scrollSpeed = 200; // px per segon
+  private scrollSpeed = 200; // px per second
 
   // Singleton
   private static _i: BackgroundManager;
@@ -37,6 +38,8 @@ export class BackgroundManager {
       Assets.load(backgroundUrl),
       Assets.load(groundUrl),
     ]);
+
+    this.groundTexture = groundTexture;
 
     this.createBackground(bgTexture);
     this.createGroundPieces(groundTexture);
@@ -62,9 +65,20 @@ export class BackgroundManager {
     this.background.position.set(screenW / 2, 0);
 
     this.container.addChildAt(this.background, 0);
+
+    // 🟩 Create a mask so only the background area is visible
+    const maskRect = new Graphics()
+      .rect(
+        (screenW - targetWidth) / 2, // X starting position of the background
+        0,                           // Y
+        targetWidth,                 // visible width
+        screenH                      // total height
+      )
+      .fill(0xffffff); // color doesn’t matter, only defines the shape
+    this.container.mask = maskRect;
+    this.container.addChild(maskRect);
   }
 
-  /** Create ground and store cropped base textures for reuse */
   /** Create ground and store cropped base textures for reuse */
   private createGroundPieces(originalTexture: Texture) {
     const { width: screenW, height: screenH } = this.app.renderer;
@@ -88,25 +102,24 @@ export class BackgroundManager {
 
     // Generate 4 base cropped pieces
     for (let i = 0; i < pieceCount; i++) {
-        const cropX = i * subWidth;
-        const croppedTexture = new Texture({
+      const cropX = i * subWidth;
+      const croppedTexture = new Texture({
         source: originalTexture.source,
         frame: new Rectangle(cropX, cropY, subWidth, cropHeight),
-        });
-        this.baseTextures.push(croppedTexture);
+      });
+      this.baseTextures.push(croppedTexture);
     }
 
     // 🟩 Fill the screen + one extra tile to prevent visible gaps
     let currentX = this.startX;
-    const endX = this.startX + groundWidth + this.scaledWidth; // 👈 tile extra
+    const endX = this.startX + groundWidth + this.scaledWidth; // 👈 one extra tile
     while (currentX < endX) {
-        const piece = this.createRandomPiece(currentX);
-        this.groundPieces.push(piece);
-        this.container.addChild(piece);
-        currentX += this.scaledWidth;
+      const piece = this.createRandomPiece(currentX);
+      this.groundPieces.push(piece);
+      this.container.addChild(piece);
+      currentX += this.scaledWidth;
     }
   }
-
 
   /** Create a random ground piece based on probabilities */
   private createRandomPiece(x: number): Sprite {
@@ -145,7 +158,7 @@ export class BackgroundManager {
 
     const delta = (dt / 1000) * this.scrollSpeed;
 
-    // Moure els fragments
+    // Move the ground fragments
     for (const piece of this.groundPieces) {
       piece.x -= delta;
     }
@@ -154,7 +167,7 @@ export class BackgroundManager {
     const last = this.groundPieces[this.groundPieces.length - 1];
     if (!first || !last) return;
 
-    // 👇 Quan la distància entre el startX i el tile sigui >= que l’amplada del tile → reciclar
+    // 👇 When the distance between startX and the first tile ≥ tile width → recycle
     if (this.startX - first.x >= this.scaledWidth) {
       this.container.removeChild(first);
       this.groundPieces.shift();
@@ -175,5 +188,20 @@ export class BackgroundManager {
     });
     this.groundPieces = [];
     this.background = undefined;
+  }
+
+  /** Rebuild background and ground when screen resizes */
+  public rebuild(screenW: number, screenH: number): void {
+    // Remove current elements
+    this.container.removeChildren();
+    this.groundPieces = [];
+    this.baseTextures = [];
+
+    // Recalculate sizes and recreate
+    const bgTexture = this.background?.texture;
+    if (!bgTexture || !this.groundTexture) return; // 👈 Make sure they exist
+
+    this.createBackground(bgTexture);
+    this.createGroundPieces(this.groundTexture);
   }
 }

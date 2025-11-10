@@ -2,7 +2,6 @@ import { Application } from "pixi.js";
 import { TextureSource } from "pixi.js";
 import { SceneManager } from "./SceneManager";
 
-
 export class GameManager {
   private app!: Application;
 
@@ -15,6 +14,7 @@ export class GameManager {
     this.start();
   }
 
+  /** Initialize the main PIXI application and start the game */
   async start(): Promise<void> {
     this.app = new Application();
 
@@ -26,7 +26,7 @@ export class GameManager {
       width: screenWidth,
       height: screenHeight,
       backgroundColor: "#10161A",
-      antialias: false,      
+      antialias: false,
     });
 
     // Append the canvas to the document
@@ -41,16 +41,31 @@ export class GameManager {
       display: "block",
     });
 
-    // Start Scene system
+    // Start the Scene system
     SceneManager.I.start(this.app);
 
     // Game loop
     this.app.ticker.add((frame) => {
       this.update(frame.deltaMS);
     });
+
+    window.addEventListener("resize", () => this.onResize());
   }
 
+  /** Called every frame to update the active scene */
   update(dt: number): void {
     SceneManager.I.update(dt);
+  }
+
+  /** Handle window resize event */
+  private onResize(): void {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // Resize the canvas
+    this.app.renderer.resize(width, height);
+
+    // 🔹 If you want the background and ground to adapt, you can do:
+    SceneManager.I.onResize?.(width, height);
   }
 }

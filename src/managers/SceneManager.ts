@@ -7,11 +7,11 @@ import { SettingsScene } from "../scenes/SettingsScene";
 import { RankingScene } from "../scenes/RankingScene";
 import { BackgroundManager } from "./BackgroundManager";
 
-/** Contract for any scene */
+/** Contract that every scene must implement */
 export interface IScene {
   container: Container;
   onStart(): void;
-  update(dt: number): void;  // called every frame
+  update(dt: number): void;   // called every frame
   onEnd(): void;              // clean up textures/listeners
   destroy(): void;
 }
@@ -27,7 +27,7 @@ export class SceneManager {
   public app!: Application;
   private current?: IScene;
   private scenePool: Set<IScene> = new Set();
-  private backgroundManager?: BackgroundManager; // ✅ Afegit aquí
+  private backgroundManager?: BackgroundManager; // ✅ Added here
 
   /** Transition table */
   private transitions: Record<SceneEvent, () => void> = {
@@ -72,16 +72,18 @@ export class SceneManager {
     return (this._i ??= new SceneManager());
   }
 
+  /** Initialize the SceneManager and load the first scene */
   start(app: Application) {
     this.app = app;
 
     // ✅ Initialize background once
     this.initBackground();
 
-    // Start with Main Menu
+    // Start with the Main Menu
     this.setScene(MainMenuScene, false);
   }
 
+  /** Load and display the background behind all scenes */
   private async initBackground() {
     this.backgroundManager = BackgroundManager.I;
     await this.backgroundManager.init(this.app);
@@ -91,15 +93,18 @@ export class SceneManager {
     BackgroundManager.I.start();
   }
 
+  /** Called every frame from GameManager */
   update(dt: number): void {
     this.current?.update(dt);
     BackgroundManager.I.update(dt);
   }
 
+  /** Trigger a scene change based on a given event */
   fire(event: SceneEvent): void {
     this.transitions[event]?.();
   }
 
+  /** Change the current scene, optionally destroying the old one */
   private setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): void {
     if (this.current) {
       this.current.onEnd();
@@ -117,11 +122,12 @@ export class SceneManager {
 
     this.current = next;
 
-    // ✅ Add scene *above* background
+    // ✅ Add the scene *above* the background
     this.app.stage.addChild(this.current.container);
     this.current.onStart();
   }
 
+  /** Retrieve a scene from the pool if it exists */
   private takeSceneFromPool<T extends IScene>(SceneType: SceneClass<T>): T | undefined {
     for (const scene of this.scenePool) {
       if (scene instanceof SceneType) {
@@ -132,6 +138,7 @@ export class SceneManager {
     return undefined;
   }
 
+  /** Permanently destroy a scene from the pool */
   private destroyFromPool<T extends IScene>(SceneType: SceneClass<T>): boolean {
     const scene = this.takeSceneFromPool(SceneType);
     if (scene) {
@@ -139,5 +146,18 @@ export class SceneManager {
       return true;
     }
     return false;
+  }
+
+  /** Handle window resizing */
+  public onResize(width: number, height: number): void {
+    // Reposition or resize background and ground
+    if (this.app) {
+      this.app.renderer.resize(width, height);
+    }
+
+    // Notify the BackgroundManager
+    if (this.backgroundManager) {
+      this.backgroundManager.rebuild(width, height);
+    }
   }
 }
