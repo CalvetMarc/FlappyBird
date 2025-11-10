@@ -5,28 +5,27 @@ import { BackgroundManager } from "../managers/BackgroundManager";
 import playUrl from "../assets/ui/UiCozyFree.png";
 
 /* 🟩 Classe auxiliar per a un toggle simple */
-/* 🟩 Classe auxiliar per a un toggle simple */
-/* 🟩 Classe auxiliar per a un toggle simple — versió nítida */
-/* 🟩 Classe auxiliar per a un toggle simple */
 class ToggleSwitch extends Container {
   private onTex: Texture;
   private offTex: Texture;
   private state: boolean;
   private knob: Sprite;
   private labelText: Text;
+  private index: number;
 
-  constructor(label: string, onTex: Texture, offTex: Texture, initial: boolean) {
+  constructor(label: string, onTex: Texture, offTex: Texture, initial: boolean, parent: Sprite, index: number) {
     super();
     this.onTex = onTex;
     this.offTex = offTex;
     this.state = initial;
+    this.index = index;
 
     // 🔤 Text gran i nítid
     this.labelText = new Text(label, {
       fontFamily: "Minecraft",
-      fontSize: 34,
+      fontSize: parent.width / 17,
       fill: 0xffffff,
-      stroke: { color: 0x4B1810, width: 5 },
+      stroke: { color: 0x4B1810, width: parent.width / 90 },
       align: "left",
     });
     this.labelText.anchor.set(0, 0.5);
@@ -34,23 +33,22 @@ class ToggleSwitch extends Container {
     // 🔘 Sprite del toggle (ON/OFF)
     this.knob = new Sprite(this.state ? this.onTex : this.offTex);
     this.knob.anchor.set(0.5);
-    this.knob.width = 32;
-    this.knob.height = 32;
+    this.knob.width = parent.width / 15;
+    this.knob.height = parent.width / 15;
     this.knob.eventMode = "static";
     this.knob.cursor = "pointer";
     this.knob.on("pointerdown", () => this.toggle());
 
     this.addChild(this.labelText, this.knob);
-    this.layout();
+    this.layout(parent);
   }
 
-  private layout() {
-    const spacing = 20;
-    this.labelText.position.set(0, 0);
+  private layout(parent: Sprite) {
+    const spacing = parent.width / 10;
+    this.labelText.position.set(parent.position.x - (parent.width / 2 * 0.75), parent.position.y - (parent.height / 2 * 0.5) + (parent.height / 8 * this.index));
 
     // Centrat verticalment amb el text
-    const knobX = this.labelText.width + spacing + this.knob.width / 2;
-    this.knob.position.set(knobX, 0);
+    this.knob.position.set(this.labelText.position.x + this.labelText.width + (parent.width / 12), this.labelText.position.y);
   }
 
   public toggle() {
@@ -65,6 +63,15 @@ class ToggleSwitch extends Container {
   public setState(v: boolean) {
     this.state = v;
     this.knob.texture = this.state ? this.onTex : this.offTex;
+  }
+
+  public recalculateTransform(parent: Sprite){
+    this.labelText.style.fontSize = parent.width / 17;
+    this.labelText.style.stroke = { color: 0x4B1810, width: parent.width / 90 };
+    this.knob.width = parent.width / 15;
+    this.knob.height = parent.width / 15;
+
+    this.layout(parent);
   }
 }
 
@@ -170,9 +177,9 @@ export class SettingsScene implements IScene {
       text: "Settings",
       style: {
         fontFamily: "Minecraft",
-        fontSize: 40,
+        fontSize: bgSprite.width / 11,
         fill: 0xffffff,
-        stroke: { color: 0x4B1810, width: 5 },
+        stroke: { color: 0x4B1810, width: this.bgSprite.width / 90  },
         align: "center",
         dropShadow: {
           color: 0x4B1810,
@@ -183,7 +190,6 @@ export class SettingsScene implements IScene {
         },
       },
     });
-
     text.anchor.set(0.5, 1);
     text.zIndex = 6;
     text.position.set(bgSprite.x, bgSprite.y - (bgSprite.height / 2 * 0.76));
@@ -196,30 +202,15 @@ export class SettingsScene implements IScene {
   private createToggles() {
     if (!this.bgSprite || !this.toggleOnTex || !this.toggleOffTex) return;
 
-    this.audioToggle = new ToggleSwitch("Audio", this.toggleOnTex, this.toggleOffTex, true);
-    this.dayCycleToggle = new ToggleSwitch("Day Cycle", this.toggleOnTex, this.toggleOffTex, true);
-    this.speedProgToggle = new ToggleSwitch("Speed Progression", this.toggleOnTex, this.toggleOffTex, false);
+    this.audioToggle = new ToggleSwitch("Audio", this.toggleOnTex, this.toggleOffTex, true, this.bgSprite, 0);
+    this.dayCycleToggle = new ToggleSwitch("Day Cycle", this.toggleOnTex, this.toggleOffTex, true, this.bgSprite, 1);
+    this.speedProgToggle = new ToggleSwitch("Speed Progression", this.toggleOnTex, this.toggleOffTex, false, this.bgSprite, 2);
 
     this.audioToggle.zIndex = 7;
     this.dayCycleToggle.zIndex = 7;
     this.speedProgToggle.zIndex = 7;
 
     this.container.addChild(this.audioToggle, this.dayCycleToggle, this.speedProgToggle);
-    this.layoutToggles();
-  }
-
-  /* 🟩 Posicionament dins del fons */
-  private layoutToggles() {
-    if (!this.bgSprite || !this.audioToggle || !this.dayCycleToggle || !this.speedProgToggle) return;
-
-    const bg = this.bgSprite;
-    const startY = bg.y - bg.height / 4; // una mica per sota del top
-    const spacing = 80;
-    const centerX = bg.x - bg.width / 2.65; // una mica cap a l'esquerra
-
-    this.audioToggle.position.set(centerX, startY);
-    this.dayCycleToggle.position.set(centerX, startY + spacing);
-    this.speedProgToggle.position.set(centerX, startY + spacing * 2);
   }
 
   private createButton() {
@@ -318,14 +309,17 @@ export class SettingsScene implements IScene {
     }
 
     if (this.titleText && this.bgSprite) {
-      this.titleText.position.set(
-        this.bgSprite.x,
-        this.bgSprite.y - (this.bgSprite.height * this.bgSprite.scale.y) / 2 - 10
-      );
+      this.titleText.position.set(this.bgSprite.x, this.bgSprite.y - (this.bgSprite.height / 2 * 0.76));
+      this.titleText.style.fontSize = this.bgSprite.width / 11;
+      this.titleText.style.stroke = { color: 0x4B1810, width: this.bgSprite.width / 90  };
     }
 
     /* 🟩 Reposiciona els toggles al canviar mida */
-    this.layoutToggles();
+    if(this.bgSprite && this.audioToggle && this.speedProgToggle && this.dayCycleToggle){
+        this.audioToggle?.recalculateTransform(this.bgSprite);
+        this.speedProgToggle?.recalculateTransform(this.bgSprite);
+        this.dayCycleToggle?.recalculateTransform(this.bgSprite);
+    }
   }
 
   destroy(): void {
