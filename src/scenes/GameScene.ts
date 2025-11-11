@@ -20,30 +20,28 @@ export class GameScene implements IScene {
   private jumpForce = -550;
   private groundY = 0;
 
+  // Estat
   private isDead = false;
+  private deadGrounded = false; // nou: mort i ja al terra
 
-  // 🔹 Tubs (control de temps)
+  // 🔹 Tubs
   private pipeTimer = 0;
-  private pipeInterval = 2000; // cada 2 segons
+  private pipeInterval = 3000; // cada 3 segons
   private pipeSpeed = 150; // píxels per segon
 
   constructor() {
     this.container.sortableChildren = true;
     this.loadAssets();
 
-    // Controls
     window.addEventListener("pointerdown", this.handleInput);
     window.addEventListener("keydown", this.handleKey);
   }
 
   private async loadAssets() {
     const app = SceneManager.I.app;
-    await PipeManager.I.init(app); // 👈 carrega les textures de pipes
-
-    // Afegim el container de pipes a l'escena
+    await PipeManager.I.init(app);
     SceneManager.I.app.stage.addChild(PipeManager.I.view);
 
-    // 🔹 Carrega l’ocell
     const birdTexture = await Assets.load(birdUrl);
     const frameW = 16;
     const frameH = 16;
@@ -72,7 +70,7 @@ export class GameScene implements IScene {
     this.bird.scale.set(scale * 0.7);
     this.bird.position.set(screenW / 2, screenH / 1.7);
 
-    this.groundY = screenH * 0.95;
+    this.groundY = screenH * 0.835;
     SceneManager.I.app.stage.addChild(this.bird);
   }
 
@@ -109,53 +107,90 @@ export class GameScene implements IScene {
   }
 
   update(dt: number): void {
-    if (!this.bird || this.isDead) return;
+    if (!this.bird) return;
+    const deltaSeconds = dt / 1000;
 
-    // 🟢 Animació d’ales
-    this.frameTimer += dt;
-    if (this.frameTimer >= this.frameInterval) {
-      this.frameTimer = 0;
-      this.currentFrame = (this.currentFrame + 1) % this.birdFrames.length;
-      this.bird.texture = this.birdFrames[this.currentFrame];
+    // 🟢 Animació d’ales (només si és viu)
+    if (!this.isDead) {
+      this.frameTimer += dt;
+      if (this.frameTimer >= this.frameInterval) {
+        this.frameTimer = 0;
+        this.currentFrame = (this.currentFrame + 1) % this.birdFrames.length;
+        this.bird.texture = this.birdFrames[this.currentFrame];
+      }
     }
 
-    // 🔽 Física
-    const deltaSeconds = dt / 1000;
-    this.velocityY += this.gravity * deltaSeconds;
-    this.bird.y += this.velocityY * deltaSeconds;
+    // 🔽 Física (només si no està mort o si està mort però encara no ha tocat terra)
+    if (!this.isDead || (this.isDead && !this.deadGrounded)) {
+      this.velocityY += this.gravity * deltaSeconds;
+      this.bird.y += this.velocityY * deltaSeconds;
+    }
 
     // 🔁 Rotació segons velocitat
-    const maxFallAngle = Math.PI / 3;
-    this.bird.rotation = Math.max(-Math.PI / 6, Math.min(this.velocityY / 400, maxFallAngle));
+    const maxFallAngle = Math.PI / 2;
+    const minUpAngle = -Math.PI / 6;
+    if (!this.isDead) {
+      this.bird.rotation = Math.max(minUpAngle, Math.min(this.velocityY / 400, maxFallAngle));
+    } else if (!this.deadGrounded) {
+      this.bird.rotation = Math.min(this.bird.rotation + 0.05, maxFallAngle);
+    }
 
-    // Límits de pantalla
+    // 🌍 Límits
     const bgSprite = BackgroundManager.I.view.children.find(
       (c) => c instanceof Sprite
     ) as Sprite | undefined;
     const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
 
-    if (this.bird.y > this.groundY) {
+    // 🧱 Toca el terra
+    if (this.bird.y >= this.groundY) {
       this.bird.y = this.groundY;
       this.velocityY = 0;
-    }
 
-    if (this.bird.y > bgHeight) {
-      this.bird.y = bgHeight;
-      this.velocityY = 0;
-      this.isDead = true;
-      this.bird.rotation = Math.PI / 2;
-      BackgroundManager.I.stop();
+      if (!this.isDead) {
+        // cau sense haver xocat amb cap tub
+        this.isDead = true;
+        this.deadGrounded = true;
+        this.bird.rotation = Math.PI / 2;
+        BackgroundManager.I.stop();
+      } else {
+        // ja era mort i acaba de tocar el terra
+        this.deadGrounded = true;
+      }
+
       return;
     }
 
-    // 🕒 Temporitzador per crear obstacles
+    // ❌ Si està mort, no fem col·lisions ni noves pipes
+    if (this.isDead) {
+      return;
+    }
+
+    // 🧱 Col·lisions amb pipes
+    const birdBounds = this.bird.getBounds() as unknown as Rectangle;
+    const pad = 4;
+    birdBounds.x += pad;
+    birdBounds.y += pad;
+    birdBounds.width -= pad * 2;
+    birdBounds.height -= pad * 2;
+
+    for (const obs of PipeManager.I.obstacles) {
+      for (const s of [...obs.upPipe, ...obs.downPipe]) {
+        const pipeBounds = s.getBounds() as unknown as Rectangle;
+        if (this.rectsIntersect(birdBounds, pipeBounds)) {
+          this.killBird(); // mor però seguirà caient amb gravetat
+          return;
+        }
+      }
+    }
+
+    // 🕒 Crear obstacles
     this.pipeTimer += dt;
     if (this.pipeTimer >= this.pipeInterval) {
       this.pipeTimer = 0;
       PipeManager.I.CreateObstacle();
     }
 
-    // 🌀 Actualitzar moviment de les pipes
+    // 🌀 Moure pipes
     for (const obstacle of (PipeManager.I as any).gamePipes) {
       for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
         sprite.x -= this.pipeSpeed * deltaSeconds;
@@ -163,42 +198,44 @@ export class GameScene implements IScene {
     }
   }
 
+  private rectsIntersect(a: Rectangle, b: Rectangle): boolean {
+    return (
+      a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y
+    );
+  }
+
+  private killBird() {
+    this.isDead = true;
+    this.deadGrounded = false; // segueix caient fins terra
+
+    if (this.bird) {
+      this.bird.rotation = Math.PI / 3;
+    }
+
+    BackgroundManager.I.stop();
+  }
+
   async onEnd(): Promise<void> {
     window.removeEventListener("pointerdown", this.handleInput);
     window.removeEventListener("keydown", this.handleKey);
-
-    await new Promise<void>((resolve) => {
-      const startTime = performance.now();
-      const duration = 300;
-      const startAlpha = this.container.alpha;
-
-      const fadeOut = (now: number) => {
-        const t = Math.min((now - startTime) / duration, 1);
-        this.container.alpha = startAlpha * (1 - t);
-        if (t < 1) requestAnimationFrame(fadeOut);
-        else {
-          SceneManager.I.app.stage.removeChild(this.container);
-          if (this.bird) SceneManager.I.app.stage.removeChild(this.bird);
-          resolve();
-        }
-      };
-
-      requestAnimationFrame(fadeOut);
-    });
   }
 
   public onResize(width: number, height: number): void {
     if (!this.bird) return;
 
     const bgWidth =
-      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ?? width;
+      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
+      width;
 
     const frameW = 16;
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
     this.bird.scale.set(scale * 0.7);
     this.bird.position.set(width / 2, height / 1.7);
-    this.groundY = height * 0.95;
+    this.groundY = height * 0.835;
   }
 
   destroy(): void {

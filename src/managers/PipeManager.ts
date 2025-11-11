@@ -106,6 +106,11 @@ export class PipeManager {
     this.gamePipes.push({upPipe, downPipe, gap: gapSlot})
   }
 
+  public get obstacles(): ReadonlyArray<Obstacle> {
+    return this.gamePipes;
+  }
+
+
   public randomInteger(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
