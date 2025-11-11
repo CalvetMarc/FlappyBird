@@ -196,6 +196,24 @@ export class GameScene implements IScene {
         sprite.x -= this.pipeSpeed * deltaSeconds * BackgroundManager.I.bgWidth;
       }
     }
+
+    // 🧹 Eliminar pipes fora de pantalla
+    const leftLimit = BackgroundManager.I.bgPosX - BackgroundManager.I.bgWidth / 2;
+
+    (PipeManager.I as any).gamePipes = (PipeManager.I as any).gamePipes.filter((obstacle: any) => {
+      // moure pipes
+      for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
+        // si alguna està encara visible, mantenim l’obstacle
+        if (sprite.x + sprite.width > leftLimit) return true;
+
+        // si no, la destruïm
+        sprite.destroy({ children: true, texture: false });
+      }
+
+      // esborrem completament del container del PipeManager
+      return false;
+    });
+
   }
 
   private rectsIntersect(a: Rectangle, b: Rectangle): boolean {
