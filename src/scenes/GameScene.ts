@@ -17,7 +17,7 @@ export class GameScene implements IScene {
   // 🔽 Física
   private velocityY = 0;
   private gravity = 1500;
-  private jumpForce = -700;
+  private jumpForce = -550;
   private groundY = 0;
 
   private isDead = false;

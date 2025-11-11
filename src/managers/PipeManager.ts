@@ -60,23 +60,23 @@ export class PipeManager {
     const pipeTileHeight = BackgroundManager.I.bgHeight / 15;
     const pipeTileWidth = this.pipeTextures[0].width / this.pipeTextures[0].height * pipeTileHeight;
 
-    const bottomTopSlotsMargin = 3;
+    const bottomTopSlotsMargin = 5;
     const gapSlot = this.randomInteger(bottomTopSlotsMargin + 1, maxPipeTiles - bottomTopSlotsMargin + 1);
 
     const upPipe: Sprite[] = [];
     upPipe.push(new Sprite(this.pipeTextures[this.pipeTextures.length - 1]));
     upPipe[upPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
-    upPipe[upPipe.length - 1].position.y = pipeTileHeight * (gapSlot - 2);
+    upPipe[upPipe.length - 1].position.y = pipeTileHeight * (gapSlot - 3);
     upPipe.push(new Sprite(this.pipeTextures[this.pipeTextures.length - 2]));
     upPipe[upPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
-    upPipe[upPipe.length - 1].position.y = pipeTileHeight * (gapSlot - 3);
-    for(let i = gapSlot - 3; i > 0; i--){
+    upPipe[upPipe.length - 1].position.y = pipeTileHeight * (gapSlot - 4);
+    for(let i = gapSlot - 4; i > 0; i--){
         upPipe.push(new Sprite(this.pipeTextures[this.pipeTextures.length - 3]));
         upPipe[upPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
         upPipe[upPipe.length - 1].position.y = pipeTileHeight * (i - 1);
     }
    
-
+    
     const downPipe: Sprite[] = [];
     downPipe.push(new Sprite(this.pipeTextures[0]));
     downPipe[downPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
@@ -84,7 +84,7 @@ export class PipeManager {
     downPipe.push(new Sprite(this.pipeTextures[1]));
     downPipe[downPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
     downPipe[downPipe.length - 1].position.y = pipeTileHeight * (gapSlot + 3);
-    for(let i = gapSlot + 3; i > 0; i--){
+    for(let i = gapSlot + 3; i < maxPipeTiles - 1; i++){
         downPipe.push(new Sprite(this.pipeTextures[2]));
         downPipe[downPipe.length - 1].position.x = BackgroundManager.I.bgPosX + (BackgroundManager.I.bgWidth/2);
         downPipe[downPipe.length - 1].position.y = pipeTileHeight * (i + 1);
@@ -95,6 +95,7 @@ export class PipeManager {
         sprite.height = pipeTileHeight;
         BackgroundManager.I.view.addChild(sprite);
 
+        
     }
     for(const sprite of downPipe){
         sprite.width = pipeTileWidth;
