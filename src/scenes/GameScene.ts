@@ -2,7 +2,7 @@ import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
 import { IScene } from "../managers/SceneManager";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
-import { Pipe } from "../objects/Pipe";
+import { PipeManager } from "../managers/PipeManager";
 import birdUrl from "../assets/birds/AllBird1.png";
 
 export class GameScene implements IScene {
@@ -21,8 +21,11 @@ export class GameScene implements IScene {
   private groundY = 0;
 
   private isDead = false;
-  private topPipe?: Pipe;
-  private bottomPipe?: Pipe;
+
+  // 🔹 Tubs (control de temps)
+  private pipeTimer = 0;
+  private pipeInterval = 2000; // cada 2 segons
+  private pipeSpeed = 150; // píxels per segon
 
   constructor() {
     this.container.sortableChildren = true;
@@ -34,8 +37,14 @@ export class GameScene implements IScene {
   }
 
   private async loadAssets() {
-    const birdTexture = await Assets.load(birdUrl);
+    const app = SceneManager.I.app;
+    await PipeManager.I.init(app); // 👈 carrega les textures de pipes
 
+    // Afegim el container de pipes a l'escena
+    SceneManager.I.app.stage.addChild(PipeManager.I.view);
+
+    // 🔹 Carrega l’ocell
+    const birdTexture = await Assets.load(birdUrl);
     const frameW = 16;
     const frameH = 16;
     const totalFrames = 4;
@@ -52,7 +61,6 @@ export class GameScene implements IScene {
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 10;
 
-    const app = SceneManager.I.app;
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
     const bgWidth =
@@ -66,40 +74,7 @@ export class GameScene implements IScene {
 
     this.groundY = screenH * 0.95;
     SceneManager.I.app.stage.addChild(this.bird);
-
-    // Crea tubs
-    this.createPipes();
   }
-
-  /** 🟩 Genera dos tubs enganxats als límits verticals */
-private createPipes() {
-  const bgSprite = BackgroundManager.I.view.children.find(
-    (c) => c instanceof Sprite
-  ) as Sprite | undefined;
-
-  const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
-  const screenW = SceneManager.I.app.renderer.width;
-
-  // 🔹 Alçada fixa per a totes dues canonades
-  const pipeHeight = bgHeight / 3;
-
-  // 🔹 Crea la canonada inferior
-  this.bottomPipe = new Pipe(pipeHeight);
-  this.bottomPipe.x = screenW * 0.8;
-  this.bottomPipe.y = bgHeight - pipeHeight; // surt exactament del final del fons
-
-  // 🔹 Crea la canonada superior (mateixa mida)
-  this.topPipe = new Pipe(pipeHeight);
-  this.topPipe.x = screenW * 0.8;
-  this.topPipe.y = 0; // enganxada dalt de tot
-
-  // 🔹 Afegeix-les a l’escenari
-  SceneManager.I.app.stage.addChild(this.topPipe);
-  SceneManager.I.app.stage.addChild(this.bottomPipe);
-}
-
-
-
 
   private handleInput = () => {
     if (!this.isDead) this.flap();
@@ -136,7 +111,7 @@ private createPipes() {
   update(dt: number): void {
     if (!this.bird || this.isDead) return;
 
-    // Animació d’ales
+    // 🟢 Animació d’ales
     this.frameTimer += dt;
     if (this.frameTimer >= this.frameInterval) {
       this.frameTimer = 0;
@@ -144,11 +119,16 @@ private createPipes() {
       this.bird.texture = this.birdFrames[this.currentFrame];
     }
 
-    // Física
+    // 🔽 Física
     const deltaSeconds = dt / 1000;
     this.velocityY += this.gravity * deltaSeconds;
     this.bird.y += this.velocityY * deltaSeconds;
 
+    // 🔁 Rotació segons velocitat
+    const maxFallAngle = Math.PI / 3;
+    this.bird.rotation = Math.max(-Math.PI / 6, Math.min(this.velocityY / 400, maxFallAngle));
+
+    // Límits de pantalla
     const bgSprite = BackgroundManager.I.view.children.find(
       (c) => c instanceof Sprite
     ) as Sprite | undefined;
@@ -168,8 +148,19 @@ private createPipes() {
       return;
     }
 
-    const maxFallAngle = Math.PI / 3;
-    this.bird.rotation = Math.max(-Math.PI / 6, Math.min(this.velocityY / 400, maxFallAngle));
+    // 🕒 Temporitzador per crear obstacles
+    this.pipeTimer += dt;
+    if (this.pipeTimer >= this.pipeInterval) {
+      this.pipeTimer = 0;
+      PipeManager.I.CreateObstacle();
+    }
+
+    // 🌀 Actualitzar moviment de les pipes
+    for (const obstacle of (PipeManager.I as any).gamePipes) {
+      for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
+        sprite.x -= this.pipeSpeed * deltaSeconds;
+      }
+    }
   }
 
   async onEnd(): Promise<void> {

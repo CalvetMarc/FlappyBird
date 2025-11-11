@@ -205,4 +205,20 @@ export class BackgroundManager {
     this.createBackground(bgTexture);
     this.createGroundPieces(this.groundTexture);
   }
+
+  get bgWidth(): number{
+    return this.background?.width ?? 800;
+  }
+
+  get bgHeight(): number{
+    return this.background?.height ?? 1000;
+  }
+
+  get bgPosX(): number{
+    return this.background?.position.x ?? 400;
+  }
+
+  get bgPosY(): number{
+    return this.background?.position.y ?? 500;
+  }
 }
