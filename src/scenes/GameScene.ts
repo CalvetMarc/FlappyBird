@@ -16,8 +16,8 @@ export class GameScene implements IScene {
 
   // 🔽 Física
   private velocityY = 0;
-  private gravity = 1500;
-  private jumpForce = -550;
+  private gravity = 2;
+  private jumpForce = -0.65;
   private groundY = 0;
 
   // Estat
@@ -27,7 +27,7 @@ export class GameScene implements IScene {
   // 🔹 Tubs
   private pipeTimer = 0;
   private pipeInterval = 3000; // cada 3 segons
-  private pipeSpeed = 150; // píxels per segon
+  private pipeSpeed = 0.2; // píxels per segon
 
   constructor() {
     this.container.sortableChildren = true;
@@ -50,7 +50,7 @@ export class GameScene implements IScene {
     for (let i = 0; i < totalFrames; i++) {
       const tex = new Texture({
         source: birdTexture.source,
-        frame: new Rectangle(i * frameW, 0, frameW, frameH),
+        frame: new Rectangle(i * frameW, SceneManager.I.playerIndex * 16, frameW, frameH),
       });
       this.birdFrames.push(tex);
     }
@@ -88,7 +88,7 @@ export class GameScene implements IScene {
   private flap() {
     if (!this.bird) return;
     if (this.bird.y >= this.groundY) this.velocityY = 0;
-    this.velocityY = this.jumpForce;
+    this.velocityY = BackgroundManager.I.bgHeight * this.jumpForce;
     this.bird.rotation = -Math.PI / 6;
   }
 
@@ -122,7 +122,7 @@ export class GameScene implements IScene {
 
     // 🔽 Física (només si no està mort o si està mort però encara no ha tocat terra)
     if (!this.isDead || (this.isDead && !this.deadGrounded)) {
-      this.velocityY += this.gravity * deltaSeconds;
+      this.velocityY += this.gravity * deltaSeconds * BackgroundManager.I.bgHeight;
       this.bird.y += this.velocityY * deltaSeconds;
     }
 
@@ -167,7 +167,7 @@ export class GameScene implements IScene {
 
     // 🧱 Col·lisions amb pipes
     const birdBounds = this.bird.getBounds() as unknown as Rectangle;
-    const pad = 4;
+    const pad = 6;
     birdBounds.x += pad;
     birdBounds.y += pad;
     birdBounds.width -= pad * 2;
@@ -193,7 +193,7 @@ export class GameScene implements IScene {
     // 🌀 Moure pipes
     for (const obstacle of (PipeManager.I as any).gamePipes) {
       for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
-        sprite.x -= this.pipeSpeed * deltaSeconds;
+        sprite.x -= this.pipeSpeed * deltaSeconds * BackgroundManager.I.bgWidth;
       }
     }
   }
