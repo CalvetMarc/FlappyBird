@@ -110,17 +110,18 @@ export class PipeManager {
 
     for(const obstacle of this.obstacles){
 
-      const normalizedMovementDone = (obstacle.startX - obstacle.endX) / (obstacle.upPipe[0].position.x - obstacle.endX);
+      const normalizedMovementDone = (obstacle.upPipe[0].position.x - obstacle.endX) / (obstacle.startX - obstacle.endX);
       const proportionalCurrentPositionX =  startX - ((startX - endX) * normalizedMovementDone);
 
+      const startIndex = obstacle.upPipe.length - 1;
       for (let i = 0; i < obstacle.upPipe.length; i++) {
         obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
-        obstacle.upPipe[i].position.y = pipeTileHeight * i;
+        obstacle.upPipe[i].position.y = pipeTileHeight * (startIndex - i);
       }
 
       for(let i = 0; i < obstacle.downPipe.length; i++){
-        obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
-        obstacle.upPipe[i].position.y = pipeTileHeight * (i + obstacle.gap);
+        obstacle.downPipe[i].position.x = proportionalCurrentPositionX;
+        obstacle.downPipe[i].position.y = pipeTileHeight * (i + obstacle.gap);
       }
 
       obstacle.startX = startX;
