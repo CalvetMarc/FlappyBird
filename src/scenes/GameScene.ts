@@ -4,6 +4,7 @@ import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { PipeManager } from "../managers/PipeManager";
 import { CharacterManager } from "../managers/CharacterManager";
+import { Milliseconds, toMs, addMs, Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
 
 export class GameScene implements IScene {
   container = new Container();
@@ -60,6 +61,12 @@ export class GameScene implements IScene {
           return;
         }
       }
+
+      const firstPipe = obs.upPipe[0];
+      if (!obs.scored && birdBounds.x > firstPipe.x + firstPipe.width) {
+        obs.scored = true; // marquem com ja comptat
+        this.incrementScore();
+      }
     }
     
   }
@@ -95,7 +102,45 @@ export class GameScene implements IScene {
     );
   }
 
-  async onEnd(): Promise<void> {
+  private incrementScore(): void {
+    if(!this.scoreText) return;
+    
+    this.score += 1; 
+    this.scoreText.text = this.score;       
+    TweenManager.I.AddTween(<Tween<Text>>{
+
+      waitTime: toMs(0),
+      duration: toMs(200),
+      context: this.scoreText!,
+      tweenFunction: function (e) {
+        const t = Math.min(e / this.duration, 1);
+        const easeOut = 1 - Math.pow(1 - t, 3);
+        const scale = 1 + 0.3 * easeOut;
+
+        this.context.scale.set(scale);
+      }
+
+    }).chain(
+      TweenManager.I.AddTween(<Tween<Text>>{
+
+        waitTime: toMs(0),
+        duration: toMs(300),
+        context: this.scoreText!,
+        tweenFunction: function (e) {
+          const t = Math.min(e / this.duration, 1);
+          const easeOut = 1 - Math.pow(1 - t, 3);
+          const scale = 1.3 - 0.3 * easeOut;
+
+          this.context.scale.set(scale);
+        }
+
+      })
+    );
+    
+  }
+
+
+  public  async onEnd(): Promise<void> {
     // 🧹 No cal eliminar listeners: CharacterManager ja ho fa
   }
 
@@ -105,7 +150,7 @@ export class GameScene implements IScene {
     CharacterManager.I.rebuild(width, height);
   }
 
-  destroy(): void {
+  public destroy(): void {
     BackgroundManager.I.destroy();
     PipeManager.I.destroy();
     CharacterManager.I.destroy();

@@ -8,6 +8,7 @@ interface Obstacle {
   upPipe: Sprite[];
   downPipe: Sprite[];
   gap: number;
+  scored: boolean;
 }
 
 export class PipeManager {
@@ -159,7 +160,7 @@ export class PipeManager {
       downPipe.push(this.makePipe(this.pipeTextures[2], startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
 
-    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot });
+    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot , scored: false});
   }
 
   /** 🧩 Helper per crear i afegir un sprite de tub */
