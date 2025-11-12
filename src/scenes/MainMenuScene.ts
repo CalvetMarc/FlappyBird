@@ -61,10 +61,7 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgWidth = (BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? screenW;
-
+    const bgWidth = BackgroundManager.I.bgWidth;
     const targetWidth = bgWidth / 3;
     const scale = targetWidth / this.logoBaseW;
     this.logo.scale.set(scale);
@@ -99,9 +96,7 @@ export class MainMenuScene implements IScene {
     const app = SceneManager.I.app;
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
-    const bgWidth = (BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? screenW;
+    const bgWidth = BackgroundManager.I.bgWidth;
 
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
@@ -146,9 +141,7 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgWidth = (BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? screenW;
+    const bgWidth = BackgroundManager.I.bgWidth;
     const targetWidth = bgWidth / 10;
 
     const makeButton = (x: number, label: "play" | "settings" | "ranking", tex: Texture): Sprite => {
@@ -202,9 +195,7 @@ export class MainMenuScene implements IScene {
     this.leftTex = new Texture({ source: originalTexture.source, frame: leftFrame });
     this.rightTex = new Texture({ source: originalTexture.source, frame: rightFrame });
 
-    const bgWidth = (BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? SceneManager.I.app.renderer.width;
+    const bgWidth = BackgroundManager.I.bgWidth;
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / cropSize;
 
@@ -257,9 +248,7 @@ export class MainMenuScene implements IScene {
     this.elapsed += dt / 1000;
 
     // 🟩 Alçada proporcional al background
-    const bgSprite = BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite | undefined;
+    const bgSprite = BackgroundManager.I.bgWidth;
 
     const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
     const amplitude = bgHeight * 0.015; // 👈 3% de l'alçada del fons
@@ -289,9 +278,8 @@ export class MainMenuScene implements IScene {
   }
 
   onResize(width: number, height: number): void {
-    const bgWidth = (BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite)?.width ?? width;
+    const bgWidth = BackgroundManager.I.bgWidth;
+
     const targetWidth = bgWidth / 10;
 
     if (this.logo && this.logoBaseW > 0) {

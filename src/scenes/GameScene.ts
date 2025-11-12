@@ -142,8 +142,7 @@ export class GameScene implements IScene {
   }
 
   public onResize(width: number, height: number): void {
-    BackgroundManager.I.rebuild(width, height);
-    PipeManager.I.rebuild(width, height);
+    PipeManager.I.rebuild();
     CharacterManager.I.rebuild(width, height);
   }
 

@@ -128,9 +128,7 @@ public groundTouched(groundRect: Rectangle) {
   public rebuild(screenW: number, screenH: number): void {
     if (!this.bird) return;
     const frameW = 16;
-    const bgWidth =
-      (BackgroundManager.I.containerObject.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
-      screenW;
+    const bgWidth = BackgroundManager.I.bgWidth;
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
     this.bird.scale.set(scale * 0.7);
@@ -172,9 +170,7 @@ public groundTouched(groundRect: Rectangle) {
 
     const screenW = this.app.renderer.width;
     const screenH = this.app.renderer.height;
-    const bgWidth =
-      (BackgroundManager.I.containerObject.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
-      screenW;
+    const bgWidth = BackgroundManager.I.bgWidth;
 
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;

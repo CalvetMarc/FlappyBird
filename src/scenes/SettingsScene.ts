@@ -160,11 +160,8 @@ export class SettingsScene implements IScene {
     bgSprite.anchor.set(0.5);
     bgSprite.zIndex = 5;
 
-    const bg = BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite | undefined;
+    const bgWidth = BackgroundManager.I.bgWidth;
 
-    const bgWidth = bg?.width ?? screenW;
     const targetWidth = bgWidth / 4;
     const scale = targetWidth / bgSprite.width;
     bgSprite.scale.set(scale * 2.4);
@@ -220,11 +217,8 @@ export class SettingsScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgSprite = BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite | undefined;
+    const bgWidth = BackgroundManager.I.bgWidth;
 
-    const bgWidth = bgSprite?.width ?? screenW;
     const targetWidth = bgWidth / 10;
 
     const btn = new Sprite(this.normalTex);
@@ -288,11 +282,7 @@ export class SettingsScene implements IScene {
   }
 
   public onResize(width: number, height: number): void {
-    const bg = BackgroundManager.I.containerObject.children.find(
-      c => c instanceof Sprite
-    ) as Sprite | undefined;
-
-    const bgWidth = bg?.width ?? width;
+    const bgWidth = BackgroundManager.I.bgWidth;
 
     if (this.button) {
       const targetWidth = bgWidth / 10;

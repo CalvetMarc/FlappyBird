@@ -1,20 +1,15 @@
-import { Application } from "pixi.js";
-import { TextureSource } from "pixi.js";
+import { Application, TextureSource } from "pixi.js";
 import { SceneManager } from "./SceneManager";
+import { SingletonBase } from "../abstractions/SingletonBase";
 
-export class GameManager {
+export class GameManager extends SingletonBase<GameManager> {
   private app!: Application;
 
-  private static _i: GameManager;
-  static get I() {
-    return (this._i ??= new GameManager());
-  }
-
   private constructor() {
+    super();
     this.start();
   }
 
-  /** Initialize the main PIXI application and start the game */
   async start(): Promise<void> {
     this.app = new Application();
 
@@ -29,10 +24,8 @@ export class GameManager {
       antialias: false,
     });
 
-    // Append the canvas to the document
     document.body.appendChild(this.app.canvas);
 
-    // ✅ Center the canvas on the page using CSS
     Object.assign(this.app.canvas.style, {
       position: "absolute",
       top: "50%",
@@ -41,36 +34,27 @@ export class GameManager {
       display: "block",
     });
 
-    // Start the Scene system
     SceneManager.I.start(this.app);
 
-    // Game loop
     this.app.ticker.add((frame) => {
       this.update(frame.deltaMS);
     });
 
     window.addEventListener("resize", () => this.onResize());
-  }  
+  }
 
-  /** Called every frame to update the active scene */
-  update(dt: number): void {
+  private update(dt: number): void {
     SceneManager.I.update(dt);
   }
 
-  get gameApp():Application{
+  get gameApp(): Application {
     return this.app;
   }
 
-  /** Handle window resize event */
   private onResize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
-
-    // Resize the canvas
     this.app.renderer.resize(width, height);
-
-    // 🔹 If you want the background and ground to adapt, you can do:
     SceneManager.I.onResize?.(width, height);
   }
-
 }

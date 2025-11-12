@@ -9,6 +9,8 @@ interface Obstacle {
   downPipe: Sprite[];
   gap: number;
   scored: boolean;
+  startX: number;
+  endX: number
 }
 
 export class PipeManager {
@@ -21,6 +23,10 @@ export class PipeManager {
   private pipeSpeed = 0.2; // proporció sobre amplada del fons
   private pipeInterval = 3000; // ms
   private pipeTimer = 0;
+  private maxPipeTiles = 15;
+  private bottomTopTilesGapMargin = 5;
+
+
 
   private move: boolean = false;
 
@@ -44,7 +50,7 @@ export class PipeManager {
   }
 
   /** 🔁 Actualitza moviment, generació i neteja de tubs */
-  public update(dt: number) {
+  public update(dt: number) {  
     if(!this.move){
       return;
     }
@@ -64,7 +70,6 @@ export class PipeManager {
         sprite.x -= this.pipeSpeed * deltaSeconds * BackgroundManager.I.bgWidth;
       }
     }
-
     // 🧹 Eliminar tubs fora de pantalla
     const leftLimit = BackgroundManager.I.bgPosX - BackgroundManager.I.bgWidth / 2;
 
@@ -95,10 +100,34 @@ export class PipeManager {
   }
 
   /** 🔄 Reajusta després d’un canvi de mida */
-  public rebuild(screenW: number, screenH: number): void {
-    this.container.removeChildren();
-    this.gamePipes = [];
+  public rebuild(): void {
+    
+    const pipeTileHeight = BackgroundManager.I.bgHeight / this.maxPipeTiles;
+    const pipeTileWidth =  (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
+
+    const startX = BackgroundManager.I.bgPosX + BackgroundManager.I.bgWidth / 2;
+    const endX = BackgroundManager.I.bgPosX - (BackgroundManager.I.bgWidth / 2) - (pipeTileWidth / 2)    
+
+    for(const obstacle of this.obstacles){
+
+      const normalizedMovementDone = (obstacle.startX - obstacle.endX) / (obstacle.upPipe[0].position.x - obstacle.endX);
+      const proportionalCurrentPositionX =  startX - ((startX - endX) * normalizedMovementDone);
+
+      for (let i = 0; i < obstacle.upPipe.length; i++) {
+        obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
+        obstacle.upPipe[i].position.y = pipeTileHeight * i;
+      }
+
+      for(let i = 0; i < obstacle.downPipe.length; i++){
+        obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
+        obstacle.upPipe[i].position.y = pipeTileHeight * (i + obstacle.gap);
+      }
+
+      obstacle.startX = startX;
+      obstacle.endX = endX;
+    }
   }
+
 
   public start(): void{
     this.move = true;
@@ -134,13 +163,10 @@ export class PipeManager {
 
   /** 🧱 Crea un nou obstacle (parella de tubs amb buit) */
   private CreateObstacle() {
-    const maxPipeTiles = 15;
-    const pipeTileHeight = BackgroundManager.I.bgHeight / maxPipeTiles;
-    const pipeTileWidth =
-      (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
+    const pipeTileHeight = BackgroundManager.I.bgHeight / this.maxPipeTiles;
+    const pipeTileWidth =  (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
 
-    const bottomTopMargin = 5;
-    const gapSlot = this.randomInteger(bottomTopMargin + 1, maxPipeTiles - bottomTopMargin + 1);
+    const gapSlot = this.randomInteger(this.bottomTopTilesGapMargin + 1, this.maxPipeTiles - this.bottomTopTilesGapMargin + 1);
     const startX = BackgroundManager.I.bgPosX + BackgroundManager.I.bgWidth / 2;
 
     const upPipe: Sprite[] = [];
@@ -156,11 +182,11 @@ export class PipeManager {
     // 🔼 Tubs inferiors
     downPipe.push(this.makePipe(this.pipeTextures[0], startX, pipeTileHeight * (gapSlot + 2), pipeTileWidth, pipeTileHeight));
     downPipe.push(this.makePipe(this.pipeTextures[1], startX, pipeTileHeight * (gapSlot + 3), pipeTileWidth, pipeTileHeight));
-    for (let i = gapSlot + 3; i < maxPipeTiles - 1; i++) {
+    for (let i = gapSlot + 3; i < this.maxPipeTiles - 1; i++) {
       downPipe.push(this.makePipe(this.pipeTextures[2], startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
 
-    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot , scored: false});
+    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot , scored: false, startX: startX, endX: BackgroundManager.I.bgPosX - (BackgroundManager.I.bgWidth / 2) - (pipeTileWidth / 2)});
   }
 
   /** 🧩 Helper per crear i afegir un sprite de tub */
