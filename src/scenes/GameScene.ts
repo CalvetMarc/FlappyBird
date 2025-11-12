@@ -1,95 +1,18 @@
-import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
+import { Container, Rectangle, Text, TextStyle } from "pixi.js";
 import { IScene } from "../managers/SceneManager";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { PipeManager } from "../managers/PipeManager";
-import birdUrl from "../assets/birds/AllBird1.png";
+import { CharacterManager } from "../managers/CharacterManager";
 
 export class GameScene implements IScene {
   container = new Container();
-
-  private bird?: Sprite;
-  private birdFrames: Texture[] = [];
-  private currentFrame = 0;
-  private frameTimer = 0;
-  private frameInterval = 100;
-
-  // 🔽 Física
-  private velocityY = 0;
-  private gravity = 2;
-  private jumpForce = -0.65;
-  private groundY = 0;
-
-  // Estat
-  private isDead = false;
-  private deadGrounded = false; // nou: mort i ja al terra
-
-  // 🔹 Tubs
-  private pipeTimer = 0;
-  private pipeInterval = 3000; // cada 3 segons
-  private pipeSpeed = 0.2; // píxels per segon
+  private scoreText?: Text; 
+  private score: number = 0;       
 
   constructor() {
     this.container.sortableChildren = true;
-    this.loadAssets();
-
-    window.addEventListener("pointerdown", this.handleInput);
-    window.addEventListener("keydown", this.handleKey);
-  }
-
-  private async loadAssets() {
-    const app = SceneManager.I.app;
-    await PipeManager.I.init(app);
-    SceneManager.I.app.stage.addChild(PipeManager.I.view);
-
-    const birdTexture = await Assets.load(birdUrl);
-    const frameW = 16;
-    const frameH = 16;
-    const totalFrames = 4;
-
-    for (let i = 0; i < totalFrames; i++) {
-      const tex = new Texture({
-        source: birdTexture.source,
-        frame: new Rectangle(i * frameW, SceneManager.I.playerIndex * 16, frameW, frameH),
-      });
-      this.birdFrames.push(tex);
-    }
-
-    this.bird = new Sprite(this.birdFrames[0]);
-    this.bird.anchor.set(0.5);
-    this.bird.zIndex = 10;
-
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
-    const bgWidth =
-      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
-      screenW;
-
-    const targetWidth = bgWidth / 10;
-    const scale = targetWidth / frameW;
-    this.bird.scale.set(scale * 0.7);
-    this.bird.position.set(screenW / 2, screenH / 1.7);
-
-    this.groundY = screenH * 0.835;
-    SceneManager.I.app.stage.addChild(this.bird);
-  }
-
-  private handleInput = () => {
-    if (!this.isDead) this.flap();
-  };
-
-  private handleKey = (e: KeyboardEvent) => {
-    if (e.code === "Space" && !this.isDead) {
-      e.preventDefault();
-      this.flap();
-    }
-  };
-
-  private flap() {
-    if (!this.bird) return;
-    if (this.bird.y >= this.groundY) this.velocityY = 0;
-    this.velocityY = BackgroundManager.I.bgHeight * this.jumpForce;
-    this.bird.rotation = -Math.PI / 6;
+    this.createScoreText();
   }
 
   onStart(): void {
@@ -102,118 +25,65 @@ export class GameScene implements IScene {
       this.container.alpha = t;
       if (t < 1) requestAnimationFrame(fadeIn);
     };
-
+    PipeManager.I.start();
     requestAnimationFrame(fadeIn);
   }
 
   update(dt: number): void {
-    if (!this.bird) return;
-    const deltaSeconds = dt / 1000;
+    PipeManager.I.update(dt);
+    CharacterManager.I.update(dt);
 
-    // 🟢 Animació d’ales (només si és viu)
-    if (!this.isDead) {
-      this.frameTimer += dt;
-      if (this.frameTimer >= this.frameInterval) {
-        this.frameTimer = 0;
-        this.currentFrame = (this.currentFrame + 1) % this.birdFrames.length;
-        this.bird.texture = this.birdFrames[this.currentFrame];
-      }
-    }
+    const birdBounds = CharacterManager.I.birdBounds;
+    if (!birdBounds) return;
 
-    // 🔽 Física (només si no està mort o si està mort però encara no ha tocat terra)
-    if (!this.isDead || (this.isDead && !this.deadGrounded)) {
-      this.velocityY += this.gravity * deltaSeconds * BackgroundManager.I.bgHeight;
-      this.bird.y += this.velocityY * deltaSeconds;
-    }
+    const groundBounds = BackgroundManager.I.groundBounds;
+    if (groundBounds) {
+      const isTouchingGround =
+        birdBounds.y + birdBounds.height >= groundBounds.y &&
+        birdBounds.x + birdBounds.width > groundBounds.x &&
+        birdBounds.x < groundBounds.x + groundBounds.width;
 
-    // 🔁 Rotació segons velocitat
-    const maxFallAngle = Math.PI / 2;
-    const minUpAngle = -Math.PI / 6;
-    if (!this.isDead) {
-      this.bird.rotation = Math.max(minUpAngle, Math.min(this.velocityY / 400, maxFallAngle));
-    } else if (!this.deadGrounded) {
-      this.bird.rotation = Math.min(this.bird.rotation + 0.05, maxFallAngle);
-    }
-
-    // 🌍 Límits
-    const bgSprite = BackgroundManager.I.view.children.find(
-      (c) => c instanceof Sprite
-    ) as Sprite | undefined;
-    const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
-
-    // 🧱 Toca el terra
-    if (this.bird.y >= this.groundY) {
-      this.bird.y = this.groundY;
-      this.velocityY = 0;
-
-      if (!this.isDead) {
-        // cau sense haver xocat amb cap tub
-        this.isDead = true;
-        this.deadGrounded = true;
-        this.bird.rotation = Math.PI / 2;
+      if (isTouchingGround) {
+        CharacterManager.I.groundTouched(groundBounds);
+        PipeManager.I.stop();
         BackgroundManager.I.stop();
-      } else {
-        // ja era mort i acaba de tocar el terra
-        this.deadGrounded = true;
+        return;
       }
-
-      return;
     }
-
-    // ❌ Si està mort, no fem col·lisions ni noves pipes
-    if (this.isDead) {
-      return;
-    }
-
-    // 🧱 Col·lisions amb pipes
-    const birdBounds = this.bird.getBounds() as unknown as Rectangle;
-    const pad = 6;
-    birdBounds.x += pad;
-    birdBounds.y += pad;
-    birdBounds.width -= pad * 2;
-    birdBounds.height -= pad * 2;
 
     for (const obs of PipeManager.I.obstacles) {
       for (const s of [...obs.upPipe, ...obs.downPipe]) {
         const pipeBounds = s.getBounds() as unknown as Rectangle;
         if (this.rectsIntersect(birdBounds, pipeBounds)) {
-          this.killBird(); // mor però seguirà caient amb gravetat
+          CharacterManager.I.kill();
+          PipeManager.I.stop();
           return;
         }
       }
     }
+    
+  }
 
-    // 🕒 Crear obstacles
-    this.pipeTimer += dt;
-    if (this.pipeTimer >= this.pipeInterval) {
-      this.pipeTimer = 0;
-      PipeManager.I.CreateObstacle();
-    }
+  private async createScoreText() {
+    const app = SceneManager.I.app;
+    const screenW = app.renderer.width;
 
-    // 🌀 Moure pipes
-    for (const obstacle of (PipeManager.I as any).gamePipes) {
-      for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
-        sprite.x -= this.pipeSpeed * deltaSeconds * BackgroundManager.I.bgWidth;
-      }
-    }
+    await document.fonts.load('48px "Minecraft"');
 
-    // 🧹 Eliminar pipes fora de pantalla
-    const leftLimit = BackgroundManager.I.bgPosX - BackgroundManager.I.bgWidth / 2;
-
-    (PipeManager.I as any).gamePipes = (PipeManager.I as any).gamePipes.filter((obstacle: any) => {
-      // moure pipes
-      for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
-        // si alguna està encara visible, mantenim l’obstacle
-        if (sprite.x + sprite.width > leftLimit) return true;
-
-        // si no, la destruïm
-        sprite.destroy({ children: true, texture: false });
-      }
-
-      // esborrem completament del container del PipeManager
-      return false;
+    const style = new TextStyle({
+      fontFamily: "Minecraft",
+      fontSize: 38,
+      fill: 0xffffff,
+      stroke: { color: 0x000000, width: 6 },
+      align: "center",
     });
 
+    this.scoreText = new Text({ text: "0", style });
+    this.scoreText.anchor.set(0.5);
+    this.scoreText.position.set(screenW / 2, 60);
+    this.scoreText.zIndex = 20;
+
+    this.container.addChild(this.scoreText);
   }
 
   private rectsIntersect(a: Rectangle, b: Rectangle): boolean {
@@ -225,42 +95,20 @@ export class GameScene implements IScene {
     );
   }
 
-  private killBird() {
-    this.isDead = true;
-    this.deadGrounded = false; // segueix caient fins terra
-
-    if (this.bird) {
-      this.bird.rotation = Math.PI / 3;
-    }
-
-    BackgroundManager.I.stop();
-  }
-
   async onEnd(): Promise<void> {
-    window.removeEventListener("pointerdown", this.handleInput);
-    window.removeEventListener("keydown", this.handleKey);
+    // 🧹 No cal eliminar listeners: CharacterManager ja ho fa
   }
 
   public onResize(width: number, height: number): void {
-    if (!this.bird) return;
-
-    const bgWidth =
-      (BackgroundManager.I.view.children.find((c) => c instanceof Sprite) as Sprite)?.width ??
-      width;
-
-    const frameW = 16;
-    const targetWidth = bgWidth / 10;
-    const scale = targetWidth / frameW;
-    this.bird.scale.set(scale * 0.7);
-    this.bird.position.set(width / 2, height / 1.7);
-    this.groundY = height * 0.835;
+    BackgroundManager.I.rebuild(width, height);
+    PipeManager.I.rebuild(width, height);
+    CharacterManager.I.rebuild(width, height);
   }
 
   destroy(): void {
-    window.removeEventListener("pointerdown", this.handleInput);
-    window.removeEventListener("keydown", this.handleKey);
-
-    if (this.bird) this.bird.destroy({ texture: true, textureSource: true });
+    BackgroundManager.I.destroy();
+    PipeManager.I.destroy();
+    CharacterManager.I.destroy();
     this.container.destroy({ children: true, texture: true, textureSource: true });
   }
 }

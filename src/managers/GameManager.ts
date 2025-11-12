@@ -57,6 +57,10 @@ export class GameManager {
     SceneManager.I.update(dt);
   }
 
+  get gameApp():Application{
+    return this.app;
+  }
+
   /** Handle window resize event */
   private onResize(): void {
     const width = window.innerWidth;
@@ -68,4 +72,5 @@ export class GameManager {
     // 🔹 If you want the background and ground to adapt, you can do:
     SceneManager.I.onResize?.(width, height);
   }
+
 }

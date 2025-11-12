@@ -160,7 +160,7 @@ export class SettingsScene implements IScene {
     bgSprite.anchor.set(0.5);
     bgSprite.zIndex = 5;
 
-    const bg = BackgroundManager.I.view.children.find(
+    const bg = BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
 
@@ -220,7 +220,7 @@ export class SettingsScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgSprite = BackgroundManager.I.view.children.find(
+    const bgSprite = BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
 
@@ -288,7 +288,7 @@ export class SettingsScene implements IScene {
   }
 
   public onResize(width: number, height: number): void {
-    const bg = BackgroundManager.I.view.children.find(
+    const bg = BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
 

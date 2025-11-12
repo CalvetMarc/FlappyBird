@@ -61,7 +61,7 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgWidth = (BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite)?.width ?? screenW;
 
@@ -99,7 +99,7 @@ export class MainMenuScene implements IScene {
     const app = SceneManager.I.app;
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
-    const bgWidth = (BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite)?.width ?? screenW;
 
@@ -146,7 +146,7 @@ export class MainMenuScene implements IScene {
     const screenW = app.renderer.width;
     const screenH = app.renderer.height;
 
-    const bgWidth = (BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite)?.width ?? screenW;
     const targetWidth = bgWidth / 10;
@@ -202,7 +202,7 @@ export class MainMenuScene implements IScene {
     this.leftTex = new Texture({ source: originalTexture.source, frame: leftFrame });
     this.rightTex = new Texture({ source: originalTexture.source, frame: rightFrame });
 
-    const bgWidth = (BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite)?.width ?? SceneManager.I.app.renderer.width;
     const targetWidth = bgWidth / 10;
@@ -225,7 +225,7 @@ export class MainMenuScene implements IScene {
 
       this.container.addChild(btn);
       return btn;
-    };
+    };    
 
     const prevBird = () => {
       if (!this.birdFrames.length || !this.bird) return;
@@ -257,7 +257,7 @@ export class MainMenuScene implements IScene {
     this.elapsed += dt / 1000;
 
     // 🟩 Alçada proporcional al background
-    const bgSprite = BackgroundManager.I.view.children.find(
+    const bgSprite = BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite | undefined;
 
@@ -289,7 +289,7 @@ export class MainMenuScene implements IScene {
   }
 
   onResize(width: number, height: number): void {
-    const bgWidth = (BackgroundManager.I.view.children.find(
+    const bgWidth = (BackgroundManager.I.containerObject.children.find(
       c => c instanceof Sprite
     ) as Sprite)?.width ?? width;
     const targetWidth = bgWidth / 10;

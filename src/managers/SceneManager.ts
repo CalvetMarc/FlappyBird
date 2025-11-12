@@ -7,6 +7,15 @@ import { SettingsScene } from "../scenes/SettingsScene";
 import { RankingScene } from "../scenes/RankingScene";
 import { BackgroundManager } from "./BackgroundManager";
 
+export const LAYERS = {
+  BACKGROUND: 0,
+  GROUND: 10,
+  PIPES: 30,
+  PLAYER: 50,
+  UI: 100,
+} as const;
+
+
 /** Contract that every scene must implement */
 export interface IScene {
   container: Container;
@@ -95,7 +104,7 @@ export class SceneManager {
     await this.backgroundManager.init(this.app);
 
     // Add background behind everything
-    this.app.stage.addChild(this.backgroundManager.view);
+    this.app.stage.addChild(this.backgroundManager.containerObject);
     BackgroundManager.I.start();
   }
 

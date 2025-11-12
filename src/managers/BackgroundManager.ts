@@ -1,5 +1,5 @@
 import { Application, Container, Sprite, Texture, Rectangle, Assets, Graphics } from "pixi.js";
-import { SceneManager } from "./SceneManager";
+import { LAYERS } from "./SceneManager";
 
 // Assets
 import backgroundUrl from "../assets/backgrounds/Background2.png";
@@ -43,10 +43,11 @@ export class BackgroundManager {
 
     this.createBackground(bgTexture);
     this.createGroundPieces(groundTexture);
+    this.container.sortableChildren = true;
   }
 
   /** Return the background container so it can be added to scenes */
-  get view(): Container {
+  get containerObject(): Container {
     return this.container;
   }
 
@@ -77,6 +78,7 @@ export class BackgroundManager {
       .fill(0xffffff); // color doesn’t matter, only defines the shape
     this.container.mask = maskRect;
     this.container.addChild(maskRect);
+    this.background.zIndex = LAYERS.BACKGROUND;
   }
 
   /** Create ground and store cropped base textures for reuse */
@@ -140,6 +142,7 @@ export class BackgroundManager {
     piece.scale.set(this.scale);
     piece.anchor.set(0, 1);
     piece.position.set(x, this.groundY);
+    piece.zIndex = LAYERS.GROUND;
     return piece;
   }
 
@@ -206,19 +209,43 @@ export class BackgroundManager {
     this.createGroundPieces(this.groundTexture);
   }
 
-  get bgWidth(): number{
+  /** 📏 Retorna els límits del terra (bounding box global) */
+  public get groundBounds(): Rectangle | undefined {
+    if (this.groundPieces.length === 0) return;
+
+    // Obtenim el primer tros com a base
+    const first = this.groundPieces[0];
+    const bounds = first.getBounds();
+
+    let minX = bounds.x;
+    let maxX = bounds.x + bounds.width;
+    let minY = bounds.y;
+    let maxY = bounds.y + bounds.height;
+
+    for (const piece of this.groundPieces) {
+      const b = piece.getBounds();
+      minX = Math.min(minX, b.x);
+      maxX = Math.max(maxX, b.x + b.width);
+      minY = Math.min(minY, b.y);
+      maxY = Math.max(maxY, b.y + b.height);
+    }
+
+    return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  public get bgWidth(): number{
     return this.background?.width ?? 800;
   }
 
-  get bgHeight(): number{
+  public get bgHeight(): number{
     return this.background?.height ?? 1000;
   }
 
-  get bgPosX(): number{
+  public get bgPosX(): number{
     return this.background?.position.x ?? 400;
   }
 
-  get bgPosY(): number{
+  public get bgPosY(): number{
     return this.background?.position.y ?? 500;
   }
 }
