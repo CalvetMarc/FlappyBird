@@ -118,4 +118,43 @@ export class TweenManager {
         this.activeTweens.get(id)!.changeCurrentState("ACTIVE");
     }
   }
+
+  // Interpolation functions
+  private static normalize(elapsed: Milliseconds, duration: Milliseconds): number {
+    return Math.min(Number(elapsed) / Number(duration), 1);
+  }
+
+  public static easeOutCubic(elapsed: Milliseconds, duration: Milliseconds): number {
+    return 1 - Math.pow(1 - this.normalize(elapsed, duration), 3);
+  }
+
+  public static easeInCubic(elapsed: Milliseconds, duration: Milliseconds): number {
+    const t: number = this.normalize(elapsed, duration);
+    return t * t * t;
+  }
+
+  public static easeInOutCubic(elapsed: Milliseconds, duration: Milliseconds): number {
+    const t: number = this.normalize(elapsed, duration);
+    return t < 0.5 ? 4 * t * t * t : 
+        1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  public static easeOutElastic(elapsed: Milliseconds, duration: Milliseconds): number {
+    const t: number = this.normalize(elapsed, duration);
+    const c4 = (2 * Math.PI) / 3;
+    return t === 0
+      ? 0
+        : t === 1
+        ? 1
+      : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+  }
+
+  public static easeOutBounce(elapsed: Milliseconds, duration: Milliseconds): number {
+    let t: number = this.normalize(elapsed, duration);
+    const n1 = 7.5625, d1 = 2.75;
+    if (t < 1 / d1) return n1 * t * t;
+    else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+    else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+    else return n1 * (t -= 2.625 / d1) * t + 0.984375;
+  }
 }

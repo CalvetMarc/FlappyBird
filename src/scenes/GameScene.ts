@@ -107,16 +107,15 @@ export class GameScene implements IScene {
     
     this.score += 1; 
     this.scoreText.text = this.score;       
+
     TweenManager.I.AddTween(<Tween<Text>>{
 
       waitTime: toMs(0),
       duration: toMs(200),
       context: this.scoreText!,
       tweenFunction: function (e) {
-        const t = Math.min(e / this.duration, 1);
-        const easeOut = 1 - Math.pow(1 - t, 3);
-        const scale = 1 + 0.3 * easeOut;
-
+        const ease = TweenManager.easeOutCubic(e, this.duration);
+        const scale = 1 + 0.3 * ease;
         this.context.scale.set(scale);
       }
 
@@ -127,10 +126,8 @@ export class GameScene implements IScene {
         duration: toMs(300),
         context: this.scoreText!,
         tweenFunction: function (e) {
-          const t = Math.min(e / this.duration, 1);
-          const easeOut = 1 - Math.pow(1 - t, 3);
-          const scale = 1.3 - 0.3 * easeOut;
-
+          const ease = TweenManager.easeOutCubic(e, this.duration);
+          const scale = 1.3 - 0.3 * ease;
           this.context.scale.set(scale);
         }
 
