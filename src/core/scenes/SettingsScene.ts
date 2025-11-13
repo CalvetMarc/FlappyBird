@@ -2,8 +2,8 @@ import { Container, Sprite, Texture, Assets, Rectangle, Text } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
-import playUrl from "../assets/ui/UiCozyFree.png";
 import { GameManager } from "../managers/GameManager";
+import playUrl from "../../assets/ui/UiCozyFree.png";
 
 /* 🟩 Classe auxiliar per a un toggle simple */
 class ToggleSwitch extends Container {

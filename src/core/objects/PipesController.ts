@@ -1,9 +1,9 @@
 import { Application, Container, Sprite, Texture, Rectangle, Assets } from "pixi.js";
-import { BackgroundManager } from "./BackgroundManager";
-import pipeUrl from "../assets/tiles/SimpleStyle1.png";
+import { BackgroundManager } from "../managers/BackgroundManager";
 import { LAYERS } from "../abstractions/IScene";
 import { IGameObject } from "../abstractions/IGameObject";
 import { Milliseconds } from "../time/TimeUnits";
+import pipeUrl from "../../assets/tiles/SimpleStyle1.png";
 
 interface Obstacle {
   upPipe: Sprite[];
@@ -14,7 +14,7 @@ interface Obstacle {
   endX: number;
 }
 
-export class PipeManager implements IGameObject{  
+export class PipesController implements IGameObject{  
   private pipeTextures: Texture[] = [];
   private gamePipes: Obstacle[] = [];
 

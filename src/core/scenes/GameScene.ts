@@ -1,8 +1,8 @@
 import { Container, Rectangle, Text, TextStyle } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { BackgroundManager } from "../managers/BackgroundManager";
-import { PipeManager } from "../managers/PipeManager";
-import { CharacterManager } from "../managers/CharacterManager";
+import { PipesController } from "../objects/PipesController";
+import { CharacterController } from "../objects/CharacterController";
 import { Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
 import { Milliseconds, ms, s } from "../time/TimeUnits";
 import { GameManager } from "../managers/GameManager";
@@ -11,22 +11,22 @@ export class GameScene implements IScene {
   container = new Container();
   private scoreText?: Text; 
   private score: number = 0;     
-  private pipeManager!: PipeManager;  
-  private character!: CharacterManager;
+  private pipesController!: PipesController;  
+  private characterController!: CharacterController;
 
   public constructor() {
     this.container.sortableChildren = true;    
   }
 
   public async onInit(): Promise<void> {
-    this.pipeManager = new PipeManager();
-    this.character = new CharacterManager();
-    await Promise.all([this.pipeManager.onCreate(), this.character.onCreate(), this.createScoreText()]);
+    this.pipesController = new PipesController();
+    this.characterController = new CharacterController();
+    await Promise.all([this.pipesController.onCreate(), this.characterController.onCreate(), this.createScoreText()]);
 
-    BackgroundManager.I.container.addChild(this.pipeManager.container);
-    BackgroundManager.I.container.addChild(this.character.container);
+    BackgroundManager.I.container.addChild(this.pipesController.container);
+    BackgroundManager.I.container.addChild(this.characterController.container);
 
-    this.pipeManager.setScroll(true);
+    this.pipesController.setScroll(true);
   }
 
   public onEnter(): void {
@@ -43,10 +43,10 @@ export class GameScene implements IScene {
   }
 
   public onUpdate(dt: Milliseconds): void {
-    this.pipeManager.onUpdate(dt);
-    this.character.onUpdate(dt);
+    this.pipesController.onUpdate(dt);
+    this.characterController.onUpdate(dt);
     
-    const birdBounds = this.character.birdBounds;
+    const birdBounds = this.characterController.birdBounds;
     if (!birdBounds) return;
 
     const groundBounds = BackgroundManager.I.groundBounds;
@@ -57,19 +57,19 @@ export class GameScene implements IScene {
         birdBounds.x < groundBounds.x + groundBounds.width;
 
       if (isTouchingGround) {
-        this.character.groundTouched(groundBounds);
-        this.pipeManager.setScroll(false);
+        this.characterController.groundTouched(groundBounds);
+        this.pipesController.setScroll(false);
         BackgroundManager.I.setScrolling(false);
         return;
       }
     }
 
-    for (const obs of this.pipeManager.obstacles) {
+    for (const obs of this.pipesController.obstacles) {
       for (const s of [...obs.upPipe, ...obs.downPipe]) {
         const pipeBounds = s.getBounds() as unknown as Rectangle;
         if (this.rectsIntersect(birdBounds, pipeBounds)) {
-          this.character.kill();
-          this.pipeManager.setScroll(false);
+          this.characterController.kill();
+          this.pipesController.setScroll(false);
           return;
         }
       }
@@ -88,14 +88,14 @@ export class GameScene implements IScene {
   }
 
   public async onDestroy(): Promise<void> {
-    this.pipeManager?.onDestroy();
-    this.character?.onDestroy();
+    this.pipesController?.onDestroy();
+    this.characterController?.onDestroy();
     this.scoreText?.destroy();
   }
 
   public onResize(width: number, height: number): void {
-    this.pipeManager.onResize(width, height);
-    this.character.onResize(width, height);
+    this.pipesController.onResize(width, height);
+    this.characterController.onResize(width, height);
   }  
 
   private async createScoreText() {

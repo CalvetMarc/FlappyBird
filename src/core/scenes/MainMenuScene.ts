@@ -2,10 +2,10 @@ import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
-import logoUrl from "../assets/ui/logoFlappyBird.png";
-import playUrl from "../assets/ui/UiCozyFree.png";
-import birdUrl from "../assets/birds/AllBird1.png";
 import { GameManager } from "../managers/GameManager";
+import logoUrl from "../../assets/ui/logoFlappyBird.png";
+import playUrl from "../../assets/ui/UiCozyFree.png";
+import birdUrl from "../../assets/birds/AllBird1.png";
 
 export class MainMenuScene implements IScene {
   private logo?: Sprite;

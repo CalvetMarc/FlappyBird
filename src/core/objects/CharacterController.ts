@@ -1,13 +1,13 @@
 import { Application, Container, Sprite, Texture, Rectangle, Assets, Bounds } from "pixi.js";
 import { LAYERS } from "../abstractions/IScene";
-import birdUrl from "../assets/birds/AllBird1.png";
-import { BackgroundManager } from "./BackgroundManager";
-import { SceneManager } from "./SceneManager";
-import { GameManager } from "./GameManager";
+import { BackgroundManager } from "../managers/BackgroundManager";
+import { SceneManager } from "../managers/SceneManager";
+import { GameManager } from "../managers/GameManager";
 import { IGameObject } from "../abstractions/IGameObject";
 import { Milliseconds } from "../time/TimeUnits";
+import birdUrl from "../../assets/birds/AllBird1.png";
 
-export class CharacterManager implements IGameObject{
+export class CharacterController implements IGameObject{
   private bird?: Sprite;
   private birdFrames: Texture[] = [];
   private currentFrame = 0;
