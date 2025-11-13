@@ -1,22 +1,35 @@
 import { Container, Rectangle, Text, TextStyle } from "pixi.js";
-import { IScene } from "../managers/SceneManager";
-import { SceneManager } from "../managers/SceneManager";
+import { IScene } from "../abstractions/IScene";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { PipeManager } from "../managers/PipeManager";
 import { CharacterManager } from "../managers/CharacterManager";
-import { Milliseconds, toMs, addMs, Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
+import { Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
+import { Milliseconds, ms, s } from "../time/TimeUnits";
+import { GameManager } from "../managers/GameManager";
 
 export class GameScene implements IScene {
   container = new Container();
   private scoreText?: Text; 
-  private score: number = 0;       
+  private score: number = 0;     
+  private pipeManager!: PipeManager;  
+  private character!: CharacterManager;
 
-  constructor() {
-    this.container.sortableChildren = true;
-    this.createScoreText();
+  public constructor() {
+    this.container.sortableChildren = true;    
   }
 
-  onStart(): void {
+  public async onInit(): Promise<void> {
+    this.pipeManager = new PipeManager();
+    this.character = new CharacterManager();
+    await Promise.all([this.pipeManager.onCreate(), this.character.onCreate(), this.createScoreText()]);
+
+    BackgroundManager.I.container.addChild(this.pipeManager.container);
+    BackgroundManager.I.container.addChild(this.character.container);
+
+    this.pipeManager.setScroll(true);
+  }
+
+  public onEnter(): void {
     this.container.alpha = 0;
     const startTime = performance.now();
     const duration = 400;
@@ -26,15 +39,14 @@ export class GameScene implements IScene {
       this.container.alpha = t;
       if (t < 1) requestAnimationFrame(fadeIn);
     };
-    PipeManager.I.start();
     requestAnimationFrame(fadeIn);
   }
 
-  update(dt: number): void {
-    PipeManager.I.update(dt);
-    CharacterManager.I.update(dt);
-
-    const birdBounds = CharacterManager.I.birdBounds;
+  public onUpdate(dt: Milliseconds): void {
+    this.pipeManager.onUpdate(dt);
+    this.character.onUpdate(dt);
+    
+    const birdBounds = this.character.birdBounds;
     if (!birdBounds) return;
 
     const groundBounds = BackgroundManager.I.groundBounds;
@@ -45,19 +57,19 @@ export class GameScene implements IScene {
         birdBounds.x < groundBounds.x + groundBounds.width;
 
       if (isTouchingGround) {
-        CharacterManager.I.groundTouched(groundBounds);
-        PipeManager.I.stop();
-        BackgroundManager.I.stop();
+        this.character.groundTouched(groundBounds);
+        this.pipeManager.setScroll(false);
+        BackgroundManager.I.setScrolling(false);
         return;
       }
     }
 
-    for (const obs of PipeManager.I.obstacles) {
+    for (const obs of this.pipeManager.obstacles) {
       for (const s of [...obs.upPipe, ...obs.downPipe]) {
         const pipeBounds = s.getBounds() as unknown as Rectangle;
         if (this.rectsIntersect(birdBounds, pipeBounds)) {
-          CharacterManager.I.kill();
-          PipeManager.I.stop();
+          this.character.kill();
+          this.pipeManager.setScroll(false);
           return;
         }
       }
@@ -71,9 +83,23 @@ export class GameScene implements IScene {
     
   }
 
+  public  async onExit(): Promise<void> {
+    // 🧹 No cal eliminar listeners: CharacterManager ja ho fa
+  }
+
+  public async onDestroy(): Promise<void> {
+    this.pipeManager?.onDestroy();
+    this.character?.onDestroy();
+    this.scoreText?.destroy();
+  }
+
+  public onResize(width: number, height: number): void {
+    this.pipeManager.onResize(width, height);
+    this.character.onResize(width, height);
+  }  
+
   private async createScoreText() {
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
+    const screenW = GameManager.I.app.renderer.width;
 
     await document.fonts.load('48px "Minecraft"');
 
@@ -110,8 +136,8 @@ export class GameScene implements IScene {
 
     TweenManager.I.AddTween(<Tween<Text>>{
 
-      waitTime: toMs(0),
-      duration: toMs(200),
+      waitTime: ms(0),
+      duration: ms(200),
       context: this.scoreText!,
       tweenFunction: function (e) {
         const ease = TweenManager.easeOutCubic(e, this.duration);
@@ -122,8 +148,8 @@ export class GameScene implements IScene {
     }).chain(
       TweenManager.I.AddTween(<Tween<Text>>{
 
-        waitTime: toMs(0),
-        duration: toMs(300),
+        waitTime: ms(0),
+        duration: ms(300),
         context: this.scoreText!,
         tweenFunction: function (e) {
           const ease = TweenManager.easeOutCubic(e, this.duration);
@@ -137,19 +163,5 @@ export class GameScene implements IScene {
   }
 
 
-  public  async onEnd(): Promise<void> {
-    // 🧹 No cal eliminar listeners: CharacterManager ja ho fa
-  }
-
-  public onResize(width: number, height: number): void {
-    PipeManager.I.rebuild();
-    CharacterManager.I.rebuild(width, height);
-  }
-
-  public destroy(): void {
-    BackgroundManager.I.destroy();
-    PipeManager.I.destroy();
-    CharacterManager.I.destroy();
-    this.container.destroy({ children: true, texture: true, textureSource: true });
-  }
+ 
 }

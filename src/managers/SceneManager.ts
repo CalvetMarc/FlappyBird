@@ -6,31 +6,13 @@ import { SettingsScene } from "../scenes/SettingsScene";
 import { RankingScene } from "../scenes/RankingScene";
 import { BackgroundManager } from "./BackgroundManager";
 import { SingletonBase } from "../abstractions/SingletonBase";
-
-export const LAYERS = {
-  BACKGROUND: 0,
-  GROUND: 10,
-  PIPES: 30,
-  PLAYER: 50,
-  UI: 100,
-} as const;
-
-export interface IScene {
-  container: Container;
-  onStart(): void;
-  update(dt: number): void;
-  onEnd(): Promise<void>;
-  destroy(): void;
-  onResize(width: number, height: number): void;
-}
-
-const sceneEvents = ["play", "pause", "settings", "menu", "ranking"] as const;
-export type SceneEvent = (typeof sceneEvents)[number];
+import { LAYERS, IScene, SceneEvent } from "../abstractions/IScene";
+import { Milliseconds } from "../time/TimeUnits";
+import { GameManager } from "./GameManager";
 
 type SceneClass<T extends IScene = IScene> = new () => T;
 
 export class SceneManager extends SingletonBase<SceneManager> {
-  public app!: Application;
   private current?: IScene;
   private scenePool: Set<IScene> = new Set();
   public playerIndex = 0;
@@ -77,8 +59,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
     };
   }
 
-  public async start(app: Application): Promise<void> {
-    this.app = app;
+  public async start(): Promise<void> {
     this.playerIndex = 0;
 
     await this.initBackground();
@@ -87,40 +68,41 @@ export class SceneManager extends SingletonBase<SceneManager> {
   }
 
   private async initBackground(): Promise<void> {
-    await BackgroundManager.I.init(this.app);
-    this.app.stage.addChild(BackgroundManager.I.containerObject);
-    BackgroundManager.I.start();
+    await BackgroundManager.I.onCreate();
+    GameManager.I.app.stage.addChild(BackgroundManager.I.container);
   }
 
-  public update(dt: number): void {
-    this.current?.update(dt);
-    BackgroundManager.I.update(dt);
+  public update(dt: Milliseconds): void {
+    this.current?.onUpdate(dt);
+    BackgroundManager.I.onUpdate(dt);
   }
 
   public fire(event: SceneEvent): void {
     this.transitions[event]?.();
   }
 
-  private async setScene<T extends IScene>(
-    SceneType: SceneClass<T>,
-    destroyCurrent: boolean
-  ): Promise<void> {
+  private async setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): Promise<void> {
     if (this.current) {
-      await this.current.onEnd();
-      this.app.stage.removeChild(this.current.container);
+      await this.current.onExit();
+      GameManager.I.app.stage.removeChild(this.current.container);
       if (destroyCurrent) {
-        this.current.destroy();
+        await this.current.onDestroy();
+        this.current.container.destroy({ children: true, texture: true, textureSource: true });
+
       } else {
         this.scenePool.add(this.current);
       }
     }
 
     let next = this.takeSceneFromPool(SceneType);
-    if (!next) next = new SceneType();
+    if (!next){
+      next = new SceneType();
+      await next.onInit();
+    } 
 
     this.current = next;
-    this.app.stage.addChild(this.current.container);
-    this.current.onStart();
+    GameManager.I.app.stage.addChild(this.current.container);
+    this.current.onEnter();
   }
 
   private takeSceneFromPool<T extends IScene>(SceneType: SceneClass<T>): T | undefined {
@@ -136,18 +118,18 @@ export class SceneManager extends SingletonBase<SceneManager> {
   private destroyFromPool<T extends IScene>(SceneType: SceneClass<T>): boolean {
     const scene = this.takeSceneFromPool(SceneType);
     if (scene) {
-      scene.destroy();
+      scene.onDestroy();
       return true;
     }
     return false;
   }
 
   public onResize(width: number, height: number): void {
-    if (this.app) {
-      this.app.renderer.resize(width, height);
+    if (GameManager.I.app) {
+      GameManager.I.app.renderer.resize(width, height);
     }
 
-    BackgroundManager.I.rebuild(width, height);
+    BackgroundManager.I.onResize(width, height);
     this.current?.onResize(width, height);
   }
 }

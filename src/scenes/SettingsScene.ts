@@ -1,8 +1,9 @@
 import { Container, Sprite, Texture, Assets, Rectangle, Text } from "pixi.js";
-import { IScene } from "../managers/SceneManager";
+import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import playUrl from "../assets/ui/UiCozyFree.png";
+import { GameManager } from "../managers/GameManager";
 
 /* 🟩 Classe auxiliar per a un toggle simple */
 class ToggleSwitch extends Container {
@@ -73,6 +74,13 @@ class ToggleSwitch extends Container {
 
     this.layout(parent);
   }
+
+  public onDestroy(){
+    this.onTex?.destroy();
+    this.offTex?.destroy();
+    this.knob?.destroy();
+    this.labelText?.destroy();
+  }
 }
 
 
@@ -80,8 +88,6 @@ class ToggleSwitch extends Container {
 /* ─────────────────────────────────────────────────────────────────────── */
 
 export class SettingsScene implements IScene {
-  container = new Container();
-
   private button?: Sprite;
   private bgSprite?: Sprite;
   private titleText?: Text;
@@ -100,9 +106,78 @@ export class SettingsScene implements IScene {
 
   private baseY = 0;
 
-  constructor() {
+  public container = new Container();
+
+  public constructor() {
     this.container.sortableChildren = true;
-    this.loadAssets();
+  }
+
+  public async onInit(): Promise<void> {
+    await this.loadAssets();
+  }
+
+  public onEnter(): void {
+    this.container.alpha = 0;
+    setTimeout(() => this.fade(1, 500), 100);
+  }
+
+  public onUpdate(dt: number): void {}
+
+  public async onExit(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      this.fade(0, 400, () => {
+         GameManager.I.app.stage.removeChild(this.container);
+        resolve();
+      });
+    });
+  }
+
+  public async onDestroy(): Promise<void> {
+
+    this.button?.destroy();
+    this.bgSprite?.destroy();
+    this.titleText?.destroy();
+    this.normalTex?.destroy();
+    this.pressedTex?.destroy();
+    this.button?.destroy();
+    this.settingsBgTex?.destroy();
+    this.toggleOnTex?.destroy();
+    this.toggleOffTex?.destroy();
+    
+    this.audioToggle?.onDestroy();
+    this.dayCycleToggle?.onDestroy();
+    this.speedProgToggle?.onDestroy();
+  }
+
+  public onResize(width: number, height: number): void {
+    const bgWidth = BackgroundManager.I.bgRect.width;
+
+    if (this.button) {
+      const targetWidth = bgWidth / 10;
+      const scale = targetWidth / this.button.texture.width;
+      this.button.scale.set(scale);
+      this.button.position.set(width / 2, height / 1.3);
+    }
+
+    if (this.bgSprite) {
+      const targetWidth = bgWidth / 4;
+      const scale = targetWidth / this.bgSprite.texture.width;
+      this.bgSprite.scale.set(scale * 2.4);
+      this.bgSprite.position.set(width / 2, height / 2.5);
+    }
+
+    if (this.titleText && this.bgSprite) {
+      this.titleText.position.set(this.bgSprite.x, this.bgSprite.y - (this.bgSprite.height / 2 * 0.76));
+      this.titleText.style.fontSize = this.bgSprite.width / 11;
+      this.titleText.style.stroke = { color: 0x4B1810, width: this.bgSprite.width / 90  };
+    }
+
+    /* 🟩 Reposiciona els toggles al canviar mida */
+    if(this.bgSprite && this.audioToggle && this.speedProgToggle && this.dayCycleToggle){
+        this.audioToggle?.recalculateTransform(this.bgSprite);
+        this.speedProgToggle?.recalculateTransform(this.bgSprite);
+        this.dayCycleToggle?.recalculateTransform(this.bgSprite);
+    }
   }
 
   /** 🧩 Carrega textures igual que al MainMenuScene */
@@ -152,15 +227,14 @@ export class SettingsScene implements IScene {
   private createSettingsBg() {
     if (!this.settingsBgTex) return;
 
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
+    const screenW = GameManager.I.app.renderer.width;
+    const screenH = GameManager.I.app.renderer.height;
 
     const bgSprite = new Sprite(this.settingsBgTex);
     bgSprite.anchor.set(0.5);
     bgSprite.zIndex = 5;
 
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const bgWidth = BackgroundManager.I.bgRect.width;
 
     const targetWidth = bgWidth / 4;
     const scale = targetWidth / bgSprite.width;
@@ -213,11 +287,10 @@ export class SettingsScene implements IScene {
   private createButton() {
     if (!this.normalTex || !this.pressedTex) return;
 
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
+    const screenW = GameManager.I.app.renderer.width;
+    const screenH = GameManager.I.app.renderer.height;
 
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const bgWidth = BackgroundManager.I.bgRect.width;
 
     const targetWidth = bgWidth / 10;
 
@@ -265,60 +338,5 @@ export class SettingsScene implements IScene {
       }
     };
     requestAnimationFrame(animate);
-  }
-
-  onStart(): void {
-    this.container.alpha = 0;
-    setTimeout(() => this.fade(1, 500), 100);
-  }
-
-  async onEnd(): Promise<void> {
-    await new Promise<void>((resolve) => {
-      this.fade(0, 400, () => {
-        SceneManager.I.app.stage.removeChild(this.container);
-        resolve();
-      });
-    });
-  }
-
-  public onResize(width: number, height: number): void {
-    const bgWidth = BackgroundManager.I.bgWidth;
-
-    if (this.button) {
-      const targetWidth = bgWidth / 10;
-      const scale = targetWidth / this.button.texture.width;
-      this.button.scale.set(scale);
-      this.button.position.set(width / 2, height / 1.3);
-    }
-
-    if (this.bgSprite) {
-      const targetWidth = bgWidth / 4;
-      const scale = targetWidth / this.bgSprite.texture.width;
-      this.bgSprite.scale.set(scale * 2.4);
-      this.bgSprite.position.set(width / 2, height / 2.5);
-    }
-
-    if (this.titleText && this.bgSprite) {
-      this.titleText.position.set(this.bgSprite.x, this.bgSprite.y - (this.bgSprite.height / 2 * 0.76));
-      this.titleText.style.fontSize = this.bgSprite.width / 11;
-      this.titleText.style.stroke = { color: 0x4B1810, width: this.bgSprite.width / 90  };
-    }
-
-    /* 🟩 Reposiciona els toggles al canviar mida */
-    if(this.bgSprite && this.audioToggle && this.speedProgToggle && this.dayCycleToggle){
-        this.audioToggle?.recalculateTransform(this.bgSprite);
-        this.speedProgToggle?.recalculateTransform(this.bgSprite);
-        this.dayCycleToggle?.recalculateTransform(this.bgSprite);
-    }
-  }
-
-  destroy(): void {
-    this.container.destroy({
-      children: true,
-      texture: true,
-      textureSource: true,
-    });
-  }
-
-  update(dt: number): void {}
+  }  
 }

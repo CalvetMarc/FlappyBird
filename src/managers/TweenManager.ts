@@ -2,10 +2,7 @@ import { Ticker } from "pixi.js";
 import { GameManager } from "./GameManager";
 import { IdProvider, UniqueId } from "../objects/IdProvider";
 import { SingletonBase } from "../abstractions/SingletonBase";
-
-export type Milliseconds = number & { readonly brand: unique symbol };
-export const toMs = (n: number): Milliseconds => n as Milliseconds;
-export const addMs = (a: Milliseconds, b: Milliseconds): Milliseconds => (a + b) as Milliseconds;
+import { Milliseconds, ms, addTime } from "../time/TimeUnits";
 
 export type Tween<TContext = unknown> = {
   waitTime: Milliseconds;
@@ -23,7 +20,7 @@ export class CreatedTween {
   public preChainedId?: UniqueId;
 
   private tween: Tween;
-  private elapsedTime: Milliseconds = toMs(0);
+  private elapsedTime: Milliseconds = ms(0);
   private state: TWEEN_STATE = "ACTIVE";
 
   constructor(id: UniqueId, tween: Tween) {
@@ -32,12 +29,16 @@ export class CreatedTween {
   }
 
   public updateTween(dt: Milliseconds): void {
-    if (this.state === "ACTIVE") {
-      this.elapsedTime = addMs(this.elapsedTime, dt);
-      this.tween.tweenFunction(this.elapsedTime);
-      if (this.elapsedTime > this.tween.duration) {
-        this.state = "FINISHED";
-      }
+    if (this.state !== "ACTIVE") return;
+
+    this.elapsedTime = addTime(ms, this.elapsedTime, dt);
+
+    // execució del tween
+    this.tween.tweenFunction(this.elapsedTime);
+
+    // finalització
+    if (this.elapsedTime >= this.tween.duration) {
+      this.state = "FINISHED";
     }
   }
 
@@ -62,20 +63,27 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   private constructor() {
     super();
+
     GameManager.I.gameApp.ticker.add((ticker: Ticker) => {
-      this.update(toMs(ticker.deltaMS));
+      this.update(ms(ticker.deltaMS));
     });
   }
 
   private update(delta: Milliseconds): void {
-    for (const [id, t] of this.activeTweens) {
-      if (t.preChainedId !== undefined && this.activeTweens.has(t.preChainedId)) continue;
-      if (t.getState() === "FINISHED") {
-        this.idProvider.release(t.id);
+    for (const [id, tween] of this.activeTweens) {
+      // si està encadenat a un tween anterior actiu → espera
+      if (tween.preChainedId !== undefined && this.activeTweens.has(tween.preChainedId)) {
+        continue;
+      }
+
+      // eliminació
+      if (tween.getState() === "FINISHED") {
+        this.idProvider.release(tween.id);
         this.activeTweens.delete(id);
         continue;
       }
-      t.updateTween(delta);
+
+      tween.updateTween(delta);
     }
   }
 
@@ -98,6 +106,7 @@ export class TweenManager extends SingletonBase<TweenManager> {
     this.activeTweens.get(id)?.changeCurrentState("ACTIVE");
   }
 
+  // EASINGS
   private static normalize(elapsed: Milliseconds, duration: Milliseconds): number {
     return Math.min(Number(elapsed) / Number(duration), 1);
   }
@@ -113,7 +122,9 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   public static easeInOutCubic(elapsed: Milliseconds, duration: Milliseconds): number {
     const t = this.normalize(elapsed, duration);
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
   public static easeOutElastic(elapsed: Milliseconds, duration: Milliseconds): number {
@@ -128,8 +139,7 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   public static easeOutBounce(elapsed: Milliseconds, duration: Milliseconds): number {
     let t = this.normalize(elapsed, duration);
-    const n1 = 7.5625,
-      d1 = 2.75;
+    const n1 = 7.5625, d1 = 2.75;
     if (t < 1 / d1) return n1 * t * t;
     else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
     else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;

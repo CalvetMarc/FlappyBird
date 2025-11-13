@@ -1,13 +1,14 @@
-import { Application, Container, Sprite, Texture, Rectangle, Assets, Graphics } from "pixi.js";
-import { LAYERS } from "./SceneManager";
+import { Application, Container, Sprite, Texture, Rectangle, Assets, Graphics, IGLUniformData, ContainerChild } from "pixi.js";
+import { LAYERS } from "../abstractions/IScene";
 import { SingletonBase } from "../abstractions/SingletonBase";
+import { IGameObject } from "../abstractions/IGameObject"; 
 
 import backgroundUrl from "../assets/backgrounds/Background2.png";
 import groundUrl from "../assets/tiles/SimpleStyle1.png";
+import { GameManager } from "./GameManager";
+import { Milliseconds } from "../time/TimeUnits";
 
-export class BackgroundManager extends SingletonBase<BackgroundManager> {
-  private app!: Application;
-  private container = new Container();
+export class BackgroundManager extends SingletonBase<BackgroundManager> implements IGameObject {
   private background?: Sprite;
   private groundPieces: Sprite[] = [];
 
@@ -23,12 +24,98 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> {
   private scrolling = false;
   private scrollSpeed = 1;
 
+  public container: Container;
+
   private constructor() {
     super();
+
+    this.container = new Container();
   }
 
-  async init(app: Application) {
-    this.app = app;
+  public async onCreate(): Promise<void> {
+    await this.init();
+    this.setScrolling(true);
+  }
+
+  public onUpdate(dt: Milliseconds) {
+    if (!this.scrolling) return;
+
+    const scaleFactor = (this.background?.width ?? 800) * 0.3;
+    const delta = (dt / 1000) * (this.scrollSpeed * scaleFactor);
+
+    for (const piece of this.groundPieces) {
+      piece.x -= delta;
+    }
+
+    const first = this.groundPieces[0];
+    const last = this.groundPieces[this.groundPieces.length - 1];
+    if (!first || !last) return;
+
+    if (this.startX - first.x >= this.scaledWidth) {
+      this.container.removeChild(first);
+      this.groundPieces.shift();
+
+      const newX = last.x + this.scaledWidth;
+      const newPiece = this.createRandomPiece(newX);
+      this.groundPieces.push(newPiece);
+      this.container.addChild(newPiece);
+    }
+  }
+
+  public async onDestroy(): Promise<void> {
+    this.container.destroy({
+      children: true,
+      texture: true,
+      textureSource: true,
+    });
+    this.groundPieces = [];
+    this.background = undefined;
+  }
+
+  public onResize(screenW: number, screenH: number): void {
+    this.container.removeChildren();
+    this.groundPieces = [];
+    this.baseTextures = [];
+
+    const bgTexture = this.background?.texture;
+    if (!bgTexture || !this.groundTexture) return;
+
+    this.createBackground(bgTexture);
+    this.createGroundPieces(this.groundTexture);
+  }
+
+  public get groundBounds(): Rectangle | undefined {
+    if (this.groundPieces.length === 0) return;
+
+    const first = this.groundPieces[0];
+    const bounds = first.getBounds();
+
+    let minX = bounds.x;
+    let maxX = bounds.x + bounds.width;
+    let minY = bounds.y;
+    let maxY = bounds.y + bounds.height;
+
+    for (const piece of this.groundPieces) {
+      const b = piece.getBounds();
+      minX = Math.min(minX, b.x);
+      maxX = Math.max(maxX, b.x + b.width);
+      minY = Math.min(minY, b.y);
+      maxY = Math.max(maxY, b.y + b.height);
+    }
+
+    return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  public get bgRect(): Rectangle{
+    const b = this.background!.getBounds();
+    return new Rectangle(b.x, b.y, b.width, b.height);
+  }
+
+  public setScrolling(scrolling: boolean) {
+    this.scrolling = scrolling;
+  }
+
+  private async init() {
     const [bgTexture, groundTexture] = await Promise.all([
       Assets.load(backgroundUrl),
       Assets.load(groundUrl),
@@ -38,14 +125,10 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> {
     this.createBackground(bgTexture);
     this.createGroundPieces(groundTexture);
     this.container.sortableChildren = true;
-  }
-
-  get containerObject(): Container {
-    return this.container;
-  }
+  }  
 
   private createBackground(texture: Texture) {
-    const { width: screenW, height: screenH } = this.app.renderer;
+    const { width: screenW, height: screenH } = GameManager.I.app.renderer;
     const aspect = texture.width / texture.height;
     const targetHeight = screenH * 0.85;
     const targetWidth = targetHeight * aspect;
@@ -55,11 +138,9 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> {
     this.background.height = targetHeight;
     this.background.anchor.set(0.5, 0);
     this.background.position.set(screenW / 2, 0);
-    this.background.zIndex = LAYERS.BACKGROUND;
-    this.background.alpha = 0;
-
+    this.background.zIndex = LAYERS.BACKGROUND;    
+        
     this.container.addChild(this.background);
-    return;
     const maskRect = new Graphics()
       .rect((screenW - targetWidth) / 2, 0, targetWidth, screenH)
       .fill(0xffffff);
@@ -69,7 +150,7 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> {
   }
 
   private createGroundPieces(originalTexture: Texture) {
-    const { width: screenW, height: screenH } = this.app.renderer;
+    const { width: screenW, height: screenH } = GameManager.I.app.renderer;
     const groundWidth = this.background?.width ?? screenW;
     const targetHeight = screenH * 0.15;
 
@@ -127,98 +208,6 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> {
     piece.position.set(x, this.groundY);
     piece.zIndex = LAYERS.GROUND;
     return piece;
-  }
-
-  public start() {
-    this.scrolling = true;
-  }
-
-  public stop() {
-    this.scrolling = false;
-  }
-
-  public update(dt: number) {
-    if (!this.scrolling) return;
-
-    const scaleFactor = (this.background?.width ?? 800) * 0.3;
-    const delta = (dt / 1000) * (this.scrollSpeed * scaleFactor);
-
-    for (const piece of this.groundPieces) {
-      piece.x -= delta;
-    }
-
-    const first = this.groundPieces[0];
-    const last = this.groundPieces[this.groundPieces.length - 1];
-    if (!first || !last) return;
-
-    if (this.startX - first.x >= this.scaledWidth) {
-      this.container.removeChild(first);
-      this.groundPieces.shift();
-
-      const newX = last.x + this.scaledWidth;
-      const newPiece = this.createRandomPiece(newX);
-      this.groundPieces.push(newPiece);
-      this.container.addChild(newPiece);
-    }
-  }
-
-  public destroy(): void {
-    this.container.destroy({
-      children: true,
-      texture: true,
-      textureSource: true,
-    });
-    this.groundPieces = [];
-    this.background = undefined;
-  }
-
-  public rebuild(screenW: number, screenH: number): void {
-    this.container.removeChildren();
-    this.groundPieces = [];
-    this.baseTextures = [];
-
-    const bgTexture = this.background?.texture;
-    if (!bgTexture || !this.groundTexture) return;
-
-    this.createBackground(bgTexture);
-    this.createGroundPieces(this.groundTexture);
-  }
-
-  public get groundBounds(): Rectangle | undefined {
-    if (this.groundPieces.length === 0) return;
-
-    const first = this.groundPieces[0];
-    const bounds = first.getBounds();
-
-    let minX = bounds.x;
-    let maxX = bounds.x + bounds.width;
-    let minY = bounds.y;
-    let maxY = bounds.y + bounds.height;
-
-    for (const piece of this.groundPieces) {
-      const b = piece.getBounds();
-      minX = Math.min(minX, b.x);
-      maxX = Math.max(maxX, b.x + b.width);
-      minY = Math.min(minY, b.y);
-      maxY = Math.max(maxY, b.y + b.height);
-    }
-
-    return new Rectangle(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  public get bgWidth(): number {
-    return this.background?.width ?? 800;
-  }
-
-  public get bgHeight(): number {
-    return this.background?.height ?? 1000;
-  }
-
-  public get bgPosX(): number {
-    return this.background?.position.x ?? 400;
-  }
-
-  public get bgPosY(): number {
-    return this.background?.position.y ?? 500;
-  }
+  }  
+  
 }

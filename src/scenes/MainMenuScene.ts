@@ -1,13 +1,13 @@
 import { Container, Sprite, Assets, Texture, Rectangle } from "pixi.js";
-import { IScene } from "../managers/SceneManager";
+import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import logoUrl from "../assets/ui/logoFlappyBird.png";
 import playUrl from "../assets/ui/UiCozyFree.png";
 import birdUrl from "../assets/birds/AllBird1.png";
+import { GameManager } from "../managers/GameManager";
 
 export class MainMenuScene implements IScene {
-  container = new Container();
   private logo?: Sprite;
   private playButton?: Sprite;
   private settingsButton?: Sprite;
@@ -32,18 +32,118 @@ export class MainMenuScene implements IScene {
 
   private birdFadeOf: boolean;
 
+  public container;
+
   constructor() {
+    this.container = new Container();
     this.container.sortableChildren = true;
     this.birdFadeOf = true;
-    this.loadAssets();
   }
 
+  public async onInit(): Promise<void> {
+    await this.loadAssets();
+  }
+
+  public onEnter(): void {
+    this.container.alpha = 0;
+    this.birdFadeOf = true;
+    setTimeout(() => this.fade(1, 500), 100);
+  }
+
+  public onUpdate(dt: number): void {
+    this.floatAnimation(dt);
+  }
+
+  public async onExit(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      // 🟩 Si birdFadeOff és false, traiem l’ocell abans del fade
+      let tempBird: Sprite | undefined;
+      if (!this.birdFadeOf && this.bird) {
+        tempBird = this.bird;
+        this.container.removeChild(this.bird);
+        GameManager.I.app.stage.addChild(tempBird); // mantenim-lo visible a l'escenari
+      }
+
+      this.fade(0, 400, () => {
+        // 🔹 Si havíem separat l’ocell, el tornem a posar al container
+        if (tempBird) {
+           GameManager.I.app.stage.removeChild(tempBird);
+          this.container.addChild(tempBird);
+        }
+
+        resolve();
+      });
+    });
+  }
+
+  public async onDestroy(): Promise<void> {
+    this.logo?.destroy();
+    this.leftButton?.destroy();
+    this.playButton?.destroy();
+    this.rightButton?.destroy();
+    this.rankingButton?.destroy();
+    this.settingsButton?.destroy();
+
+    this.leftTex?.destroy();
+    this.rightTex?.destroy();
+    this.rankingTex?.destroy();
+    this.settingsTex?.destroy();
+    this.playNormalTex?.destroy();
+    this.playPressedTex?.destroy();
+
+    this.logo?.destroy();
+    this.bird?.destroy();
+
+    for(const texture of this.birdFrames){
+      texture?.destroy();
+    }
+  }
+
+  public onResize(width: number, height: number): void {
+    const bgWidth = BackgroundManager.I.get;
+
+    const targetWidth = bgWidth / 10;
+
+    if (this.logo && this.logoBaseW > 0) {
+      const scale = (bgWidth / 3) / this.logoBaseW;
+      this.logo.scale.set(scale);
+      this.logo.position.set(width / 2, height / 8);
+      this.baseY = this.logo.position.y;
+    }
+
+    const spacing = targetWidth * 3;
+    const centerX = width / 2;
+    const btnY = height / 1.3;
+
+    const rescale = (mult: number, btn?: Sprite) => {
+      if (!btn) return;
+      const s = targetWidth / btn.texture.width;
+      btn.scale.set(s * mult);
+    };
+
+    rescale(1, this.settingsButton);
+    rescale(1, this.playButton);
+    rescale(1, this.rankingButton);
+    rescale(0.7, this.bird);
+    rescale(0.5, this.leftButton);
+    rescale(0.5, this.rightButton);
+
+    if (this.settingsButton) this.settingsButton.position.set(centerX - spacing, btnY);
+    if (this.playButton) this.playButton.position.set(centerX, btnY);
+    if (this.rankingButton) this.rankingButton.position.set(centerX + spacing, btnY);
+
+    if (this.bird && this.playButton)
+      this.bird.position.set(this.playButton.x, this.playButton.y - this.playButton.height * 1.7);
+
+    if (this.leftButton && this.bird)
+      this.leftButton.position.set(this.bird.x - this.bird.width * 1.5, this.bird.y);
+
+    if (this.rightButton && this.bird)
+      this.rightButton.position.set(this.bird.x + this.bird.width * 1.5, this.bird.y);
+  }  
+
   private async loadAssets() {
-    const [logoTexture, playTexture, birdTexture] = await Promise.all([
-      Assets.load(logoUrl),
-      Assets.load(playUrl),
-      Assets.load(birdUrl),
-    ]);
+    const [logoTexture, playTexture, birdTexture] = await Promise.all([Assets.load(logoUrl), Assets.load(playUrl), Assets.load(birdUrl)]);
 
     this.createLogo(logoTexture);
     this.createButtons(playTexture);
@@ -57,11 +157,10 @@ export class MainMenuScene implements IScene {
     this.logo = new Sprite(logoTexture);
     this.logoBaseW = this.logo.texture.width;
 
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
+    const screenW = GameManager.I.app.renderer.width;
+    const screenH = GameManager.I.app.renderer.height;
 
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const bgWidth = BackgroundManager.I.bgRect.width;
     const targetWidth = bgWidth / 3;
     const scale = targetWidth / this.logoBaseW;
     this.logo.scale.set(scale);
@@ -93,10 +192,9 @@ export class MainMenuScene implements IScene {
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 12;
 
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const screenW = GameManager.I.app.renderer.width;
+    const screenH =  GameManager.I.app.renderer.height;
+    const bgWidth = BackgroundManager.I.bgRect.width;
 
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / frameW;
@@ -137,11 +235,10 @@ export class MainMenuScene implements IScene {
       frame: new Rectangle(settingsX, settingsY, cropSize, cropSize),
     });
 
-    const app = SceneManager.I.app;
-    const screenW = app.renderer.width;
-    const screenH = app.renderer.height;
+    const screenW = GameManager.I.app.renderer.width;
+    const screenH = GameManager.I.app.renderer.height;
 
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const bgWidth = BackgroundManager.I.bgRect.width;
     const targetWidth = bgWidth / 10;
 
     const makeButton = (x: number, label: "play" | "settings" | "ranking", tex: Texture): Sprite => {
@@ -195,7 +292,7 @@ export class MainMenuScene implements IScene {
     this.leftTex = new Texture({ source: originalTexture.source, frame: leftFrame });
     this.rightTex = new Texture({ source: originalTexture.source, frame: rightFrame });
 
-    const bgWidth = BackgroundManager.I.bgWidth;
+    const bgWidth = BackgroundManager.I.bgRect.width;
     const targetWidth = bgWidth / 10;
     const scale = targetWidth / cropSize;
 
@@ -247,10 +344,7 @@ export class MainMenuScene implements IScene {
     if (!this.logo) return;
     this.elapsed += dt / 1000;
 
-    // 🟩 Alçada proporcional al background
-    const bgSprite = BackgroundManager.I.bgWidth;
-
-    const bgHeight = bgSprite?.height ?? SceneManager.I.app.renderer.height;
+    const bgHeight = BackgroundManager.I.bgRect.height;
     const amplitude = bgHeight * 0.015; // 👈 3% de l'alçada del fons
     const speed = 1.2; // freqüència de l’oscil·lació
 
@@ -275,88 +369,5 @@ export class MainMenuScene implements IScene {
     };
 
     requestAnimationFrame(animate);
-  }
-
-  onResize(width: number, height: number): void {
-    const bgWidth = BackgroundManager.I.bgWidth;
-
-    const targetWidth = bgWidth / 10;
-
-    if (this.logo && this.logoBaseW > 0) {
-      const scale = (bgWidth / 3) / this.logoBaseW;
-      this.logo.scale.set(scale);
-      this.logo.position.set(width / 2, height / 8);
-      this.baseY = this.logo.position.y;
-    }
-
-    const spacing = targetWidth * 3;
-    const centerX = width / 2;
-    const btnY = height / 1.3;
-
-    const rescale = (mult: number, btn?: Sprite) => {
-      if (!btn) return;
-      const s = targetWidth / btn.texture.width;
-      btn.scale.set(s * mult);
-    };
-
-    rescale(1, this.settingsButton);
-    rescale(1, this.playButton);
-    rescale(1, this.rankingButton);
-    rescale(0.7, this.bird);
-    rescale(0.5, this.leftButton);
-    rescale(0.5, this.rightButton);
-
-    if (this.settingsButton) this.settingsButton.position.set(centerX - spacing, btnY);
-    if (this.playButton) this.playButton.position.set(centerX, btnY);
-    if (this.rankingButton) this.rankingButton.position.set(centerX + spacing, btnY);
-
-    if (this.bird && this.playButton)
-      this.bird.position.set(this.playButton.x, this.playButton.y - this.playButton.height * 1.7);
-
-    if (this.leftButton && this.bird)
-      this.leftButton.position.set(this.bird.x - this.bird.width * 1.5, this.bird.y);
-
-    if (this.rightButton && this.bird)
-      this.rightButton.position.set(this.bird.x + this.bird.width * 1.5, this.bird.y);
-  }
-
-  onStart(): void {
-    this.container.alpha = 0;
-    this.birdFadeOf = true;
-    setTimeout(() => this.fade(1, 500), 100);
-  }
-
-  async onEnd(): Promise<void> {
-    await new Promise<void>((resolve) => {
-      // 🟩 Si birdFadeOff és false, traiem l’ocell abans del fade
-      let tempBird: Sprite | undefined;
-      if (!this.birdFadeOf && this.bird) {
-        tempBird = this.bird;
-        this.container.removeChild(this.bird);
-        SceneManager.I.app.stage.addChild(tempBird); // mantenim-lo visible a l'escenari
-      }
-
-      this.fade(0, 400, () => {
-        // 🔹 Quan acaba el fade, eliminem el container
-        SceneManager.I.app.stage.removeChild(this.container);
-
-        // 🔹 Si havíem separat l’ocell, el tornem a posar al container
-        if (tempBird) {
-          SceneManager.I.app.stage.removeChild(tempBird);
-          this.container.addChild(tempBird);
-        }
-
-        resolve();
-      });
-    });
-  }
-
-
-  update(dt: number): void {
-    this.floatAnimation(dt);
-  }
-
-  destroy(): void {
-    this.container.destroy({ children: true, texture: true, textureSource: true });
   }
 }

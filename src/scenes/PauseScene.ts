@@ -1,27 +1,35 @@
 import { Container, Graphics, Text } from "pixi.js";
-import { IScene } from "../managers/SceneManager";
+import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 
 
 export class PauseScene implements IScene {
-  container = new Container();
+  public container = new Container();
   
   constructor() {
     
   }
 
+  public async onInit(): Promise<void> {
+    
+  }
+
   /** Called when the scene becomes active */
-  onStart(): void {
+  public onEnter(): void {
     
   }
 
   /** Called every frame */
-  update(dt: number): void {
+  public onUpdate(dt: number): void {
     
   }
 
   /** Called before scene is removed or pooled */
-  async onEnd(): Promise<void> {
+  public async onExit(): Promise<void> {
+    
+  }
+
+  public async onDestroy(): Promise<void> {
     
   }
 
@@ -30,11 +38,5 @@ export class PauseScene implements IScene {
   }
 
   /** Called if the SceneManager decides to fully destroy this scene */
-  destroy(): void {
-    this.container.destroy({
-      children: true,
-      texture: true,
-      textureSource: true,
-    });
-  }
+  
 }
