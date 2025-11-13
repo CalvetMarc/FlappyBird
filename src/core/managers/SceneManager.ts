@@ -131,5 +131,6 @@ export class SceneManager extends SingletonBase<SceneManager> {
 
     BackgroundManager.I.onResize(width, height);
     this.current?.onResize(width, height);
+    this.scenePool.forEach(s => s.onResize(width, height));
   }
 }

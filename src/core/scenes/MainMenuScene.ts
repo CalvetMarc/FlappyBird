@@ -100,7 +100,7 @@ export class MainMenuScene implements IScene {
   }
 
   public onResize(width: number, height: number): void {
-    const bgWidth = BackgroundManager.I.get;
+    const bgWidth = BackgroundManager.I.bgRect.width;
 
     const targetWidth = bgWidth / 10;
 
@@ -133,7 +133,7 @@ export class MainMenuScene implements IScene {
     if (this.rankingButton) this.rankingButton.position.set(centerX + spacing, btnY);
 
     if (this.bird && this.playButton)
-      this.bird.position.set(this.playButton.x, this.playButton.y - this.playButton.height * 1.7);
+      this.bird.position.set(BackgroundManager.I.bgRect.x + (BackgroundManager.I.bgRect.width / 2), BackgroundManager.I.bgRect.height / 1.4);
 
     if (this.leftButton && this.bird)
       this.leftButton.position.set(this.bird.x - this.bird.width * 1.5, this.bird.y);
@@ -200,7 +200,7 @@ export class MainMenuScene implements IScene {
     const scale = targetWidth / frameW;
     this.bird.scale.set(scale * 0.7);
 
-    this.bird.position.set(screenW / 2, screenH / 1.7);
+    this.bird.position.set(BackgroundManager.I.bgRect.x + (BackgroundManager.I.bgRect.width / 2), BackgroundManager.I.bgRect.height / 1.4);
     this.container.addChild(this.bird);
   }
 
