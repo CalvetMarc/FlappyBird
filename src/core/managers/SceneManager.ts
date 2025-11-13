@@ -125,10 +125,6 @@ export class SceneManager extends SingletonBase<SceneManager> {
   }
 
   public onResize(width: number, height: number): void {
-    if (GameManager.I.app) {
-      GameManager.I.app.renderer.resize(width, height);
-    }
-
     BackgroundManager.I.onResize(width, height);
     this.current?.onResize(width, height);
     this.scenePool.forEach(s => s.onResize(width, height));

@@ -3,6 +3,8 @@ import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { GameManager } from "../managers/GameManager";
+import { TweenManager, Tween } from "../managers/TweenManager";
+import { ms } from "../time/TimeUnits";
 import logoUrl from "../../assets/ui/logoFlappyBird.png";
 import playUrl from "../../assets/ui/UiCozyFree.png";
 import birdUrl from "../../assets/birds/AllBird1.png";
@@ -47,7 +49,7 @@ export class MainMenuScene implements IScene {
   public onEnter(): void {
     this.container.alpha = 0;
     this.birdFadeOf = true;
-    setTimeout(() => this.fade(1, 500), 100);
+    this.fadeTo(1, 500, 100);
   }
 
   public onUpdate(dt: number): void {
@@ -64,7 +66,7 @@ export class MainMenuScene implements IScene {
         GameManager.I.app.stage.addChild(tempBird); // mantenim-lo visible a l'escenari
       }
 
-      this.fade(0, 400, () => {
+      this.fadeTo(0, 500, 0, () => {
         // 🔹 Si havíem separat l’ocell, el tornem a posar al container
         if (tempBird) {
            GameManager.I.app.stage.removeChild(tempBird);
@@ -354,20 +356,22 @@ export class MainMenuScene implements IScene {
   }
 
 
-  private fade(targetAlpha: number, duration: number, onComplete?: () => void) {
-    const startAlpha = this.container.alpha;
-    const startTime = performance.now();
+  private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {
 
-    const animate = (now: number) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      this.container.alpha = startAlpha + (targetAlpha - startAlpha) * t;
-      if (t < 1) requestAnimationFrame(animate);
-      else {
-        this.container.alpha = targetAlpha;
-        onComplete?.();
+    const start = this.container.alpha;
+
+    TweenManager.I.AddTween(<Tween<Container>>{
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: this.container!,
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+        const v = start + (target - start) * t;
+        this.context.alpha = v;
+
+        if (elapsed >= ms(duration)) onComplete?.();
       }
-    };
-
-    requestAnimationFrame(animate);
+    });
   }
+
 }

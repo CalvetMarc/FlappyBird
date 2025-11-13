@@ -3,6 +3,8 @@ import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { GameManager } from "../managers/GameManager";
+import { TweenManager, Tween } from "../managers/TweenManager";
+import { ms } from "../time/TimeUnits";
 import playUrl from "../../assets/ui/UiCozyFree.png";
 
 /* 🟩 Classe auxiliar per a un toggle simple */
@@ -118,14 +120,14 @@ export class SettingsScene implements IScene {
 
   public onEnter(): void {
     this.container.alpha = 0;
-    setTimeout(() => this.fade(1, 500), 100);
+    this.fadeTo(1, 500, 100);
   }
 
   public onUpdate(dt: number): void {}
 
   public async onExit(): Promise<void> {
     await new Promise<void>((resolve) => {
-      this.fade(0, 400, () => {
+      this.fadeTo(0, 400, 0, () => {
          GameManager.I.app.stage.removeChild(this.container);
         resolve();
       });
@@ -324,19 +326,23 @@ export class SettingsScene implements IScene {
     this.button = btn;
   }
 
-  private fade(targetAlpha: number, duration: number, onComplete?: () => void) {
-    const startAlpha = this.container.alpha;
-    const startTime = performance.now();
+  private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {
 
-    const animate = (now: number) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      this.container.alpha = startAlpha + (targetAlpha - startAlpha) * t;
-      if (t < 1) requestAnimationFrame(animate);
-      else {
-        this.container.alpha = targetAlpha;
-        onComplete?.();
-      }
-    };
-    requestAnimationFrame(animate);
-  }  
+    const start = this.container.alpha;
+
+    TweenManager.I.AddTween(<Tween<Container>>{
+    
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: this.container!,
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+        const v = start + (target - start) * t;
+        this.context.alpha = v;
+
+        if (elapsed >= ms(duration)) onComplete?.();
+      }    
+    });
+  }
+
 }
