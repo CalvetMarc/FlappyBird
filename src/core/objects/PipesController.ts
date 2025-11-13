@@ -95,25 +95,26 @@ export class PipesController implements IGameObject{
     const pipeTileWidth = (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
 
     const startX = BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width;
-    const endX =
-      BackgroundManager.I.bgRect.x - BackgroundManager.I.bgRect.width / 2 - pipeTileWidth / 2;
+    const endX =   BackgroundManager.I.bgRect.x - pipeTileWidth / 2;
 
     for (const obstacle of this.obstacles) {
-      const normalizedMovementDone =
-        (obstacle.upPipe[0].position.x - obstacle.endX) /
-        (obstacle.startX - obstacle.endX);
+      const normalizedMovementDone = (obstacle.upPipe[0].position.x - obstacle.endX) / (obstacle.startX - obstacle.endX);
 
-      const proportionalCurrentPositionX = startX - (startX - endX) * normalizedMovementDone;
+      const proportionalCurrentPositionX = endX + ((startX - endX) * normalizedMovementDone);
 
       const startIndex = obstacle.upPipe.length - 1;
       for (let i = 0; i < obstacle.upPipe.length; i++) {
         obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
         obstacle.upPipe[i].position.y = pipeTileHeight * (startIndex - i);
+        obstacle.upPipe[i].width = pipeTileWidth;
+        obstacle.upPipe[i].height = pipeTileHeight;
       }
 
       for (let i = 0; i < obstacle.downPipe.length; i++) {
         obstacle.downPipe[i].position.x = proportionalCurrentPositionX;
-        obstacle.downPipe[i].position.y = pipeTileHeight * (i + obstacle.gap);
+        obstacle.downPipe[i].position.y = pipeTileHeight * (this.maxPipeTiles - ((obstacle.downPipe.length - 1) - i) - 1);
+        obstacle.downPipe[i].width = pipeTileWidth;
+        obstacle.downPipe[i].height = pipeTileHeight;
       }
 
       obstacle.startX = startX;
@@ -137,10 +138,7 @@ export class PipesController implements IGameObject{
     const pipeTileHeight = BackgroundManager.I.bgRect.height / this.maxPipeTiles;
     const pipeTileWidth = (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
 
-    const gapSlot = this.randomInteger(
-      this.bottomTopTilesGapMargin + 1,
-      this.maxPipeTiles - this.bottomTopTilesGapMargin + 1
-    );
+    const gapSlot = this.randomInteger(this.bottomTopTilesGapMargin + 1, this.maxPipeTiles - this.bottomTopTilesGapMargin + 1);
     const startX = BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width;
 
     const upPipe: Sprite[] = [];
@@ -158,7 +156,7 @@ export class PipesController implements IGameObject{
       downPipe.push(this.makePipe(this.pipeTextures[2], startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
 
-    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot, scored: false, startX: startX, endX: BackgroundManager.I.bgRect.x - (BackgroundManager.I.bgRect.width / 2) - (pipeTileWidth / 2) });
+    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot, scored: false, startX: startX, endX: BackgroundManager.I.bgRect.x - (pipeTileWidth / 2) });
   }
 
   private makePipe(tex: Texture, x: number, y: number, w: number, h: number): Sprite {

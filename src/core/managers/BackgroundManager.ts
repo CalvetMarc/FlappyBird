@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Texture, Rectangle, Assets, Graphics, IGLUniformData, ContainerChild } from "pixi.js";
+import { Container, Sprite, Texture, Rectangle, Assets, Graphics } from "pixi.js";
 import { LAYERS } from "../abstractions/IScene";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { IGameObject } from "../abstractions/IGameObject"; 
@@ -74,16 +74,45 @@ export class BackgroundManager extends SingletonBase<BackgroundManager> implemen
   }
 
   public onResize(screenW: number, screenH: number): void {
-    this.container.removeChildren();
-    this.groundPieces = [];
-    this.baseTextures = [];
+    if (!this.background || !this.groundTexture) return;
 
-    const bgTexture = this.background?.texture;
-    if (!bgTexture || !this.groundTexture) return;
+    // 👉 Recalcular background (SENSE destruir)
+    const aspect = this.background.texture.width / this.background.texture.height;
+    const targetHeight = screenH * 0.85;
+    const targetWidth = targetHeight * aspect;
 
-    this.createBackground(bgTexture);
-    this.createGroundPieces(this.groundTexture);
-  }
+    this.background.width = targetWidth;
+    this.background.height = targetHeight;
+    this.background.position.set(screenW / 2, 0);
+
+    // 👉 Recalcular mask (SENSE recalc crear-la cada cop)
+    if (this.container.mask instanceof Graphics) {
+        const mask = this.container.mask as Graphics;
+        mask.clear();
+        mask.rect((screenW - targetWidth) / 2, 0, targetWidth, screenH).fill(0xffffff);
+    }
+
+    // 👉 Recalcular configuració del terra
+    const texW = this.groundTexture.width;
+    const texH = this.groundTexture.height;
+    const cropHeight = texH * 0.284;
+
+    this.scale = (screenH * 0.15) / cropHeight;
+    this.scaledWidth = (texW * 0.5 / 4) * this.scale;
+    this.groundY = screenH;
+    this.startX = (screenW - targetWidth) / 2;
+    this.groundWidthPx = targetWidth;
+
+    // 👉 Reposicionar i rescalar peces existents del terra
+    let x = this.startX;
+    for (let i = 0; i < this.groundPieces.length; i++) {
+        const piece = this.groundPieces[i];
+        piece.scale.set(this.scale);
+        piece.position.set(x, this.groundY);
+        x += this.scaledWidth;
+    }
+}
+
 
   public get groundBounds(): Rectangle | undefined {
     if (this.groundPieces.length === 0) return;
