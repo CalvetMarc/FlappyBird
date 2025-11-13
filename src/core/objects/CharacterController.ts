@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Texture, Rectangle, Assets, Bounds } from "pixi.js";
+import { Application, Container, Sprite, Texture, Rectangle, Assets, Bounds, ObservablePoint, Size } from "pixi.js";
 import { LAYERS } from "../abstractions/IScene";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { SceneManager } from "../managers/SceneManager";
@@ -21,12 +21,15 @@ export class CharacterController implements IGameObject{
   private isDead = false;
   private deadGrounded = false;
 
+  private lastBgSize: Size;
+
   public container: Container;
 
   public constructor() {
     this.container = new Container();
     this.container.sortableChildren = true;
     this.container.zIndex = LAYERS.PLAYER;
+    this.lastBgSize = { width: BackgroundManager.I.bgRect.width, height: BackgroundManager.I.bgRect.height};
   }
 
   public async onCreate() {
@@ -60,6 +63,8 @@ export class CharacterController implements IGameObject{
     } else if (!this.deadGrounded) {
       this.bird.rotation = Math.min(this.bird.rotation + 0.05, maxFall);
     }
+
+    this.lastBgSize = { width: BackgroundManager.I.bgRect.width, height: BackgroundManager.I.bgRect.height};
   }
 
   public async onDestroy(): Promise<void> {
@@ -76,8 +81,14 @@ export class CharacterController implements IGameObject{
     const targetWidth = BackgroundManager.I.bgRect.width / 10;
     const scale = targetWidth / frameW;
 
+    const lastRelativePositionY: number =  this.bird.position.y - BackgroundManager.I.bgRect.y;
+    const normalizedRelativePositionY: number = lastRelativePositionY / this.lastBgSize.height;
+
+    const newPosition: ObservablePoint = { x: BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width / 2, y: BackgroundManager.I.bgRect.y + BackgroundManager.I.bgRect.height * normalizedRelativePositionY} as ObservablePoint;
+    this.bird.position.set(newPosition.x, newPosition.y);
+
     this.bird.scale.set(scale * 0.7);
-    this.bird.position.set(w / 2, h / 1.7);
+
   }
 
   public get birdBounds(): Rectangle | undefined {
