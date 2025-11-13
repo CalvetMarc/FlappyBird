@@ -94,6 +94,28 @@ export class TweenManager extends SingletonBase<TweenManager> {
     return newTween;
   }
 
+  public AddLoopTween(tween: Tween): CreatedTween {
+    const id = this.idProvider.acquire();
+    const created = new CreatedTween(id, tween);
+
+    const originalUpdate = created.updateTween.bind(created);
+
+    created.updateTween = (dt: Milliseconds) => {
+      if (created.getState() !== "ACTIVE") return;
+
+      originalUpdate(dt);
+
+      if (Number(created["elapsedTime"]) >= Number(tween.duration)) {
+        created["elapsedTime"] = ms(0);
+        created.changeCurrentState("ACTIVE"); 
+      }
+    };
+
+    this.activeTweens.set(id, created);
+    return created;
+  }
+
+
   public KillTween(id: UniqueId): void {
     this.activeTweens.get(id)?.changeCurrentState("FINISHED");
   }

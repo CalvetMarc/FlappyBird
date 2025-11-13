@@ -3,8 +3,9 @@ import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { BackgroundManager } from "../managers/BackgroundManager";
 import { GameManager } from "../managers/GameManager";
-import { TweenManager, Tween } from "../managers/TweenManager";
+import { TweenManager, Tween, CreatedTween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";
+import { UniqueId } from "../objects/IdProvider";
 import logoUrl from "../../assets/ui/logoFlappyBird.png";
 import playUrl from "../../assets/ui/UiCozyFree.png";
 import birdUrl from "../../assets/birds/AllBird1.png";
@@ -42,6 +43,8 @@ export class MainMenuScene implements IScene {
 
   private birdFadeOf: boolean;
 
+  private logoTweenID!: UniqueId; 
+
   public container: Container;
 
   constructor() {
@@ -58,10 +61,11 @@ export class MainMenuScene implements IScene {
     this.container.alpha = 0;
     this.birdFadeOf = true;
     this.fadeTo(1, 500, 100);
+
+    this.startLogoFloat();
   }
 
   public onUpdate(dt: number): void {
-    this.floatAnimation(dt);
   }
 
   public async onExit(): Promise<void> {
@@ -106,6 +110,8 @@ export class MainMenuScene implements IScene {
     this.bird?.destroy();
 
     for (const t of this.birdFrames) t?.destroy();
+
+    TweenManager.I.KillTween(this.logoTweenID);
   }
 
   public onResize(width: number, height: number): void {
@@ -389,17 +395,27 @@ export class MainMenuScene implements IScene {
     }
   }
 
-  private floatAnimation(dt: number) {
+  private startLogoFloat() {
     if (!this.logo) return;
-    this.elapsed += dt / 1000;
 
+    const baseY = this.logo.y;
     const bgHeight = BackgroundManager.I.bgRect.height;
-    const amplitude = bgHeight * 0.015;
-    const speed = 1.2;
 
-    const offset = Math.sin(this.elapsed * Math.PI * speed) * amplitude;
-    this.logo.position.y = this.baseY + offset;
+    const amplitude = bgHeight * 0.015;
+    const duration = ms(2000);
+
+    this.logoTweenID = TweenManager.I.AddLoopTween(<Tween<Container>>{
+      waitTime: ms(0),
+      duration: duration,
+      context: this.logo!,
+      tweenFunction: function (elapsed) {
+        const t = Number(elapsed) / Number(this.duration); // LINEAL ⇒ 0..1
+        const offset = Math.sin(t * Math.PI * 2) * amplitude; 
+        this.context.y = baseY + offset;
+      }
+    }).id;
   }
+
 
   private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {
     const start = this.container.alpha;
