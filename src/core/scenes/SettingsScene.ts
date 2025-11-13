@@ -156,7 +156,7 @@ export class SettingsScene implements IScene {
 
     if (this.button) {
       const targetWidth = bgWidth / 10;
-      const scale = targetWidth / this.button.texture.width;
+      const scale = (BackgroundManager.I.bgRect.width / 10) / 15;
       this.button.scale.set(scale);
       this.button.position.set(width / 2, height / 1.3);
     }
@@ -290,34 +290,30 @@ export class SettingsScene implements IScene {
     if (!this.normalTex || !this.pressedTex) return;
 
     const screenW = GameManager.I.app.renderer.width;
-    const screenH = GameManager.I.app.renderer.height;
-
-    const bgWidth = BackgroundManager.I.bgRect.width;
-
-    const targetWidth = bgWidth / 10;
-
+    const screenH = GameManager.I.app.renderer.height;    
+    
     const btn = new Sprite(this.normalTex);
     btn.anchor.set(0.5);
     btn.zIndex = 10;
-    const scale = targetWidth / btn.width;
-    btn.scale.set(scale);
+   
+    btn.scale.set((BackgroundManager.I.bgRect.width / 10) / btn.width);
     btn.position.set(screenW / 2, screenH / 1.3);
     btn.eventMode = "static";
     btn.cursor = "pointer";
 
     btn.on("pointerdown", () => {
-      btn.scale.set(scale * 0.9);
+      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15 * 0.9);
       btn.texture = this.pressedTex!;
     });
 
     btn.on("pointerup", () => {
-      btn.scale.set(scale);
+      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
       btn.texture = this.normalTex!;
       setTimeout(() => SceneManager.I.fire("menu"), 80);
     });
 
     btn.on("pointerupoutside", () => {
-      btn.scale.set(scale);
+      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
       btn.texture = this.normalTex!;
     });
 

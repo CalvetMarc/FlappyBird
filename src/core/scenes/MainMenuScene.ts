@@ -247,24 +247,23 @@ export class MainMenuScene implements IScene {
       const btn = new Sprite(tex);
       btn.anchor.set(0.5);
       btn.zIndex = 11;
-      const scale = targetWidth / btn.width;
-      btn.scale.set(scale);
+      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
       btn.position.set(x, screenH / 1.3);
       btn.eventMode = "static";
       btn.cursor = "pointer";
 
       btn.on("pointerdown", () => {
-        btn.scale.set(scale * 0.9);
+        btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15 * 0.9);
         if (label === "play") btn.texture = this.playPressedTex!;
       });
       btn.on("pointerup", () => {
-        btn.scale.set(scale);
+        btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
         if (label === "play") btn.texture = this.playNormalTex!;
         this.birdFadeOf = label !== "play";
         setTimeout(() => SceneManager.I.fire(label), 40);
       });
       btn.on("pointerupoutside", () => {
-        btn.scale.set(scale);
+        btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
         if (label === "play") btn.texture = this.playNormalTex!;
       });
 
@@ -293,25 +292,20 @@ export class MainMenuScene implements IScene {
 
     this.leftTex = new Texture({ source: originalTexture.source, frame: leftFrame });
     this.rightTex = new Texture({ source: originalTexture.source, frame: rightFrame });
-
-    const bgWidth = BackgroundManager.I.bgRect.width;
-    const targetWidth = bgWidth / 10;
-    const scale = targetWidth / cropSize;
-
+    
     const makeButton = (tex: Texture, onClick: () => void): Sprite => {
       const btn = new Sprite(tex);
       btn.anchor.set(0.5);
       btn.zIndex = 11;
-      btn.scale.set(scale * 0.5);
+      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 25);
       btn.eventMode = "static";
       btn.cursor = "pointer";
 
       btn.on("pointerdown", () => {
-        btn.scale.set(scale * 0.4);
-        onClick();
+        btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 30);
       });
-      btn.on("pointerup", () => btn.scale.set(scale * 0.5));
-      btn.on("pointerupoutside", () => btn.scale.set(scale * 0.5));
+      btn.on("pointerup", () => {btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 25); onClick();});
+      btn.on("pointerupoutside", () => btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 25));
 
       this.container.addChild(btn);
       return btn;
