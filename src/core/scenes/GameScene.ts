@@ -96,24 +96,32 @@ export class GameScene implements IScene {
   public onResize(width: number, height: number): void {
     this.pipesController.onResize(width, height);
     this.characterController.onResize(width, height);
+    if(this.scoreText){
+      const screenW = GameManager.I.app.renderer.width;
+      const screenY = GameManager.I.app.renderer.height;
+      this.scoreText.position.set(screenW / 2, screenY * 0.08);
+      this.scoreText.style.fontSize = BackgroundManager.I.bgRect.width / 10;
+      this.scoreText.style.stroke = {color: 0x000000, width: BackgroundManager.I.bgRect.width / 90}
+    }
   }  
 
   private async createScoreText() {
     const screenW = GameManager.I.app.renderer.width;
+    const screenY = GameManager.I.app.renderer.height;
 
     await document.fonts.load('48px "Minecraft"');
 
     const style = new TextStyle({
       fontFamily: "Minecraft",
-      fontSize: 38,
+      fontSize: BackgroundManager.I.bgRect.width / 10,
       fill: 0xffffff,
-      stroke: { color: 0x000000, width: 6 },
+      stroke: { color: 0x000000, width: BackgroundManager.I.bgRect.width / 90 },
       align: "center",
     });
 
     this.scoreText = new Text({ text: "0", style });
     this.scoreText.anchor.set(0.5);
-    this.scoreText.position.set(screenW / 2, 60);
+    this.scoreText.position.set(screenW / 2, screenY * 0.08);
     this.scoreText.zIndex = 20;
 
     this.container.addChild(this.scoreText);

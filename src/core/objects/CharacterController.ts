@@ -92,7 +92,9 @@ export class CharacterController implements IGameObject{
   }
 
   public get birdBounds(): Rectangle | undefined {
-    if (!this.bird) return;
+    if (!this.bird) 
+      return;
+    
     const bounds = this.bird.getBounds();
     const r = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
 
