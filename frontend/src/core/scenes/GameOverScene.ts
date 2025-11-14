@@ -2,34 +2,20 @@ import { Container, Text } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { sendScore } from "../../SessionManager";
+import { GameManager } from "../managers/GameManager";
 
 export class GameOverScene implements IScene {
-  public container = new Container();
-
-  private playerId!: string;
-  private score!: number;
-  private timePlayed!: number;
-
+  public container = new Container();  
   public constructor() {}
 
   public async onInit(): Promise<void> {
     // Aquí pots preparar UI si vols
   }
 
-  public async onEnter(params?: any): Promise<void> {
-    // Guardem els paràmetres rebuts
-    this.playerId = params.playerId;
-    this.score = params.score;
-    this.timePlayed = params.timePlayed;
-
-    console.log("GameOverScene → Enviant score…");
+  public async onEnter(): Promise<void> {   
 
     // Enviem score al backend
-    const resultat = await sendScore(
-      this.playerId,
-      this.score,
-      this.timePlayed
-    );
+    const resultat = await sendScore(GameManager.I.lastScore);
 
     console.log("Resposta del backend:", resultat);
 
