@@ -67,6 +67,7 @@ export class GameScene implements IScene {
       if (isTouchingGround) {
         this.characterController.groundTouched(groundBounds);
         this.pipesController.setScroll(false);
+        GameManager.I.lastScore = this.score;
         BackgroundManager.I.setScrolling(false);
         SceneManager.I.fire("gameover")
         return;

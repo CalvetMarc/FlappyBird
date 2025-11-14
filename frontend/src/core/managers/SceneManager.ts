@@ -51,6 +51,10 @@ export class SceneManager extends SingletonBase<SceneManager> {
           this.destroyFromPool(GameScene);
           this.setScene(MainMenuScene, true);
         }
+        else if (this.current instanceof GameOverScene) {
+          this.destroyFromPool(GameScene);
+          this.setScene(MainMenuScene, true);
+        }
       },
       ranking: () => {
         if (this.current instanceof GameScene || this.current instanceof MainMenuScene) {

@@ -5,7 +5,7 @@ let currentSessionId: string | null = null;
 let currentSeed: string | null = null;
 let heartbeatInterval: number | null = null;
 
-const SERVER = "http://localhost:3000";
+const SERVER = "https://flappy-backend-tqe2.onrender.com";
 const PLAYER_ID = "guest"; // Pots canviar-ho si vols
 
 export async function startSession() {
