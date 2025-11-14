@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# Compilats TS
+dist/
+
+# Env secrets
+.env
+
+# SQLite database
+*.db
+*.sqlite
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build de front (si algun dia fas build)
+frontend/dist/
+
+# Directori generat per Prisma
+prisma/generated/
