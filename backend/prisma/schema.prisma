@@ -1,0 +1,25 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Score {
+  id         Int    @id @default(autoincrement())
+  playerId   String
+  score      Int
+  serverHash String
+}
+
+model GameSession {
+  id        Int    @id @default(autoincrement())
+  sessionId String @unique
+  seed      String
+  expiresAt DateTime
+}
+
+
+
