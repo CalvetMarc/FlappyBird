@@ -5,7 +5,8 @@ import { BackgroundManager } from "../managers/BackgroundManager";
 import { GameManager } from "../managers/GameManager";
 import { TweenManager, Tween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";
-import playUrl from "../../assets/ui/UiCozyFree.png";
+import { AssetsManager } from "../managers/AssetsManager";
+import playUrl from "../../../public/assets/ui/UiCozyFree.png";
 
 /* 🟩 Classe auxiliar per a un toggle simple */
 class ToggleSwitch extends Container {
@@ -232,7 +233,8 @@ export class SettingsScene implements IScene {
     const screenW = GameManager.I.app.renderer.width;
     const screenH = GameManager.I.app.renderer.height;
 
-    const bgSprite = new Sprite(this.settingsBgTex);
+    const bgSprite = AssetsManager.I.getSprite("ui", "panelOrange") as Sprite;// new Sprite(this.settingsBgTex);
+    bgSprite.rotation = Math.PI/2;
     bgSprite.anchor.set(0.5);
     bgSprite.zIndex = 5;
 
@@ -240,7 +242,7 @@ export class SettingsScene implements IScene {
 
     const targetWidth = bgWidth / 4;
     const scale = targetWidth / bgSprite.width;
-    bgSprite.scale.set(scale * 2.4);
+    bgSprite.scale.set(scale * 2.4 * 1.4);
     bgSprite.position.set(screenW / 2, screenH / 2.5);
 
     this.bgSprite = bgSprite;
@@ -292,7 +294,7 @@ export class SettingsScene implements IScene {
     const screenW = GameManager.I.app.renderer.width;
     const screenH = GameManager.I.app.renderer.height;    
     
-    const btn = new Sprite(this.normalTex);
+    const btn = AssetsManager.I.getSprite("ui", "button", 0);
     btn.anchor.set(0.5);
     btn.zIndex = 10;
    

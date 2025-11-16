@@ -1,8 +1,8 @@
 import { Container, Rectangle, Text, TextStyle } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { BackgroundManager } from "../managers/BackgroundManager";
-import { PipesController } from "../objects/PipesController";
-import { CharacterController } from "../objects/CharacterController";
+import { PipesController } from "../objects/Game/PipesController";
+import { CharacterController } from "../objects/Game/CharacterController";
 import { Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
 import { Milliseconds, ms, s } from "../time/TimeUnits";
 import { GameManager } from "../managers/GameManager";

@@ -6,8 +6,8 @@ import { IGameObject } from "../abstractions/IGameObject";
 import { GameManager } from "./GameManager";
 import { Milliseconds } from "../time/TimeUnits";
 
-import backgroundUrl from "../../assets/backgrounds/Background2.png";
-import groundUrl from "../../assets/tiles/SimpleStyle1.png";
+import backgroundUrl from "../../../public/assets/backgrounds/Background2.png";
+import groundUrl from "../../../public/assets/tiles/SimpleStyle1.png";
 
 export class BackgroundManager extends SingletonBase<BackgroundManager> implements IGameObject {
   private background?: Sprite;

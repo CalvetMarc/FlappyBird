@@ -2,6 +2,7 @@ import { Application, TextureSource } from "pixi.js";
 import { SceneManager } from "./SceneManager";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { Milliseconds, ms } from "../time/TimeUnits";
+import { AssetsManager } from "./AssetsManager";
 
 
 export class GameManager extends SingletonBase<GameManager> { 
@@ -28,6 +29,10 @@ export class GameManager extends SingletonBase<GameManager> {
 
     Object.assign(this.app.canvas.style, { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "block" });
 
+    //await LayoutManager.I.start();
+
+    await AssetsManager.I.start();
+
     await SceneManager.I.start();
 
     this.app.ticker.add((frame) => {
@@ -53,4 +58,5 @@ export class GameManager extends SingletonBase<GameManager> {
     this.app.renderer.resize(width, height);
     SceneManager.I.onResize?.(width, height);
   }
+    
 }

@@ -6,9 +6,9 @@ import { GameManager } from "../managers/GameManager";
 import { TweenManager, Tween, CreatedTween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";
 import { UniqueId } from "../objects/IdProvider";
-import logoUrl from "../../assets/ui/logoFlappyBird.png";
-import playUrl from "../../assets/ui/UiCozyFree.png";
-import birdUrl from "../../assets/birds/AllBird1.png";
+import logoUrl from "../../../public/assets/ui/logoFlappyBird.png";
+import playUrl from "../../../public/assets/ui/UiCozyFree.png";
+import birdUrl from "../../../public/assets/birds/AllBird1.png";
 
 export class MainMenuScene implements IScene {
   private logo?: Sprite;

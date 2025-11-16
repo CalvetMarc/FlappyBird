@@ -19,6 +19,6 @@
     "noEmit": true,  // Vite s’encarrega del build
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
+  "include": ["src", "public/assets"],
   "exclude": ["node_modules"]
 }
