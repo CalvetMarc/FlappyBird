@@ -1,5 +1,5 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
-import { Sprite, Texture, Assets, BitmapText, Rectangle } from "pixi.js";
+import { Sprite, Texture, Assets, BitmapText, Rectangle, Size } from "pixi.js";
 import { manifest } from "../../assets";
 import { SpritePool } from "../objects/SpritePool";
 import { BitmapTextPool } from "../objects/BitmapTextPool";
@@ -55,6 +55,25 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     if (!frames) throw new Error(`Frames not found for asset: ${key}`);
 
     return this.spritePool.getForTexture(frames[frame]);
+  }
+
+  public getFrameCount(bundle: string, asset: string): number {
+    const key = `${bundle}/${asset}`;
+    const frames = this.textures.get(key);
+    if (!frames) throw new Error(`Frames not found for asset: ${key}`);
+    return frames.length;
+  }
+
+  public getTextureSize(bundle: string, asset: string, frame: number = 0): Size {
+    const key = `${bundle}/${asset}`;
+    const frames = this.textures.get(key);
+    if (!frames) throw new Error(`Frames not found for asset: ${key}`);
+
+    const tex = frames[frame];
+    return {
+      width: tex.width,
+      height: tex.height
+    };
   }
 
   public releaseSprite(sprite: Sprite) {

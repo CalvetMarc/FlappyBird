@@ -72,16 +72,11 @@ export class SceneManager extends SingletonBase<SceneManager> {
   public async start(): Promise<void> {
     this.playerIndex = 0;
 
-    await this.initBackground();
+    await BackgroundManager.I.onCreate();
     await new Promise((resolve) => setTimeout(resolve, 700));
     this.setScene(MainMenuScene, false);
   }
-
-  private async initBackground(): Promise<void> {
-    await BackgroundManager.I.onCreate();
-    GameManager.I.app.stage.addChild(BackgroundManager.I.container);
-  }
-
+  
   public update(dt: Milliseconds): void {
     this.current?.onUpdate(dt);
     BackgroundManager.I.onUpdate(dt);

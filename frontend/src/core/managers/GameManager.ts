@@ -3,6 +3,7 @@ import { SceneManager } from "./SceneManager";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { Milliseconds, ms } from "../time/TimeUnits";
 import { AssetsManager } from "./AssetsManager";
+import { LayoutManager } from "./LayoutManager";
 
 
 export class GameManager extends SingletonBase<GameManager> { 
@@ -17,19 +18,16 @@ export class GameManager extends SingletonBase<GameManager> {
   }
 
   public async start(): Promise<void> {
-    this.app = new Application();
-
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
+    this.app = new Application();    
     TextureSource.defaultOptions.scaleMode = "nearest";
 
-    await this.app.init({width: screenWidth, height: screenHeight, backgroundColor: "#10161A", antialias: false });
+    await this.app.init({backgroundColor: "#10161A", antialias: false });
 
     document.body.appendChild(this.app.canvas);
 
     Object.assign(this.app.canvas.style, { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "block" });
 
-    //await LayoutManager.I.start();
+    await LayoutManager.I.start();
 
     await AssetsManager.I.start();
 
@@ -39,7 +37,7 @@ export class GameManager extends SingletonBase<GameManager> {
       this.update(ms(frame.deltaMS));
     });
 
-    window.addEventListener("resize", () => this.onResize());
+    //window.addEventListener("resize", () => this.onResize());
   }
 
   private update(dt: Milliseconds): void {
@@ -53,10 +51,8 @@ export class GameManager extends SingletonBase<GameManager> {
 
 
   private onResize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    this.app.renderer.resize(width, height);
-    SceneManager.I.onResize?.(width, height);
+    
+    //SceneManager.I.onResize?.(0, 0);
   }
     
 }
