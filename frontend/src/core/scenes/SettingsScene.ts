@@ -1,7 +1,6 @@
 import { Container, Sprite, Texture, Assets, Rectangle, Text } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
-import { BackgroundManager } from "../managers/BackgroundManager";
 import { GameManager } from "../managers/GameManager";
 import { TweenManager, Tween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";

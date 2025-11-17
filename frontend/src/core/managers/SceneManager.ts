@@ -4,12 +4,12 @@ import { GameScene } from "../scenes/GameScene";
 import { PauseScene } from "../scenes/PauseScene";
 import { SettingsScene } from "../scenes/SettingsScene";
 import { RankingScene } from "../scenes/RankingScene";
-import { BackgroundManager } from "./BackgroundManager";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { LAYERS, IScene, SceneEvent } from "../abstractions/IScene";
 import { Milliseconds } from "../time/TimeUnits";
 import { GameManager } from "./GameManager";
 import { GameOverScene } from "../scenes/GameOverScene";
+import { LayoutManager } from "./LayoutManager";
 
 type SceneClass<T extends IScene = IScene> = new () => T;
 
@@ -72,14 +72,12 @@ export class SceneManager extends SingletonBase<SceneManager> {
   public async start(): Promise<void> {
     this.playerIndex = 0;
 
-    await BackgroundManager.I.onCreate();
     await new Promise((resolve) => setTimeout(resolve, 700));
     this.setScene(MainMenuScene, false);
   }
-  
+
   public update(dt: Milliseconds): void {
     this.current?.onUpdate(dt);
-    BackgroundManager.I.onUpdate(dt);
   }
 
   public fire(event: SceneEvent): void {
@@ -89,10 +87,12 @@ export class SceneManager extends SingletonBase<SceneManager> {
   private async setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): Promise<void> {
     if (this.current) {
       await this.current.onExit();
-      GameManager.I.app.stage.removeChild(this.current.container);
+      LayoutManager.I.gameContainer.removeChild(this.current.containerGame);
+      LayoutManager.I.uiContainer.removeChild(this.current.containerUi);
       if (destroyCurrent) {
         await this.current.onDestroy();
-        this.current.container.destroy({ children: true, texture: true, textureSource: true });
+        this.current.containerGame.destroy({ children: true, texture: true, textureSource: true });
+        this.current.containerUi.destroy({ children: true, texture: true, textureSource: true });
 
       } else {
         this.scenePool.add(this.current);
@@ -106,7 +106,8 @@ export class SceneManager extends SingletonBase<SceneManager> {
     } 
 
     this.current = next;
-    GameManager.I.app.stage.addChild(this.current.container);
+    LayoutManager.I.gameContainer.addChild(this.current.containerGame);
+    LayoutManager.I.uiContainer.addChild(this.current.containerUi);
     this.current.onEnter();
   }
 
@@ -129,9 +130,4 @@ export class SceneManager extends SingletonBase<SceneManager> {
     return false;
   }
 
-  public onResize(width: number, height: number): void {
-    BackgroundManager.I.onResize(width, height);
-    this.current?.onResize(width, height);
-    this.scenePool.forEach(s => s.onResize(width, height));
-  }
 }

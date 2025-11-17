@@ -3,7 +3,6 @@ import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { sendScore } from "../../SessionManager";
 import { GameManager } from "../managers/GameManager";
-import { BackgroundManager } from "../managers/BackgroundManager";
 import uiUrl from "../../../public/assets/ui/UiCozyFree.png";
 
 export class GameOverScene implements IScene {

@@ -49,12 +49,17 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     }
   }
 
-  public getSprite(bundle: string, asset: string, frame: number = 0): Sprite {
+  public getSprite(bundle: string, asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {
     const key = `${bundle}/${asset}`;
     const frames = this.textures.get(key);
     if (!frames) throw new Error(`Frames not found for asset: ${key}`);
 
-    return this.spritePool.getForTexture(frames[frame]);
+    if(sprite === null){
+      return this.spritePool.getForTexture(frames[frame])
+    }
+
+    sprite.texture = frames[frame];
+    return sprite;
   }
 
   public getFrameCount(bundle: string, asset: string): number {

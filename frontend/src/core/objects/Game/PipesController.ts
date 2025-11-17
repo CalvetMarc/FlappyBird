@@ -1,5 +1,4 @@
 import { Application, Container, Sprite, Texture, Rectangle, Assets } from "pixi.js";
-import { BackgroundManager } from "../../managers/BackgroundManager";
 import { LAYERS } from "../../abstractions/IScene";
 import { IGameObject } from "../../abstractions/IGameObject";
 import { Milliseconds } from "../../time/TimeUnits";

@@ -6,5 +6,4 @@ export interface IGameObject{
     onCreate(): Promise<void>;
     onUpdate(dt: Milliseconds): void;
     onDestroy(): Promise<void>;
-    onResize(width: number, height: number): void;
 }

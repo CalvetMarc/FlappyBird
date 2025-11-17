@@ -191,10 +191,10 @@ export const manifest: AssetsManifest = {
         button: {
           src: "/assets/ui/Spritesheet_UI_Flat_Animated.png",
           frames: [
-            { x: 96, y: 96, w: 32, h: 32 },
-            { x: 64, y: 96, w: 32, h: 32 },
-            { x: 32, y: 96, w: 32, h: 32 },
-            { x: 0, y: 96, w: 32, h: 32 }
+            { x: 96, y: 64, w: 32, h: 32 },
+            { x: 64, y: 64, w: 32, h: 32 },
+            { x: 32, y: 64, w: 32, h: 32 },
+            { x: 0, y: 64, w: 32, h: 32 }
           ]
         },
         bigTick: {
@@ -234,21 +234,24 @@ export const manifest: AssetsManifest = {
           ]
         },
         ranking: {
-          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
           frames: [
-            { x: 352, y: 192, w: 32, h: 32 }
+            { x: 136, y: 34, w: 34, h: 34 },
+            { x: 170, y: 34, w: 34, h: 34 }
           ]
         },
         settings: {
-          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
           frames: [
-            { x: 416, y: 224, w: 32, h: 32 }
+            { x: 136, y: 0, w: 34, h: 34 },
+            { x: 170, y: 0, w: 34, h: 34 }
           ]
         },
         play: {
-          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
           frames: [
-            { x: 288, y: 224, w: 32, h: 32 }
+            { x: 136, y: 102, w: 34, h: 34 },
+            { x: 170, y: 102, w: 34, h: 34 }
           ]
         },
         panelGrey: {
@@ -298,7 +301,8 @@ export const manifest: AssetsManifest = {
           frames: [
             { x: 288, y: 192, w: 64, h: 32 },
           ]
-        }
+        }        
+
       }
     }
   ]

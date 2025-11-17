@@ -10,13 +10,13 @@ export const LAYERS = {
 } as const;
 
 export interface IScene {
-  container: Container;
+  containerGame: Container;
+  containerUi: Container;
   onInit(): Promise<void>;
   onEnter(): void;
   onUpdate(dt: Milliseconds): void;
   onExit(): Promise<void>;
   onDestroy(): Promise<void>;
-  onResize(width: number, height: number): void;
 }
 
 const sceneEvents = ["play", "pause", "settings", "menu", "ranking", "gameover"] as const;

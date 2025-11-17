@@ -4,13 +4,14 @@ import { SingletonBase } from "../abstractions/SingletonBase";
 import { Milliseconds, ms } from "../time/TimeUnits";
 import { AssetsManager } from "./AssetsManager";
 import { LayoutManager } from "./LayoutManager";
+import { BackgroundController } from "../objects/Game/BackgroundController";
 
 
 export class GameManager extends SingletonBase<GameManager> { 
 
-  private app!: Application;
-
   public lastScore: number;
+  private appBackground!: BackgroundController 
+  private app!: Application;
 
   private constructor() {
     super();
@@ -28,31 +29,25 @@ export class GameManager extends SingletonBase<GameManager> {
     Object.assign(this.app.canvas.style, { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "block" });
 
     await LayoutManager.I.start();
-
+    
     await AssetsManager.I.start();
+    
+    this.appBackground = new BackgroundController();
 
     await SceneManager.I.start();
 
     this.app.ticker.add((frame) => {
       this.update(ms(frame.deltaMS));
     });
-
-    //window.addEventListener("resize", () => this.onResize());
   }
 
   private update(dt: Milliseconds): void {
+    this.appBackground.onUpdate(dt);
     SceneManager.I.update(dt);
   }
 
   public get gameApp(): Application {
     return this.app;
-  }
-
-
-
-  private onResize(): void {
-    
-    //SceneManager.I.onResize?.(0, 0);
   }
     
 }

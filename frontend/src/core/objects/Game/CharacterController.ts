@@ -1,6 +1,5 @@
 import { Application, Container, Sprite, Texture, Rectangle, Assets, Bounds, ObservablePoint, Size } from "pixi.js";
 import { LAYERS } from "../../abstractions/IScene";
-import { BackgroundManager } from "../../managers/BackgroundManager";
 import { SceneManager } from "../../managers/SceneManager";
 import { GameManager } from "../../managers/GameManager";
 import { IGameObject } from "../../abstractions/IGameObject";
