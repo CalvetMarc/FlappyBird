@@ -1,18 +1,26 @@
-import { Sprite, Graphics, Container, Filter, ColorMatrixFilter } from "pixi.js";
+import { Sprite, Graphics, Container, ColorMatrixFilter, BitmapText } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { LayoutManager } from "../../managers/LayoutManager";
 
 const debug = false;
 
-export class Button extends Container {
+export class Toggle extends Container {
   private bgSprite: Sprite;
-  private iconName: string;
+  private iconAssetNameOn: string;
+  private iconAssetNameOff: string;
   private iconSprite: Sprite;  
-  private initScale: number;
-  private iconIsOneFrame: boolean;
+  private currentValue: boolean;
+  private labelText: BitmapText;
 
-  constructor(buttonScale: number, iconAssetName: string,callback: () => void, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
+  constructor(label: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
+
+    this.currentValue = initValue; 
+    
+    this.iconAssetNameOff = iconAssetNameOff;
+    this.iconAssetNameOn = iconAssetNameOn;
+    
+    this.labelText = AssetsManager.I.getText(label, "Minecraft", fontSize);
 
     this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0);
     this.bgSprite.anchor = 0.5;
@@ -20,7 +28,7 @@ export class Button extends Container {
     this.bgSprite.cursor = "pointer";
     this.bgSprite.setSize(LayoutManager.I.layoutSize.width / 25);
 
-    this.iconSprite = AssetsManager.I.getSprite("ui", iconAssetName, 0);
+    this.iconSprite = AssetsManager.I.getSprite("ui", this.currentValue ? iconAssetNameOn : iconAssetNameOff, 0);
     this.iconSprite.anchor = 0.5;
     this.iconSprite.position = { x: 0, y: -3.5}
     this.iconSprite.scale.set(iconScale);    
@@ -33,49 +41,22 @@ export class Button extends Container {
     this.iconSprite.rotation = iconRotationRadians;
 
     this.bgSprite.addChild(this.iconSprite);
-    this.addChild(this.bgSprite);
+    this.labelText.addChild(this.bgSprite);
+    this.bgSprite.position.x = this.labelText.width + LayoutManager.I.layoutSize.width * 0.1;
+    this.addChild(this.labelText);
 
     this.bgSprite.on("pointerdown", () => this.onPointerDown());
-    this.bgSprite.on("pointerup", () => this.onPointerUp(callback));
-    this.bgSprite.on("pointerupoutside", () => this.onPointerUpOutside());   
 
-    this.initScale = buttonScale;
-    this.scale.set(buttonScale);
-
-    this.iconName = iconAssetName;
-    this.iconIsOneFrame = iconIsOneFrame;
+    this.scale.set(toggleScale);
 
     if(debug){
       this.debugBounds();
     }
   }
 
-  private onPointerDown(){
-    this.scale.set(this.initScale * 0.9);
-    if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 1, this.iconSprite);
-    }
-    this.iconSprite.position = { x: 0, y: -1.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 2, this.bgSprite);
-  }
-
-  private onPointerUp(callback: () => void){
-    this.scale.set(this.initScale);
-    if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 0, this.iconSprite);
-    }
-    this.iconSprite.position = { x: 0, y: -3.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0, this.bgSprite);
-    setTimeout(() => callback(), 40);
-  }
-
-  private onPointerUpOutside(){
-    this.scale.set(this.initScale);
-    if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 0, this.iconSprite);
-    }
-    this.iconSprite.position = { x: 0, y: -3.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0, this.bgSprite);
+  private onPointerDown(){    
+    this.currentValue = !this.currentValue;
+    this.iconSprite = AssetsManager.I.getSprite("ui", this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
   }
 
   private hexToHue(hex: number): number {

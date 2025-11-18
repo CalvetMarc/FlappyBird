@@ -4,7 +4,9 @@ import { SceneManager } from "../managers/SceneManager";
 
 
 export class RankingScene implements IScene {
-  public container = new Container();
+  
+  public containerGame: Container;
+  public containerUi: Container;
   
   public constructor() {
     

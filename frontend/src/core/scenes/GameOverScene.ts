@@ -7,9 +7,12 @@ import uiUrl from "../../../public/assets/ui/UiCozyFree.png";
 
 export class GameOverScene implements IScene {
 
-  public container = new Container();
+  public containerGame: Container;
+  public containerUi: Container;
 
-  public constructor() {}
+  public constructor() {
+    
+  }
 
   public async onInit(): Promise<void> {
 

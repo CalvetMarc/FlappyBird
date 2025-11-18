@@ -9,12 +9,14 @@ import { startSession } from "../../SessionManager";
 import { SceneManager } from "../managers/SceneManager";
 
 export class GameScene implements IScene {
-  container = new Container();
   private scoreText?: Text; 
   private score: number = 0;     
   private pipesController!: PipesController;  
   private characterController!: CharacterController;
-
+  
+  public containerGame: Container;
+  public containerUi: Container;
+  
   public constructor() {
     this.container.sortableChildren = true;    
   }

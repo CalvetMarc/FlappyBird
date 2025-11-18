@@ -109,10 +109,16 @@ export const manifest: AssetsManifest = {
       name: "fonts",
       assets: {      
         vcrBase: {
-          src: "/assets/fonts/noStroke/vcr_osd_mono.fnt"
+          src: [
+            "/assets/fonts/noStroke/vcr_osd_mono.fnt",
+            "/assets/fonts/noStroke/vcr_osd_mono.png",
+          ]
         },
         vcrBlackStroke: {
-          src: "/assets/fonts/blackStroke/vcr_osd_mono_blackStroke.fnt"
+          src: [
+            "/assets/fonts/blackStroke/vcr_osd_mono_blackStroke.fnt",
+            "/assets/fonts/blackStroke/vcr_osd_mono_blackStroke.png",
+          ]
         }
       }
     },
@@ -252,6 +258,20 @@ export const manifest: AssetsManifest = {
           frames: [
             { x: 136, y: 102, w: 34, h: 34 },
             { x: 170, y: 102, w: 34, h: 34 }
+          ]
+        },
+        arrowRight: {
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
+          frames: [
+            { x: 136, y: 170, w: 34, h: 34 },
+            { x: 170, y: 170, w: 34, h: 34 }
+          ]
+        },
+        arrowLeft: {
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
+          frames: [
+            { x: 34, y: 170, w: 34, h: 34 },
+            { x: 68, y: 170, w: 34, h: 34 }
           ]
         },
         panelGrey: {

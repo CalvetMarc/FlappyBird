@@ -16,7 +16,7 @@ type SceneClass<T extends IScene = IScene> = new () => T;
 export class SceneManager extends SingletonBase<SceneManager> {
   private current?: IScene;
   private scenePool: Set<IScene> = new Set();
-  public playerIndex = 0;
+  public playerIndex = 1;
 
   private transitions: Record<SceneEvent, () => void>;
 
@@ -70,8 +70,6 @@ export class SceneManager extends SingletonBase<SceneManager> {
   }
 
   public async start(): Promise<void> {
-    this.playerIndex = 0;
-
     await new Promise((resolve) => setTimeout(resolve, 700));
     this.setScene(MainMenuScene, false);
   }

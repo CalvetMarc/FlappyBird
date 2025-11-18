@@ -98,10 +98,10 @@ export class MainMenuScene implements IScene {
     this.playBtn = new Button(2.5, "play", () => SceneManager.I.fire("play"));
     this.playBtn.position = {x: LayoutManager.I.layoutSize.width * 0.5, y: buttonsYPos};
 
-    this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"));
+    this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), 0x0c0807);
     this.settingsBtn.position = {x: LayoutManager.I.layoutSize.width * 0.5 - buttonsXSpacing, y: buttonsYPos};
 
-    this.rankingBtn = new Button(2.5, "ranking", () => SceneManager.I.fire("ranking"));
+    this.rankingBtn = new Button(2.5, "ranking", () => SceneManager.I.fire("ranking"), 0xff8800);
     this.rankingBtn.position = {x: LayoutManager.I.layoutSize.width * 0.5 + buttonsXSpacing, y: buttonsYPos};
     
     this.containerUi.addChild(this.playBtn, this.settingsBtn, this.rankingBtn);
@@ -112,30 +112,29 @@ export class MainMenuScene implements IScene {
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 12;
 
-    this.bird.position = {x: LayoutManager.I.layoutSize.width * 0.5, y: LayoutManager.I.layoutSize.y * 0.714};
+    this.bird.position = {x: LayoutManager.I.layoutSize.width * 0.5, y: LayoutManager.I.layoutSize.height * 0.614};
     this.bird.scale.set(LayoutManager.I.layoutSize.width * 0.0044);
 
-    this.containerUi.addChild(this.bird);
+    this.containerUi.addChild(this.bird);    
   }
 
   private createSideButtons() {    
-    const buttonsWidth = LayoutManager.I.layoutSize.width * 0.004;
-    const buttonsheight = buttonsWidth;
-    const distFromCenter = this.bird.width * 1.5;
+    const distFromCenter = LayoutManager.I.layoutSize.width / 10;
 
     this.nextBtn = new Button(1.5, "smallArrow", () => {
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex + 1) % 7;
       this.bird = AssetsManager.I.getSprite("characters", "bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    });
+    }, 0x4b5320, true, 0, 2);
     this.prevBtn = new Button(1.5, "smallArrow", () => {     
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex - 1 + 7) % 7;
       this.bird = AssetsManager.I.getSprite("characters", "bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    });
+    }, 0x4b5320, true, Math.PI, 2);
 
-    this.prevBtn.position = {x: this.bird.position.x - distFromCenter, y: this.bird.position.y};
-    this.nextBtn.position = {x: this.bird.position.x + distFromCenter, y: this.bird.position.y};    
-    this.prevBtn.scale.set(buttonsWidth, buttonsheight);
-    this.nextBtn.scale.set(buttonsWidth, buttonsheight);   
+    this.prevBtn.position = {x: this.bird.position.x - distFromCenter, y: this.bird.position.y * 1.008};
+    this.nextBtn.position = {x: this.bird.position.x + distFromCenter, y: this.bird.position.y * 1.008};    
+
+    this.containerUi.addChild(this.prevBtn);  
+    this.containerUi.addChild(this.nextBtn);    
   }
 
   private startLogoFloat() {

@@ -4,7 +4,9 @@ import { SceneManager } from "../managers/SceneManager";
 
 
 export class PauseScene implements IScene {
-  public container = new Container();
+  
+  public containerGame: Container;
+  public containerUi: Container;
   
   constructor() {
     

@@ -1,5 +1,5 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
-import { Sprite, Texture, Assets, BitmapText, Rectangle, Size } from "pixi.js";
+import { Sprite, Texture, Assets, BitmapText, Rectangle, Size, BitmapFont } from "pixi.js";
 import { manifest } from "../../assets";
 import { SpritePool } from "../objects/SpritePool";
 import { BitmapTextPool } from "../objects/BitmapTextPool";
