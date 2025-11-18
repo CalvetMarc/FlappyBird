@@ -7,7 +7,6 @@ import { BitmapTextPool } from "../objects/BitmapTextPool";
 
 export class AssetsManager extends SingletonBase<AssetsManager> {
   private textures: Map<string, Texture[]> = new Map();
-  private bitmapFonts: Map<string, string> = new Map();
   private spritePool: SpritePool;
   private textPool: BitmapTextPool;
 
@@ -29,12 +28,6 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
         const def = assetsDef[assetName];
         const key = `${bundle.name}/${assetName}`;
 
-        // Carrega fonts bitmap (Pixi v8)
-        if (entry instanceof BitmapFont) {
-          this.bitmapFonts.set(key, entry.fontFamily);
-          continue;
-        }
-
         if (typeof entry === "string") continue;
 
         if (entry instanceof Texture) {
@@ -55,7 +48,6 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
         }
       }
     }
-    console.log(this.bitmapFonts);
   }
 
   public getSprite(bundle: string, asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {
