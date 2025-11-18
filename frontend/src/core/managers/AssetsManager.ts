@@ -1,11 +1,13 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
-import { Sprite, Texture, Assets, BitmapText, Rectangle, Size, BitmapFont } from "pixi.js";
+import { Sprite, Texture, Assets, Rectangle, Size, BitmapText, BitmapFont } from "pixi.js";
+
 import { manifest } from "../../assets";
 import { SpritePool } from "../objects/SpritePool";
 import { BitmapTextPool } from "../objects/BitmapTextPool";
 
 export class AssetsManager extends SingletonBase<AssetsManager> {
   private textures: Map<string, Texture[]> = new Map();
+  private bitmapFonts: Map<string, string> = new Map();
   private spritePool: SpritePool;
   private textPool: BitmapTextPool;
 
@@ -23,11 +25,17 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
       const assetsDef = bundle.assets as Record<string, any>;
 
       for (const assetName in loaded) {
-        const key = `${bundle.name}/${assetName}`;
         const entry = loaded[assetName];
         const def = assetsDef[assetName];
+        const key = `${bundle.name}/${assetName}`;
 
-        if (typeof entry === "string" || entry?.font) continue;
+        // Carrega fonts bitmap (Pixi v8)
+        if (entry instanceof BitmapFont) {
+          this.bitmapFonts.set(key, entry.fontFamily);
+          continue;
+        }
+
+        if (typeof entry === "string") continue;
 
         if (entry instanceof Texture) {
           let frames: Texture[] = [];
@@ -47,6 +55,7 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
         }
       }
     }
+    console.log(this.bitmapFonts);
   }
 
   public getSprite(bundle: string, asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {
@@ -54,8 +63,8 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     const frames = this.textures.get(key);
     if (!frames) throw new Error(`Frames not found for asset: ${key}`);
 
-    if(sprite === null){
-      return this.spritePool.getForTexture(frames[frame])
+    if (!sprite) {
+      return this.spritePool.getForTexture(frames[frame]);
     }
 
     sprite.texture = frames[frame];
@@ -75,10 +84,7 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     if (!frames) throw new Error(`Frames not found for asset: ${key}`);
 
     const tex = frames[frame];
-    return {
-      width: tex.width,
-      height: tex.height
-    };
+    return { width: tex.width, height: tex.height };
   }
 
   public releaseSprite(sprite: Sprite) {

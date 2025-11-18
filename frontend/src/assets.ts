@@ -107,18 +107,9 @@ export const manifest: AssetsManifest = {
     },
     {
       name: "fonts",
-      assets: {      
+      assets: {
         vcrBase: {
-          src: [
-            "/assets/fonts/noStroke/vcr_osd_mono.fnt",
-            "/assets/fonts/noStroke/vcr_osd_mono.png",
-          ]
-        },
-        vcrBlackStroke: {
-          src: [
-            "/assets/fonts/blackStroke/vcr_osd_mono_blackStroke.fnt",
-            "/assets/fonts/blackStroke/vcr_osd_mono_blackStroke.png",
-          ]
+          src: "/assets/fonts/vcr_osd_mono/vcr_osd_mono.fnt"
         }
       }
     },
