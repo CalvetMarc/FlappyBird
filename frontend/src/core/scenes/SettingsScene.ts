@@ -64,9 +64,9 @@ export class SettingsScene implements IScene {
 
   private createSettingsBg() { 
 
-    const textureSize: Size = AssetsManager.I.getTextureSize("ui", "panelOrange");
+    const textureSize: Size = AssetsManager.I.getTextureSize("panelOrange");
     const aspectRelation: number = textureSize.height / textureSize.width;
-    this.bgSprite = AssetsManager.I.getSprite("ui", "panelOrange");
+    this.bgSprite = AssetsManager.I.getSprite("panelOrange");
 
     this.bgSprite.width = LayoutManager.I.layoutSize.width / 4;
     this.bgSprite.height = this.bgSprite.width * aspectRelation;
@@ -75,7 +75,7 @@ export class SettingsScene implements IScene {
     this.bgSprite.zIndex = 5;
     this.bgSprite.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.height * 0.4);
     
-    this.titleText = AssetsManager.I.getText("Settings", "vcr_osd_mono_blackStroke", 48);
+    this.titleText = AssetsManager.I.getText("VCR OSD Mono", 48);
 
     this.titleText.anchor.set(0.5, 1);
     this.titleText.zIndex = 6;

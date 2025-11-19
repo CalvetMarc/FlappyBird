@@ -20,15 +20,15 @@ export class Toggle extends Container {
     this.iconAssetNameOff = iconAssetNameOff;
     this.iconAssetNameOn = iconAssetNameOn;
     
-    this.labelText = AssetsManager.I.getText(label, "Minecraft", fontSize);
+    this.labelText = AssetsManager.I.getText(label, "VCR OSD Mono", fontSize);
 
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0);
+    this.bgSprite = AssetsManager.I.getSprite("button", 0);
     this.bgSprite.anchor = 0.5;
     this.bgSprite.eventMode = "static";
     this.bgSprite.cursor = "pointer";
     this.bgSprite.setSize(LayoutManager.I.layoutSize.width / 25);
 
-    this.iconSprite = AssetsManager.I.getSprite("ui", this.currentValue ? iconAssetNameOn : iconAssetNameOff, 0);
+    this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? iconAssetNameOn : iconAssetNameOff, 0);
     this.iconSprite.anchor = 0.5;
     this.iconSprite.position = { x: 0, y: -3.5}
     this.iconSprite.scale.set(iconScale);    
@@ -56,7 +56,7 @@ export class Toggle extends Container {
 
   private onPointerDown(){    
     this.currentValue = !this.currentValue;
-    this.iconSprite = AssetsManager.I.getSprite("ui", this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
+    this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
   }
 
   private hexToHue(hex: number): number {
@@ -75,12 +75,12 @@ export class Toggle extends Container {
       else if (max === g) h = (b - r) / delta + 2;
       else h = (r - g) / delta + 4;
 
-      h *= 60; // convertir a graus
+      h *= 60; 
     }
 
     if (h < 0) h += 360;
 
-    return h; // 0–360 graus
+    return h; 
   }
 
 

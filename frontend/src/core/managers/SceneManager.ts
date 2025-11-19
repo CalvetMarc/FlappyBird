@@ -16,7 +16,7 @@ type SceneClass<T extends IScene = IScene> = new () => T;
 export class SceneManager extends SingletonBase<SceneManager> {
   private current?: IScene;
   private scenePool: Set<IScene> = new Set();
-  public playerIndex = 1;
+  public playerIndex = 0;
 
   private transitions: Record<SceneEvent, () => void>;
 

@@ -9,6 +9,8 @@ import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
 const scrollSpeed = 300;
+const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
+
 
 export class BackgroundController implements IGameObject {
   private background?: Sprite;
@@ -74,7 +76,7 @@ export class BackgroundController implements IGameObject {
     const targetHeight = LayoutManager.I.layoutSize.height * 0.85;
     const targetWidth = targetHeight;
 
-    this.background = AssetsManager.I.getSprite("backgrounds", "noon") as Sprite;
+    this.background = AssetsManager.I.getSprite("bgNoon") as Sprite;
     this.background.width = targetWidth;
     this.background.height = targetHeight;
     this.background.zIndex = LAYERS.BACKGROUND;    
@@ -84,7 +86,7 @@ export class BackgroundController implements IGameObject {
 
   private createGroundPieces() {    
 
-    const textureSize: Size = AssetsManager.I.getTextureSize("tiles", "groundDay", 0);
+    const textureSize: Size = AssetsManager.I.getTextureSize("groundDay", 0);
     const sliceAspectRatio = textureSize.width / textureSize.height;
 
     const sliceHeight = LayoutManager.I.layoutSize.height * 0.15;    
@@ -103,20 +105,19 @@ export class BackgroundController implements IGameObject {
   }
 
   private createRandomPiece(pieceRectangle: Rectangle): Sprite {
-    const probabilities = [0.3, 0.25, 0.25, 0.2];
     const r = Math.random();
     let cumulative = 0;
     let index = 0;
 
-    for (let i = 0; i < probabilities.length; i++) {
-      cumulative += probabilities[i];
+    for (let i = 0; i < groundTileSpawnProbabilities.length; i++) {
+      cumulative += groundTileSpawnProbabilities[i];
       if (r < cumulative) {
         index = i;
         break;
       }
     }
 
-    const piece = AssetsManager.I.getSprite("tiles", "groundDay", index);
+    const piece = AssetsManager.I.getSprite("groundDay", index);
     piece.position.set(pieceRectangle.x, pieceRectangle.y);
     piece.scale.set(pieceRectangle.width  / piece.texture.width, pieceRectangle.height / piece.texture.height);
     piece.zIndex = LAYERS.GROUND;

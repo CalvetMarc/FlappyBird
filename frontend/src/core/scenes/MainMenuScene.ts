@@ -44,7 +44,7 @@ export class MainMenuScene implements IScene {
       text: 'Hello Pixi!',
       style: {
         fontFamily: 'VCR OSD Mono', // Name from .fnt file
-        fontSize: 48,
+        fontSize: 102,
         fill: 0xff1010,
         align: 'center',
       }
@@ -88,7 +88,7 @@ export class MainMenuScene implements IScene {
   }
 
   private createLogo() {
-    this.logo = AssetsManager.I.getSprite("ui", "logo", 0);
+    this.logo = AssetsManager.I.getSprite("logo", 0);
     this.logoBaseW = this.logo.texture.width;
 
     const scale = (LayoutManager.I.layoutSize.width / 3) / this.logoBaseW;
@@ -119,7 +119,7 @@ export class MainMenuScene implements IScene {
   };
 
   private createBird() {
-    this.bird = AssetsManager.I.getSprite("characters", "bird" + (SceneManager.I.playerIndex + 1).toString(), 0);
+    this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0);
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 12;
 
@@ -134,12 +134,12 @@ export class MainMenuScene implements IScene {
 
     this.nextBtn = new Button(1.5, "smallArrow", () => {
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex + 1) % 7;
-      this.bird = AssetsManager.I.getSprite("characters", "bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    }, 0x4b5320, true, 0, 2);
+      this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
+    }, 0xffffff, true, 0, 2);
     this.prevBtn = new Button(1.5, "smallArrow", () => {     
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex - 1 + 7) % 7;
-      this.bird = AssetsManager.I.getSprite("characters", "bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    }, 0x4b5320, true, Math.PI, 2);
+      this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
+    }, 0xffffff, true, Math.PI, 2);
 
     this.prevBtn.position = {x: this.bird.position.x - distFromCenter, y: this.bird.position.y * 1.008};
     this.nextBtn.position = {x: this.bird.position.x + distFromCenter, y: this.bird.position.y * 1.008};    

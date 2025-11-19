@@ -14,13 +14,13 @@ export class Button extends Container {
   constructor(buttonScale: number, iconAssetName: string,callback: () => void, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
 
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0);
+    this.bgSprite = AssetsManager.I.getSprite("button", 0);
     this.bgSprite.anchor = 0.5;
     this.bgSprite.eventMode = "static";
     this.bgSprite.cursor = "pointer";
     this.bgSprite.setSize(LayoutManager.I.layoutSize.width / 25);
 
-    this.iconSprite = AssetsManager.I.getSprite("ui", iconAssetName, 0);
+    this.iconSprite = AssetsManager.I.getSprite(iconAssetName, 0);
     this.iconSprite.anchor = 0.5;
     this.iconSprite.position = { x: 0, y: -3.5}
     this.iconSprite.scale.set(iconScale);    
@@ -53,29 +53,29 @@ export class Button extends Container {
   private onPointerDown(){
     this.scale.set(this.initScale * 0.9);
     if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 1, this.iconSprite);
+      this.iconSprite = AssetsManager.I.getSprite(this.iconName, 1, this.iconSprite);
     }
     this.iconSprite.position = { x: 0, y: -1.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 2, this.bgSprite);
+    this.bgSprite = AssetsManager.I.getSprite("button", 2, this.bgSprite);
   }
 
   private onPointerUp(callback: () => void){
     this.scale.set(this.initScale);
     if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 0, this.iconSprite);
+      this.iconSprite = AssetsManager.I.getSprite(this.iconName, 0, this.iconSprite);
     }
     this.iconSprite.position = { x: 0, y: -3.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0, this.bgSprite);
+    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);
     setTimeout(() => callback(), 40);
   }
 
   private onPointerUpOutside(){
     this.scale.set(this.initScale);
     if(!this.iconIsOneFrame){
-      this.iconSprite = AssetsManager.I.getSprite("ui", this.iconName, 0, this.iconSprite);
+      this.iconSprite = AssetsManager.I.getSprite(this.iconName, 0, this.iconSprite);
     }
     this.iconSprite.position = { x: 0, y: -3.5}
-    this.bgSprite = AssetsManager.I.getSprite("ui", "button", 0, this.bgSprite);
+    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);
   }
 
   private hexToHue(hex: number): number {
@@ -94,12 +94,12 @@ export class Button extends Container {
       else if (max === g) h = (b - r) / delta + 2;
       else h = (r - g) / delta + 4;
 
-      h *= 60; // convertir a graus
+      h *= 60; 
     }
 
     if (h < 0) h += 360;
 
-    return h; // 0–360 graus
+    return h; 
   }
 
 

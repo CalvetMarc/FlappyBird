@@ -1,5 +1,5 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
-import { Sprite, Texture, Assets, Rectangle, Size, BitmapText, BitmapFont } from "pixi.js";
+import { Sprite, Texture, Assets, Rectangle, Size, BitmapText } from "pixi.js";
 
 import { manifest } from "../../assets";
 import { SpritePool } from "../objects/SpritePool";
@@ -19,61 +19,61 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
   public async start(): Promise<void> {
     await Assets.init({ manifest });
 
-    for (const bundle of manifest.bundles) {
-      const loaded = await Assets.loadBundle(bundle.name);
-      const assetsDef = bundle.assets as Record<string, any>;
+    const texturesBundle = manifest.bundles.find(b => b.name === "textures");
+    if (!texturesBundle) {
+      throw new Error('Bundle "textures" not found in manifest.');
+    }
 
-      for (const assetName in loaded) {
-        const entry = loaded[assetName];
-        const def = assetsDef[assetName];
-        const key = `${bundle.name}/${assetName}`;
+    const loaded = await Assets.loadBundle("textures");
+    const assetsDef = texturesBundle.assets as Record<string, any>;
 
-        if (typeof entry === "string") continue;
+    for (const assetName in loaded) {
+      const entry = loaded[assetName];
+      const def = assetsDef[assetName];
+      const key = assetName; 
 
-        if (entry instanceof Texture) {
-          let frames: Texture[] = [];
+      // Skip non-textures
+      if (typeof entry === "string") continue;
+      if (!(entry instanceof Texture)) continue;
 
-          if (def?.frames) {
-            frames = def.frames.map((f: any) =>
-              new Texture({
-                source: entry.baseTexture,
-                frame: new Rectangle(f.x, f.y, f.w, f.h)
-              })
-            );
-          } else {
-            frames = [entry];
-          }
+      let frames: Texture[] = [];
 
-          this.textures.set(key, frames);
-        }
+      // Build animation frames
+      if (def?.frames) {
+        frames = def.frames.map((f: any) =>
+          new Texture({
+            source: entry.source, 
+            frame: new Rectangle(f.x, f.y, f.w, f.h),
+          })
+        );
+      } else {
+        frames = [entry];
       }
+
+      this.textures.set(key, frames);
     }
   }
 
-  public getSprite(bundle: string, asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {
-    const key = `${bundle}/${asset}`;
-    const frames = this.textures.get(key);
-    if (!frames) throw new Error(`Frames not found for asset: ${key}`);
+  // ---------- SPRITE ----------
+  public getSprite(asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {
+    const frames = this.textures.get(asset);
+    if (!frames) throw new Error(`Frames not found for asset: textures/${asset}`);
 
-    if (!sprite) {
-      return this.spritePool.getForTexture(frames[frame]);
-    }
+    if (!sprite) return this.spritePool.getForTexture(frames[frame]);
 
     sprite.texture = frames[frame];
     return sprite;
   }
 
-  public getFrameCount(bundle: string, asset: string): number {
-    const key = `${bundle}/${asset}`;
-    const frames = this.textures.get(key);
-    if (!frames) throw new Error(`Frames not found for asset: ${key}`);
+  public getFrameCount(asset: string): number {
+    const frames = this.textures.get(asset);
+    if (!frames) throw new Error(`Frames not found for asset: textures/${asset}`);
     return frames.length;
   }
 
-  public getTextureSize(bundle: string, asset: string, frame: number = 0): Size {
-    const key = `${bundle}/${asset}`;
-    const frames = this.textures.get(key);
-    if (!frames) throw new Error(`Frames not found for asset: ${key}`);
+  public getTextureSize(asset: string, frame: number = 0): Size {
+    const frames = this.textures.get(asset);
+    if (!frames) throw new Error(`Frames not found for asset: textures/${asset}`);
 
     const tex = frames[frame];
     return { width: tex.width, height: tex.height };
@@ -83,6 +83,7 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     this.spritePool.release(sprite);
   }
 
+  // ---------- BITMAP TEXT ----------
   public getText(text: string, font: string, size: number = 32): BitmapText {
     return this.textPool.getForFont(text, font, size);
   }
