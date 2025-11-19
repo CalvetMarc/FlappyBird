@@ -86,7 +86,7 @@ export class SettingsScene implements IScene {
     this.titleBgSprite.rotation = -Math.PI * 0.5;
     this.titleBgSprite.anchor.set(0.5);
     this.titleBgSprite.zIndex = 5;
-    this.titleBgSprite.position.set(-40, 0);
+    this.titleBgSprite.position.set(-39, 0);
     
     this.titleText = AssetsManager.I.getText("Settings", "vcrHeavy", 9.5);
     this.titleText.anchor.set(0.5);
@@ -109,14 +109,14 @@ export class SettingsScene implements IScene {
     this.dayCycleToggle = new Toggle("Day Cycle", "bigTick", "bigCross", 1, 7);
     this.bgSprite.addChild(this.dayCycleToggle);
     this.dayCycleToggle.rotation = -Math.PI * 0.5;
-    this.dayCycleToggle.position.set(5, 0);
+    this.dayCycleToggle.position.set(8, 0);
     this.dayCycleToggle.scale.set(0.95);
 
 
     this.speedProgToggle = new Toggle("Speed Ramp", "bigTick", "bigCross", 1, 7, false);
     this.bgSprite.addChild(this.speedProgToggle);
     this.speedProgToggle.rotation = -Math.PI * 0.5;
-    this.speedProgToggle.position.set(22, 0);
+    this.speedProgToggle.position.set(28, 0);
     this.speedProgToggle.scale.set(0.95);    
   }
 
