@@ -12,6 +12,7 @@ import { LayoutManager } from "../managers/LayoutManager";
 export class SettingsScene implements IScene {
   private titleText!: BitmapText;
   private bgSprite!: Sprite;
+  private titleBgSprite!: Sprite;
   
   private audioToggle!: Toggle;
   private dayCycleToggle!: Toggle;
@@ -57,47 +58,66 @@ export class SettingsScene implements IScene {
   /** 🧩 Carrega textures igual que al MainMenuScene */
   private async loadAssets() {
     this.createSettingsBg();
-    //this.createToggles();
+    this.createToggles();
     //this.createButton();
   }
 
 
   private createSettingsBg() { 
+    const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelGrey");
+    const aspectRelationBg: number = textureBgSize.width / textureBgSize.height;
+    this.bgSprite = AssetsManager.I.getSprite("bigPanelGrey");
 
-    const textureSize: Size = AssetsManager.I.getTextureSize("panelOrange");
-    const aspectRelation: number = textureSize.height / textureSize.width;
-    this.bgSprite = AssetsManager.I.getSprite("panelOrange");
-
-    this.bgSprite.width = LayoutManager.I.layoutSize.width / 4;
-    this.bgSprite.height = this.bgSprite.width * aspectRelation;
-    this.bgSprite.rotation = Math.PI/2;
+    this.bgSprite.height = LayoutManager.I.layoutSize.height * 0.5;
+    this.bgSprite.width = this.bgSprite.height * aspectRelationBg;
+    this.bgSprite.rotation = Math.PI * 0.5;
     this.bgSprite.anchor.set(0.5);
     this.bgSprite.zIndex = 5;
-    this.bgSprite.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.height * 0.4);
+    this.bgSprite.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.height * 0.43);
+
+    const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
+    const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;
+    this.titleBgSprite = AssetsManager.I.getSprite("title1up");
+
+    const width = this.titleBgSprite.width * 1.1;
+    const height = width * aspectRelationTitleBg;
+    this.titleBgSprite.width = width;
+    this.titleBgSprite.height = height;
+    this.titleBgSprite.rotation = -Math.PI * 0.5;
+    this.titleBgSprite.anchor.set(0.5);
+    this.titleBgSprite.zIndex = 5;
+    this.titleBgSprite.position.set(-40, 0);
     
-    this.titleText = AssetsManager.I.getText("VCR OSD Mono", 48);
-
-    this.titleText.anchor.set(0.5, 1);
+    this.titleText = AssetsManager.I.getText("Settings", "vcrHeavy", 9.5);
+    this.titleText.anchor.set(0.5);
     this.titleText.zIndex = 6;
-    this.titleText.position.set(this.bgSprite.x, this.bgSprite.y - (this.bgSprite.height * 0.5 * 0.76));
-
-    this.bgSprite.addChild(this.titleText)
+    this.titleText.position.set(0.5, -3);
+    this.titleText.tint = 0xC0C0C0;
+    
+    this.titleBgSprite.addChild(this.titleText);
+    this.bgSprite.addChild(this.titleBgSprite);    
     this.containerUi.addChild(this.bgSprite);
   }
 
-  /* 🟩 Crea i afegeix els tres toggles dins del bgSprite */
   private createToggles() {
-    if (!this.bgSprite || !this.toggleOnTex || !this.toggleOffTex) return;
+    this.audioToggle = new Toggle("Audio", "bigTick", "bigCross", 1, 7);
+    this.bgSprite.addChild(this.audioToggle);
+    this.audioToggle.rotation = -Math.PI * 0.5;
+    this.audioToggle.position.set(-12, 0);
+    this.audioToggle.scale.set(0.95);
 
-    this.audioToggle = new ToggleSwitch("Audio", this.toggleOnTex, this.toggleOffTex, true, this.bgSprite, 0);
-    this.dayCycleToggle = new ToggleSwitch("Day Cycle", this.toggleOnTex, this.toggleOffTex, true, this.bgSprite, 1);
-    this.speedProgToggle = new ToggleSwitch("Speed Progression", this.toggleOnTex, this.toggleOffTex, false, this.bgSprite, 2);
+    this.dayCycleToggle = new Toggle("Day Cycle", "bigTick", "bigCross", 1, 7);
+    this.bgSprite.addChild(this.dayCycleToggle);
+    this.dayCycleToggle.rotation = -Math.PI * 0.5;
+    this.dayCycleToggle.position.set(5, 0);
+    this.dayCycleToggle.scale.set(0.95);
 
-    this.audioToggle.zIndex = 7;
-    this.dayCycleToggle.zIndex = 7;
-    this.speedProgToggle.zIndex = 7;
 
-    this.container.addChild(this.audioToggle, this.dayCycleToggle, this.speedProgToggle);
+    this.speedProgToggle = new Toggle("Speed Ramp", "bigTick", "bigCross", 1, 7, false);
+    this.bgSprite.addChild(this.speedProgToggle);
+    this.speedProgToggle.rotation = -Math.PI * 0.5;
+    this.speedProgToggle.position.set(22, 0);
+    this.speedProgToggle.scale.set(0.95);    
   }
 
   private createButton() {

@@ -19,30 +19,32 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
   public async start(): Promise<void> {
     await Assets.init({ manifest });
 
+    for (const bundle of manifest.bundles) {
+      await Assets.loadBundle(bundle.name);
+    }
+
     const texturesBundle = manifest.bundles.find(b => b.name === "textures");
     if (!texturesBundle) {
       throw new Error('Bundle "textures" not found in manifest.');
     }
 
-    const loaded = await Assets.loadBundle("textures");
+    const loadedTextures = await Assets.loadBundle("textures");
     const assetsDef = texturesBundle.assets as Record<string, any>;
 
-    for (const assetName in loaded) {
-      const entry = loaded[assetName];
+    for (const assetName in loadedTextures) {
+      const entry = loadedTextures[assetName];
       const def = assetsDef[assetName];
-      const key = assetName; 
+      const key = assetName;
 
-      // Skip non-textures
       if (typeof entry === "string") continue;
       if (!(entry instanceof Texture)) continue;
 
       let frames: Texture[] = [];
 
-      // Build animation frames
       if (def?.frames) {
         frames = def.frames.map((f: any) =>
           new Texture({
-            source: entry.source, 
+            source: entry.source,
             frame: new Rectangle(f.x, f.y, f.w, f.h),
           })
         );

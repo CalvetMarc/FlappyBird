@@ -6,13 +6,16 @@ const debug = false;
 
 export class Toggle extends Container {
   private bgSprite: Sprite;
+  private labelBgSprite: Sprite;
+
   private iconAssetNameOn: string;
   private iconAssetNameOff: string;
   private iconSprite: Sprite;  
   private currentValue: boolean;
   private labelText: BitmapText;
 
-  constructor(label: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
+  constructor(label: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, 
+    textTintHex: number = 0x222222, boolean = false, iconRotationRadians: number = 0, iconScale: number = 2) {
     super();
 
     this.currentValue = initValue; 
@@ -20,30 +23,41 @@ export class Toggle extends Container {
     this.iconAssetNameOff = iconAssetNameOff;
     this.iconAssetNameOn = iconAssetNameOn;
     
-    this.labelText = AssetsManager.I.getText(label, "VCR OSD Mono", fontSize);
+    this.labelBgSprite = AssetsManager.I.getSprite("title2up", 0);
+    this.labelBgSprite.anchor = 0.5;
+    this.labelBgSprite.scale.y = 0.7;
+    this.labelBgSprite.zIndex = 1;
 
-    this.bgSprite = AssetsManager.I.getSprite("button", 0);
+    this.labelText = AssetsManager.I.getText(label, "vcrBase", fontSize);
+    this.labelText.anchor.set(0, 0.5);
+    this.labelText.tint = textTintHex;    
+    this.labelText.zIndex = 2;  
+    this.labelText.scale.y = 2 - this.labelBgSprite.scale.y;
+    this.labelText.position.set(this.labelBgSprite.width * -0.41, -2);
+
+
+    this.bgSprite = AssetsManager.I.getSprite("smallPanelGrey2", 0);
     this.bgSprite.anchor = 0.5;
+    this.bgSprite.scale.set(fontSize / 30);
     this.bgSprite.eventMode = "static";
     this.bgSprite.cursor = "pointer";
-    this.bgSprite.setSize(LayoutManager.I.layoutSize.width / 25);
+    this.bgSprite.position.set(this.labelBgSprite.width * 0.38, -1);    
+    this.bgSprite.zIndex = 2;
 
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? iconAssetNameOn : iconAssetNameOff, 0);
     this.iconSprite.anchor = 0.5;
-    this.iconSprite.position = { x: 0, y: -3.5}
     this.iconSprite.scale.set(iconScale);    
+    this.iconSprite.zIndex = 3;
 
-    const hue = this.hexToHue(iconTintHex);
     const filter = new ColorMatrixFilter();
-    filter.hue(hue, false);
     this.iconSprite.filters = [filter];
     
     this.iconSprite.rotation = iconRotationRadians;
 
     this.bgSprite.addChild(this.iconSprite);
-    this.labelText.addChild(this.bgSprite);
-    this.bgSprite.position.x = this.labelText.width + LayoutManager.I.layoutSize.width * 0.1;
-    this.addChild(this.labelText);
+    this.addChild(this.bgSprite);
+    this.labelBgSprite.addChild(this.labelText);
+    this.addChild(this.labelBgSprite);
 
     this.bgSprite.on("pointerdown", () => this.onPointerDown());
 
@@ -58,31 +72,6 @@ export class Toggle extends Container {
     this.currentValue = !this.currentValue;
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
   }
-
-  private hexToHue(hex: number): number {
-    const r = ((hex >> 16) & 0xff) / 255;
-    const g = ((hex >> 8) & 0xff) / 255;
-    const b = (hex & 0xff) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const delta = max - min;
-
-    let h = 0;
-
-    if (delta !== 0) {
-      if (max === r) h = ((g - b) / delta) % 6;
-      else if (max === g) h = (b - r) / delta + 2;
-      else h = (r - g) / delta + 4;
-
-      h *= 60; 
-    }
-
-    if (h < 0) h += 360;
-
-    return h; 
-  }
-
 
   private debugBounds(){
     const box = new Graphics().rect(-this.iconSprite.width * 0.5, -this.iconSprite.height * 0.5, this.iconSprite.width, this.iconSprite.height).stroke({ color: 0xff00ff, width: 2 });

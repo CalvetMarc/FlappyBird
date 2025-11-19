@@ -176,11 +176,11 @@ export const manifest: AssetsManifest = {
 
         bigTick: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
-          frames: [{ x: 352, y: 128, w: 32, h: 32 }]
+          frames: [{ x: 352.5, y: 128, w: 32, h: 32 }]
         },
         bigCross: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
-          frames: [{ x: 384, y: 128, w: 32, h: 32 }]
+          frames: [{ x: 383.5, y: 128, w: 32, h: 32 }]
         },
         bigArrow: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
@@ -238,17 +238,55 @@ export const manifest: AssetsManifest = {
           ]
         },
 
-        panelGrey: {
+        bigPanelGrey: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 32, y: 32, w: 96, h: 64 }]
         },
-        panelBlue: {
+        midPanelGrey: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 32, y: 96, w: 64, h: 32 }]
+        },
+        smallPanelGrey: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 32, y: 128, w: 32, h: 32 }]
+        },
+        smallPanelGrey2: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 32, y: 160, w: 32, h: 32 }]
+        },
+
+        bigPanelBlue: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 128, y: 32, w: 96, h: 64 }]
         },
-        panelOrange: {
+        midPanelBlue: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 128, y: 96, w: 64, h: 32 }]
+        },
+        smallPanelBlue: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 128, y: 128, w: 32, h: 32 }]
+        },
+        smallPanelBlue2: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 128, y: 160, w: 32, h: 32 }]
+        },
+
+        bigPanelOrange: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 224, y: 32, w: 96, h: 64 }]
+        },
+        midPanelOrange: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 224, y: 96, w: 64, h: 32 }]
+        },
+        smallPanelOrange: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 224, y: 128, w: 32, h: 32 }]
+        },
+        smallPanelOrange2: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 224, y: 160, w: 32, h: 32 }]
         },
 
         textPage: {
@@ -281,7 +319,13 @@ export const manifest: AssetsManifest = {
       name: "fonts",
       assets: {
         vcrBase: {
-          src: "/assets/fonts/vcr_osd_mono/vcr_osd_mono.fnt"
+          src: "/assets/fonts/vcr_osd_mono_noStroke/vcr_osd_mono_noStroke.fnt"
+        },
+        vcrLight: {
+          src: "/assets/fonts/vcr_osd_mono_lightStroke/vcr_osd_mono_lightStroke.fnt"
+        },
+        vcrHeavy: {
+          src: "/assets/fonts/vcr_osd_mono_heavyStroke/vcr_osd_mono_heavyStroke.fnt"
         }
       }
     },

@@ -39,17 +39,7 @@ export class MainMenuScene implements IScene {
   }
 
   public async onInit(): Promise<void> {
-
-    const loadedFontText = new BitmapText({
-      text: 'Hello Pixi!',
-      style: {
-        fontFamily: 'VCR OSD Mono', // Name from .fnt file
-        fontSize: 102,
-        fill: 0xff1010,
-        align: 'center',
-      }
-    });
-    this.containerUi.addChild(loadedFontText);
+   
     this.createLogo();
     this.createButtons();
     this.createBird();
