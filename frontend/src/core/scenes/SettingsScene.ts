@@ -6,6 +6,7 @@ import { TweenManager, Tween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";
 import { AssetsManager } from "../managers/AssetsManager";
 import { Toggle } from "../objects/UI/Toggle"
+import { Button } from "../objects/UI/Button";
 import { LayoutManager } from "../managers/LayoutManager";
 
 
@@ -13,6 +14,7 @@ export class SettingsScene implements IScene {
   private titleText!: BitmapText;
   private bgSprite!: Sprite;
   private titleBgSprite!: Sprite;
+  private closeBtn!: Button;
   
   private audioToggle!: Toggle;
   private dayCycleToggle!: Toggle;
@@ -45,7 +47,6 @@ export class SettingsScene implements IScene {
   public async onExit(): Promise<void> {
     await new Promise<void>((resolve) => {
       this.fadeTo(0, 400, 0, () => {
-         //GameManager.I.app.stage.removeChild(this.container);
         resolve();
       });
     });
@@ -55,11 +56,10 @@ export class SettingsScene implements IScene {
     //TODO
   }
 
-  /** 🧩 Carrega textures igual que al MainMenuScene */
   private async loadAssets() {
     this.createSettingsBg();
     this.createToggles();
-    //this.createButton();
+    this.createButton();
   }
 
 
@@ -103,57 +103,30 @@ export class SettingsScene implements IScene {
     this.audioToggle = new Toggle("Audio", "bigTick", "bigCross", 1, 7);
     this.bgSprite.addChild(this.audioToggle);
     this.audioToggle.rotation = -Math.PI * 0.5;
-    this.audioToggle.position.set(-12, 0);
+    this.audioToggle.position.set(-15, 0);
     this.audioToggle.scale.set(0.95);
 
     this.dayCycleToggle = new Toggle("Day Cycle", "bigTick", "bigCross", 1, 7);
     this.bgSprite.addChild(this.dayCycleToggle);
     this.dayCycleToggle.rotation = -Math.PI * 0.5;
-    this.dayCycleToggle.position.set(8, 0);
+    this.dayCycleToggle.position.set(3, 0);
     this.dayCycleToggle.scale.set(0.95);
 
 
     this.speedProgToggle = new Toggle("Speed Ramp", "bigTick", "bigCross", 1, 7, false);
     this.bgSprite.addChild(this.speedProgToggle);
     this.speedProgToggle.rotation = -Math.PI * 0.5;
-    this.speedProgToggle.position.set(28, 0);
+    this.speedProgToggle.position.set(21, 0);
     this.speedProgToggle.scale.set(0.95);    
   }
 
   private createButton() {
-    if (!this.normalTex || !this.pressedTex) return;
 
-    const screenW = GameManager.I.app.renderer.width;
-    const screenH = GameManager.I.app.renderer.height;    
-    
-    const btn = AssetsManager.I.getSprite("ui", "button", 0);
-    btn.anchor.set(0.5);
-    btn.zIndex = 10;
-   
-    btn.scale.set((BackgroundManager.I.bgRect.width / 10) / btn.width);
-    btn.position.set(screenW / 2, screenH / 1.3);
-    btn.eventMode = "static";
-    btn.cursor = "pointer";
+    this.closeBtn = new Button(0.35, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn.position.x = 40;
+    this.closeBtn.rotation = -Math.PI * 0.5;
 
-    btn.on("pointerdown", () => {
-      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15 * 0.9);
-      btn.texture = this.pressedTex!;
-    });
-
-    btn.on("pointerup", () => {
-      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
-      btn.texture = this.normalTex!;
-      setTimeout(() => SceneManager.I.fire("menu"), 80);
-    });
-
-    btn.on("pointerupoutside", () => {
-      btn.scale.set((BackgroundManager.I.bgRect.width / 10) / 15);
-      btn.texture = this.normalTex!;
-    });
-
-    this.baseY = btn.y;
-    this.container.addChild(btn);
-    this.button = btn;
+    this.bgSprite.addChild(this.closeBtn);
   }
 
   private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {

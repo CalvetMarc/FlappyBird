@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, Rectangle, Assets, Graphics, Size, ObservablePoint, Point } from "pixi.js";
+import { Container, Sprite, Texture, Rectangle, Assets, Graphics, Size, ObservablePoint, Point, Bounds } from "pixi.js";
 import { LAYERS } from "../../abstractions/IScene";
 import { SingletonBase } from "../../abstractions/SingletonBase";
 import { IGameObject } from "../../abstractions/IGameObject"; 
@@ -71,6 +71,12 @@ export class BackgroundController implements IGameObject {
   public setScrolling(scrolling: boolean) {
     this.scrolling = scrolling;
   } 
+
+  public get groundBounds(): Bounds | undefined{
+    if(this.groundPieces.length <= 0) return undefined;
+
+    return new Bounds(this.groundPieces[0].x, this.groundPieces[0].y, this.groundPieces[0].width * this.groundPieces.length, this.groundPieces[0].height);
+  }
 
   private createBackground() {
     const targetHeight = LayoutManager.I.layoutSize.height * 0.85;

@@ -3,6 +3,8 @@ import { LAYERS } from "../../abstractions/IScene";
 import { IGameObject } from "../../abstractions/IGameObject";
 import { Milliseconds } from "../../time/TimeUnits";
 import pipeUrl from "../../../../public/assets/tiles/SimpleStyle1.png"
+import { LayoutManager } from "../../managers/LayoutManager";
+import { AssetsManager } from "../../managers/AssetsManager";
 
 interface Obstacle {
   upPipe: Sprite[];
@@ -14,7 +16,6 @@ interface Obstacle {
 }
 
 export class PipesController implements IGameObject{  
-  private pipeTextures: Texture[] = [];
   private gamePipes: Obstacle[] = [];
 
   private pipeSpeed = 0.2;
@@ -25,23 +26,15 @@ export class PipesController implements IGameObject{
 
   private move!: boolean;
 
-  public container = new Container();
+  public container :Container;
 
   constructor(){
+    this.container = new Container();
+    this.container.sortableChildren = true;
+    this.container.zIndex = LAYERS.PIPES;
   } 
 
   public async onCreate(): Promise<void>{
-    this.container.sortableChildren = true;
-    this.container.zIndex = LAYERS.PIPES;
-    this.pipeTextures = [];
-
-    const pipeTex = await Assets.load(pipeUrl);
-
-    for (let i = 0; i < 5; i++) {
-      this.pipeTextures.push(
-        new Texture({ source: pipeTex.source, frame: new Rectangle(0, i * 16, 32, 16) })
-      );
-    }
 
     this.gamePipes = [];
     this.pipeTimer = 0;
@@ -64,11 +57,11 @@ export class PipesController implements IGameObject{
 
     for (const obstacle of this.gamePipes) {
       for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
-        sprite.x -= this.pipeSpeed * deltaSeconds * BackgroundManager.I.bgRect.width;
+        sprite.x -= this.pipeSpeed * deltaSeconds * LayoutManager.I.layoutSize.width;
       }
     }
 
-    const leftLimit = BackgroundManager.I.bgRect.x - BackgroundManager.I.bgRect.width / 2;
+    const leftLimit = LayoutManager.I.layoutBounds.minX;
 
     this.gamePipes = this.gamePipes.filter((obstacle) => {
       const visible = [...obstacle.upPipe, ...obstacle.downPipe].some(
@@ -86,39 +79,7 @@ export class PipesController implements IGameObject{
   }
 
   public async onDestroy(): Promise<void> {
-      
-  }
-
-  public onResize(width: number, height: number): void {
-    const pipeTileHeight = BackgroundManager.I.bgRect.height / this.maxPipeTiles;
-    const pipeTileWidth = (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
-
-    const startX = BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width;
-    const endX =   BackgroundManager.I.bgRect.x - pipeTileWidth / 2;
-
-    for (const obstacle of this.obstacles) {
-      const normalizedMovementDone = (obstacle.upPipe[0].position.x - obstacle.endX) / (obstacle.startX - obstacle.endX);
-
-      const proportionalCurrentPositionX = endX + ((startX - endX) * normalizedMovementDone);
-
-      const startIndex = obstacle.upPipe.length - 1;
-      for (let i = 0; i < obstacle.upPipe.length; i++) {
-        obstacle.upPipe[i].position.x = proportionalCurrentPositionX;
-        obstacle.upPipe[i].position.y = pipeTileHeight * (startIndex - i);
-        obstacle.upPipe[i].width = pipeTileWidth;
-        obstacle.upPipe[i].height = pipeTileHeight;
-      }
-
-      for (let i = 0; i < obstacle.downPipe.length; i++) {
-        obstacle.downPipe[i].position.x = proportionalCurrentPositionX;
-        obstacle.downPipe[i].position.y = pipeTileHeight * (this.maxPipeTiles - ((obstacle.downPipe.length - 1) - i) - 1);
-        obstacle.downPipe[i].width = pipeTileWidth;
-        obstacle.downPipe[i].height = pipeTileHeight;
-      }
-
-      obstacle.startX = startX;
-      obstacle.endX = endX;
-    }
+      //Todo
   }
 
  public setScroll(move: boolean){
@@ -134,32 +95,35 @@ export class PipesController implements IGameObject{
   }  
 
   private CreateObstacle() {
-    const pipeTileHeight = BackgroundManager.I.bgRect.height / this.maxPipeTiles;
-    const pipeTileWidth = (this.pipeTextures[0].width / this.pipeTextures[0].height) * pipeTileHeight;
+    const pipeTileSize = AssetsManager.I.getTextureSize("greenPipe");
+    const aspectRelationPipeTile = pipeTileSize.width / pipeTileSize.height;
+    
+    const pipeTileHeight = LayoutManager.I.layoutSize.height / this.maxPipeTiles;
+    const pipeTileWidth = pipeTileHeight * pipeTileHeight;
 
     const gapSlot = this.randomInteger(this.bottomTopTilesGapMargin + 1, this.maxPipeTiles - this.bottomTopTilesGapMargin + 1);
-    const startX = BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width;
+    const startX =  LayoutManager.I.layoutBounds.maxX;
 
     const upPipe: Sprite[] = [];
     const downPipe: Sprite[] = [];
 
-    upPipe.push(this.makePipe(this.pipeTextures[4], startX, pipeTileHeight * (gapSlot - 3), pipeTileWidth, pipeTileHeight));
-    upPipe.push(this.makePipe(this.pipeTextures[3], startX, pipeTileHeight * (gapSlot - 4), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe("greenPipe", 4, startX, pipeTileHeight * (gapSlot - 3), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe("greenPipe", 3, startX, pipeTileHeight * (gapSlot - 4), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot - 4; i > 0; i--) {
-      upPipe.push(this.makePipe(this.pipeTextures[2], startX, pipeTileHeight * (i - 1), pipeTileWidth, pipeTileHeight));
+      upPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i - 1), pipeTileWidth, pipeTileHeight));
     }
 
-    downPipe.push(this.makePipe(this.pipeTextures[0], startX, pipeTileHeight * (gapSlot + 2), pipeTileWidth, pipeTileHeight));
-    downPipe.push(this.makePipe(this.pipeTextures[1], startX, pipeTileHeight * (gapSlot + 3), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe("greenPipe", 0, startX, pipeTileHeight * (gapSlot + 2), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe("greenPipe", 1, startX, pipeTileHeight * (gapSlot + 3), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot + 3; i < this.maxPipeTiles - 1; i++) {
-      downPipe.push(this.makePipe(this.pipeTextures[2], startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
+      downPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
 
-    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot, scored: false, startX: startX, endX: BackgroundManager.I.bgRect.x - (pipeTileWidth / 2) });
+    this.gamePipes.push({ upPipe, downPipe, gap: gapSlot, scored: false, startX: startX, endX: LayoutManager.I.layoutBounds.minX });
   }
 
-  private makePipe(tex: Texture, x: number, y: number, w: number, h: number): Sprite {
-    const sprite = new Sprite(tex);
+  private makePipe(asset: string, frame: number, x: number, y: number, w: number, h: number): Sprite {
+    const sprite = AssetsManager.I.getSprite(asset, frame);
     sprite.width = w;
     sprite.height = h;
     sprite.position.set(x, y);

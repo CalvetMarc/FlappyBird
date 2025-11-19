@@ -1,4 +1,4 @@
-import { Container, Rectangle, Text, TextStyle } from "pixi.js";
+import { Container, Rectangle, BitmapText, TextStyle } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { PipesController } from "../objects/Game/PipesController";
 import { CharacterController } from "../objects/Game/CharacterController";
@@ -7,58 +7,64 @@ import { Milliseconds, ms, s } from "../time/TimeUnits";
 import { GameManager } from "../managers/GameManager";
 import { startSession } from "../../SessionManager";
 import { SceneManager } from "../managers/SceneManager";
+import { LayoutManager } from "../managers/LayoutManager";
+import { AssetsManager } from "../managers/AssetsManager";
 
 export class GameScene implements IScene {
-  private scoreText?: Text; 
+  private scoreText!: BitmapText; 
   private score: number = 0;     
-  private pipesController!: PipesController;  
+  private pipesController!: PipesController;   
   private characterController!: CharacterController;
   
   public containerGame: Container;
   public containerUi: Container;
   
   public constructor() {
-    this.container.sortableChildren = true;    
+    this.containerGame = new Container();
+    this.containerUi = new Container();
+    this.containerGame.sortableChildren = true;    
+    this.containerUi.sortableChildren = true;
   }
 
   public async onInit(): Promise<void> {
+    /*
     const ok = await startSession();
     if (!ok) {
       console.error("No s'ha pogut iniciar la sessió amb el backend");
       return;
-    }
-
-    this.pipesController = new PipesController();
-    this.characterController = new CharacterController();
-    await Promise.all([this.pipesController.onCreate(), this.characterController.onCreate(), this.createScoreText()]);
-
-    BackgroundManager.I.container.addChild(this.pipesController.container);
-    BackgroundManager.I.container.addChild(this.characterController.container);
-
+    }*/
+   this.pipesController = new PipesController();
+   this.characterController = new CharacterController();
+   await Promise.all([this.pipesController.onCreate(), this.characterController.onCreate(), this.createScoreText()]);
+   
+   this.containerGame.addChild(this.pipesController.container);
+   this.containerGame.addChild(this.characterController.container);
     this.pipesController.setScroll(true);
   }
 
   public onEnter(): void {
-    this.container.alpha = 0;
+    this.containerUi.alpha = 0;
     const startTime = performance.now();
     const duration = 400;
 
     const fadeIn = (now: number) => {
       const t = Math.min((now - startTime) / duration, 1);
-      this.container.alpha = t;
+      this.containerUi.alpha = t;
       if (t < 1) requestAnimationFrame(fadeIn);
     };
     requestAnimationFrame(fadeIn);
   }
 
   public onUpdate(dt: Milliseconds): void {
-    this.pipesController.onUpdate(dt);
     this.characterController.onUpdate(dt);
     
     const birdBounds = this.characterController.birdBounds;
     if (!birdBounds) return;
+    this.pipesController.onUpdate(dt);
+    
+    return;
 
-    const groundBounds = BackgroundManager.I.groundBounds;
+    const groundBounds = GameManager.I.backgroundController.groundBounds;
     if (groundBounds) {
       const isTouchingGround =
         birdBounds.y + birdBounds.height >= groundBounds.y &&
@@ -69,7 +75,7 @@ export class GameScene implements IScene {
         this.characterController.groundTouched(groundBounds);
         this.pipesController.setScroll(false);
         GameManager.I.lastScore = this.score;
-        BackgroundManager.I.setScrolling(false);
+        GameManager.I.backgroundController.setScrolling(false);
         SceneManager.I.fire("gameover")
         return;
       }
@@ -95,47 +101,21 @@ export class GameScene implements IScene {
   }
 
   public  async onExit(): Promise<void> {
-    // 🧹 No cal eliminar listeners: CharacterManager ja ho fa
+    // Todo
   }
 
   public async onDestroy(): Promise<void> {
     this.pipesController?.onDestroy();
     this.characterController?.onDestroy();
-    this.scoreText?.destroy();
   }
 
-  public onResize(width: number, height: number): void {
-    this.pipesController.onResize(width, height);
-    this.characterController.onResize(width, height);
-    if(this.scoreText){
-      const screenW = GameManager.I.app.renderer.width;
-      const screenY = GameManager.I.app.renderer.height;
-      this.scoreText.position.set(screenW / 2, screenY * 0.08);
-      this.scoreText.style.fontSize = BackgroundManager.I.bgRect.width / 10;
-      this.scoreText.style.stroke = {color: 0x000000, width: BackgroundManager.I.bgRect.width / 90}
-    }
-  }  
-
   private async createScoreText() {
-    const screenW = GameManager.I.app.renderer.width;
-    const screenY = GameManager.I.app.renderer.height;
+    
+    this.scoreText = AssetsManager.I.getText("0", "vcrHeavy", 32);
+    this.scoreText!.anchor.set(0.5);
+    this.scoreText.position.set(LayoutManager.I.layoutSize.width * 0.5, 0);
 
-    await document.fonts.load('48px "Minecraft"');
-
-    const style = new TextStyle({
-      fontFamily: "Minecraft",
-      fontSize: BackgroundManager.I.bgRect.width / 10,
-      fill: 0xffffff,
-      stroke: { color: 0x000000, width: BackgroundManager.I.bgRect.width / 90 },
-      align: "center",
-    });
-
-    this.scoreText = new Text({ text: "0", style });
-    this.scoreText.anchor.set(0.5);
-    this.scoreText.position.set(screenW / 2, screenY * 0.08);
-    this.scoreText.zIndex = 20;
-
-    this.container.addChild(this.scoreText);
+    this.containerUi.addChild(this.scoreText);
   }
 
   private rectsIntersect(a: Rectangle, b: Rectangle): boolean {
@@ -153,7 +133,7 @@ export class GameScene implements IScene {
     this.score += 1; 
     this.scoreText.text = this.score;       
 
-    TweenManager.I.AddTween(<Tween<Text>>{
+    TweenManager.I.AddTween(<Tween<BitmapText>>{
 
       waitTime: ms(0),
       duration: ms(200),
@@ -165,7 +145,7 @@ export class GameScene implements IScene {
       }
 
     }).chain(
-      TweenManager.I.AddTween(<Tween<Text>>{
+      TweenManager.I.AddTween(<Tween<BitmapText>>{
 
         waitTime: ms(0),
         duration: ms(300),

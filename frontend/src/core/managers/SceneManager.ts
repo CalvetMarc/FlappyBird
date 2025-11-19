@@ -89,8 +89,8 @@ export class SceneManager extends SingletonBase<SceneManager> {
       LayoutManager.I.uiContainer.removeChild(this.current.containerUi);
       if (destroyCurrent) {
         await this.current.onDestroy();
-        this.current.containerGame.destroy({ children: true, texture: true, textureSource: true });
-        this.current.containerUi.destroy({ children: true, texture: true, textureSource: true });
+        this.current.containerGame.destroy({ children: true });
+        this.current.containerUi.destroy({ children: true });
 
       } else {
         this.scenePool.add(this.current);

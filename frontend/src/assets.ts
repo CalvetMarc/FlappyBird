@@ -177,16 +177,16 @@ export const manifest: AssetsManifest = {
         bigTick: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 352.5, y: 128, w: 32, h: 32 }]
+        },        
+        bigArrow: {
+          src: "/assets/ui/Spritesheet_UI_Flat.png",
+          frames: [{ x: 416, y: 128, w: 32, h: 32 }]
         },
         bigCross: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 383.5, y: 128, w: 32, h: 32 }]
         },
-        bigArrow: {
-          src: "/assets/ui/Spritesheet_UI_Flat.png",
-          frames: [{ x: 416, y: 128, w: 32, h: 32 }]
-        },
-
+        
         smallTick: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 352, y: 160, w: 32, h: 32 }]
@@ -229,12 +229,19 @@ export const manifest: AssetsManifest = {
             { x: 170, y: 170, w: 34, h: 34 }
           ]
         },
-
         arrowLeft: {
           src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
           frames: [
             { x: 34, y: 170, w: 34, h: 34 },
             { x: 68, y: 170, w: 34, h: 34 }
+          ]
+        },
+
+        cross: {
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
+          frames: [
+            { x: 204, y: 0, w: 34, h: 34 },
+            { x: 272, y: 0, w: 34, h: 34 }
           ]
         },
 

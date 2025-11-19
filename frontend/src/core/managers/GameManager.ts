@@ -49,5 +49,9 @@ export class GameManager extends SingletonBase<GameManager> {
   public get gameApp(): Application {
     return this.app;
   }
+
+  public get backgroundController(): BackgroundController{
+    return this.appBackground;
+  }
     
 }
