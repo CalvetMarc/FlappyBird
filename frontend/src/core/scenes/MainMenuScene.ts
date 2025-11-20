@@ -64,7 +64,7 @@ export class MainMenuScene implements IScene {
         this.containerUi.removeChild(this.bird);
         this.containerGame.addChild(this.bird);
       }
-
+      
       this.fadeTo(0, 500, 0, () => {
         this.containerGame.removeChild(this.bird);
         this.containerUi.addChild(this.bird);

@@ -1,4 +1,4 @@
-import { Container, Rectangle, BitmapText, TextStyle } from "pixi.js";
+import { Container, Rectangle, BitmapText, TextStyle, Bounds } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { PipesController } from "../objects/Game/PipesController";
 import { CharacterController } from "../objects/Game/CharacterController";
@@ -57,45 +57,34 @@ export class GameScene implements IScene {
 
   public onUpdate(dt: Milliseconds): void {
     this.characterController.onUpdate(dt);
+    this.pipesController.onUpdate(dt);    
     
     const birdBounds = this.characterController.birdBounds;
-    if (!birdBounds) return;
-    this.pipesController.onUpdate(dt);
+
+    const groundBounds: Bounds = GameManager.I.backgroundController.groundBounds;
+    const isTouchingGround = this.boundsIntersect(groundBounds, birdBounds);
+    if (isTouchingGround) {
+      this.characterController.groundTouched(groundBounds);
+      this.pipesController.setScroll(false);
+      GameManager.I.lastScore = this.score;
+      GameManager.I.backgroundController.setScrolling(false);
+      SceneManager.I.fire("gameover")
+      return;
+    }
     
-    return;
+    const nextObstacleBounds: Bounds[] = this.pipesController.nextObstacleBounds;
+    if(nextObstacleBounds.length <= 0) return;
 
-    const groundBounds = GameManager.I.backgroundController.groundBounds;
-    if (groundBounds) {
-      const isTouchingGround =
-        birdBounds.y + birdBounds.height >= groundBounds.y &&
-        birdBounds.x + birdBounds.width > groundBounds.x &&
-        birdBounds.x < groundBounds.x + groundBounds.width;
-
-      if (isTouchingGround) {
-        this.characterController.groundTouched(groundBounds);
-        this.pipesController.setScroll(false);
-        GameManager.I.lastScore = this.score;
-        GameManager.I.backgroundController.setScrolling(false);
-        SceneManager.I.fire("gameover")
-        return;
-      }
+    const isTouchingPipes: boolean =  nextObstacleBounds.some(bound => this.boundsIntersect(bound, birdBounds));
+    if(isTouchingPipes){
+      this.characterController.kill();
+      this.pipesController.setScroll(false);
+      return;
     }
 
-    for (const obs of this.pipesController.obstacles) {
-      for (const s of [...obs.upPipe, ...obs.downPipe]) {
-        const pipeBounds = s.getBounds() as unknown as Rectangle;
-        if (this.rectsIntersect(birdBounds, pipeBounds)) {
-          this.characterController.kill();
-          this.pipesController.setScroll(false);
-          return;
-        }
-      }
-
-      const firstPipe = obs.upPipe[0];
-      if (!obs.scored && birdBounds.x > firstPipe.x + firstPipe.width) {
-        obs.scored = true; // marquem com ja comptat
-        this.incrementScore();
-      }
+    if(nextObstacleBounds[0].maxX < birdBounds.minX){
+      this.pipesController.scoreNext();
+      this.incrementScore();
     }
     
   }
@@ -118,12 +107,12 @@ export class GameScene implements IScene {
     this.containerUi.addChild(this.scoreText);
   }
 
-  private rectsIntersect(a: Rectangle, b: Rectangle): boolean {
+  private boundsIntersect(a: Bounds, b: Bounds): boolean {
     return (
-      a.x < b.x + b.width &&
-      a.x + a.width > b.x &&
-      a.y < b.y + b.height &&
-      a.y + a.height > b.y
+      a.minX < b.maxX &&
+      a.maxX > b.minX &&
+      a.minY < b.maxY &&
+      a.maxY > b.minY
     );
   }
 

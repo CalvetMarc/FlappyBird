@@ -8,8 +8,7 @@ import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
 export class CharacterController implements IGameObject{
-  private bird!: Sprite;
-  private birdFrames: Texture[] = [];
+  private bird!: Sprite;  
   private currentFrame = 0;
   private frameTimer = 0;
   private frameInterval = 100;
@@ -37,14 +36,14 @@ export class CharacterController implements IGameObject{
 
   public onUpdate(dt: Milliseconds) {
     if (!this.bird) return;
-
+    console.log(this.isDead);
     const delta = dt / 1000;
 
     this.frameTimer += dt;
     if (!this.isDead && this.frameTimer >= this.frameInterval) {
       this.frameTimer = 0;
-      this.currentFrame = (this.currentFrame + 1) % this.birdFrames.length;
-      this.bird.texture = this.birdFrames[this.currentFrame];
+      this.currentFrame = (this.currentFrame + 1) % AssetsManager.I.getFrameCount("bird" + (SceneManager.I.playerIndex + 1).toString());
+      this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), this.currentFrame, this.bird);
     }
 
     if (!this.isDead || (this.isDead && !this.deadGrounded)) {
@@ -70,19 +69,9 @@ export class CharacterController implements IGameObject{
     this.container.destroy({ children: true, texture: true, textureSource: true });
   }
 
-  public get birdBounds(): Rectangle | undefined {
-    if (!this.bird) 
-      return;
-    
-    const bounds = this.bird.getBounds();
-    const r = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
-
-    const pad = 6;
-    r.x += pad;
-    r.y += pad;
-    r.width -= pad * 2;
-    r.height -= pad * 2;
-    return r;
+  public get birdBounds(): Bounds {
+    const bounds: Bounds = new Bounds(this.bird.x - (this.bird.width * 0.5), this.bird.y - (this.bird.height * 0.5), this.bird.x + (this.bird.width * 0.5), this.bird.y + (this.bird.height * 0.5));
+    return bounds;
   }
 
   public kill() {
@@ -91,7 +80,7 @@ export class CharacterController implements IGameObject{
     GameManager.I.backgroundController.setScrolling(false);
   }
 
-  public groundTouched(rect: Rectangle) {
+  public groundTouched(rect: Bounds) {
     if (!this.bird) return;
 
     this.velocityY = 0;
@@ -99,7 +88,7 @@ export class CharacterController implements IGameObject{
 
     const b = this.birdBounds;
     if (b) {
-      const offset = b.y + b.height - rect.y;
+      const offset = b.maxY - rect.minY;
       if (offset > 0) this.bird.y -= offset;
     }
 
