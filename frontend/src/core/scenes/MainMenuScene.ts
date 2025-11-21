@@ -44,6 +44,7 @@ export class MainMenuScene implements IScene {
     this.createButtons();
     this.createBird();
     this.createSideButtons();
+    this.startLogoFloat();
 
     this.containerUi.alpha = 0;
   }
@@ -52,8 +53,6 @@ export class MainMenuScene implements IScene {
     this.containerUi.alpha = 0;
     this.birdFadeOf = true;
     this.fadeTo(1, 500, 100);
-
-    this.startLogoFloat();
   }
 
   public onUpdate(dt: number): void {  }
@@ -96,7 +95,7 @@ export class MainMenuScene implements IScene {
     const buttonsYPos = LayoutManager.I.layoutSize.height * 0.77;
     const buttonsXSpacing = LayoutManager.I.layoutSize.width / 4;
 
-    this.playBtn = new Button(2.5, "play", () => SceneManager.I.fire("play"));
+    this.playBtn = new Button(2.5, "play", () => {this.birdFadeOf = false; SceneManager.I.fire("play");});
     this.playBtn.position = {x: LayoutManager.I.layoutSize.width * 0.5, y: buttonsYPos};
 
     this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), 0x0c0807);

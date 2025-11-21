@@ -1,4 +1,4 @@
-import { Ticker } from "pixi.js";
+import { Ticker, ViewContainer } from "pixi.js";
 import { GameManager } from "./GameManager";
 import { IdProvider, UniqueId } from "../objects/IdProvider";
 import { SingletonBase } from "../abstractions/SingletonBase";
@@ -9,9 +9,10 @@ export type Tween<TContext = unknown> = {
   duration: Milliseconds;
   context: TContext;
   tweenFunction(this: Tween<TContext>, elapsed: Milliseconds): void;
+  onComplete?: () => void;
 };
 
-const TweenState = ["ACTIVE", "PAUSED", "FINISHED"] as const;
+const TweenState = ["WAIT", "ACTIVE", "PAUSED", "FINISHED"] as const;
 type TWEEN_STATE = (typeof TweenState)[number];
 
 export class CreatedTween {
@@ -21,23 +22,31 @@ export class CreatedTween {
 
   private tween: Tween;
   private elapsedTime: Milliseconds = ms(0);
-  private state: TWEEN_STATE = "ACTIVE";
+  private state: TWEEN_STATE;
 
   constructor(id: UniqueId, tween: Tween) {
     this.id = id;
     this.tween = tween;
+    this.state = tween.waitTime > 0 ? "WAIT" : "ACTIVE";
   }
 
   public updateTween(dt: Milliseconds): void {
-    if (this.state !== "ACTIVE") return;
+    if (this.state !== "WAIT" && this.state !== "ACTIVE" ) return;
 
     this.elapsedTime = addTime(ms, this.elapsedTime, dt);
 
-    // execució del tween
+    if(this.state === "WAIT"){
+      if(this.elapsedTime > this.tween.waitTime){
+        this.elapsedTime =   ms(this.elapsedTime - this.tween.waitTime);
+        this.state = "ACTIVE";
+      }
+      return;
+    }    
+
     this.tween.tweenFunction(this.elapsedTime);
 
-    // finalització
     if (this.elapsedTime >= this.tween.duration) {
+      this.tween.onComplete?.();
       this.state = "FINISHED";
     }
   }
@@ -166,5 +175,23 @@ export class TweenManager extends SingletonBase<TweenManager> {
     else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
     else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
     else return n1 * (t -= 2.625 / d1) * t + 0.984375;
+  }
+
+  //PREMADE
+
+  public fadeTo(targetObject: ViewContainer[], finalValue: number, duration: number, waitTime: number = 0, onComplete?: () => void): number {
+    const start = targetObject[0].alpha;
+
+    return TweenManager.I.AddTween(<Tween<ViewContainer[]>>{
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: targetObject!,
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+        const v = start + (finalValue - start) * t;
+        this.context.forEach(vc => vc.alpha = v);
+      },
+      onComplete: onComplete
+    });
   }
 }

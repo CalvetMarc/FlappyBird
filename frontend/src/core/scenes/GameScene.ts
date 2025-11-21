@@ -68,7 +68,7 @@ export class GameScene implements IScene {
       this.pipesController.setScroll(false);
       GameManager.I.lastScore = this.score;
       GameManager.I.backgroundController.setScrolling(false);
-      SceneManager.I.fire("gameover")
+      TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500, () => SceneManager.I.fire("gameover"));
       return;
     }
     
@@ -89,7 +89,7 @@ export class GameScene implements IScene {
     
   }
 
-  public  async onExit(): Promise<void> {
+  public async onExit(): Promise<void> {
     // Todo
   }
 
@@ -100,9 +100,9 @@ export class GameScene implements IScene {
 
   private async createScoreText() {
     
-    this.scoreText = AssetsManager.I.getText("0", "vcrHeavy", 32);
+    this.scoreText = AssetsManager.I.getText("0", "vcrHeavy", 64);
     this.scoreText!.anchor.set(0.5);
-    this.scoreText.position.set(LayoutManager.I.layoutSize.width * 0.5, 0);
+    this.scoreText.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.width * 0.075);
 
     this.containerUi.addChild(this.scoreText);
   }
