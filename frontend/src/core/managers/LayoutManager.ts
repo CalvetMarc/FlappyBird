@@ -68,6 +68,8 @@ export class LayoutManager extends SingletonBase<LayoutManager> {
         this._uiContainer.scale.set(this._gameWidth / this._initialGameSize.width, this._gameHeight / this._initialGameSize.height);
     }
 
+    console.log(this._initialGameSize);
+
   }
 
   private redrawMask(): void {

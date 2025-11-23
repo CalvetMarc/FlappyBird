@@ -19,7 +19,7 @@ interface Obstacle {
 export class PipesController implements IGameObject{  
   private gamePipes: Obstacle[] = [];
 
-  private pipeSpeed = 200;
+  private pipeSpeed = 0.25;
   private pipeInterval = 3000;
   private pipeTimer = 0;
   private maxPipeTiles = 15;
@@ -61,7 +61,7 @@ export class PipesController implements IGameObject{
 
     for (const obstacle of this.gamePipes) {
       for (const sprite of [...obstacle.upPipe, ...obstacle.downPipe]) {
-        sprite.x -= this.pipeSpeed * deltaSeconds;
+        sprite.x -= this.pipeSpeed * deltaSeconds * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
       }
     }
 

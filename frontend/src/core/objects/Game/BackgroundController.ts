@@ -8,7 +8,7 @@ import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
-const scrollSpeed = 230;
+const scrollSpeed = 0.32;
 const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
 
 
@@ -40,7 +40,7 @@ export class BackgroundController implements IGameObject {
     const delta = (dt / 1000);
 
     for (const piece of this.groundPieces) {
-      piece.x -= delta * scrollSpeed ;
+      piece.x -= delta * scrollSpeed * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
     }
 
     const firstSlice = this.groundPieces[0];

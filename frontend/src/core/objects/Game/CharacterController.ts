@@ -7,6 +7,8 @@ import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
+const sensitivity = 0.0022;  
+
 export class CharacterController implements IGameObject{
   private bird!: Sprite;  
   private currentFrame = 0;
@@ -14,8 +16,8 @@ export class CharacterController implements IGameObject{
   private frameInterval = 100;
 
   private velocityY = 0;
-  private gravity = 2;
-  private jumpForce = -0.65;
+  private gravity = 2.4;
+  private jumpForce = -0.75;
 
   private isDead = false;
   private deadGrounded = false;
@@ -47,17 +49,22 @@ export class CharacterController implements IGameObject{
     }
 
     if (!this.isDead || (this.isDead && !this.deadGrounded)) {
-      this.velocityY += this.gravity * delta * LayoutManager.I.layoutCurrentSize.height;
+      this.velocityY += this.gravity * delta * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
       this.bird.y += this.velocityY * delta;
     }
 
     const maxFall = Math.PI / 2;
     const minUp = -Math.PI / 6;
 
+
     if (!this.isDead) {
-      this.bird.rotation = Math.max(minUp, Math.min(this.velocityY / 400, maxFall));
-    } else if (!this.deadGrounded) {
-      this.bird.rotation = Math.min(this.bird.rotation + 0.05, maxFall);
+        const rot = this.velocityY * sensitivity;
+        this.bird.rotation = Math.max(minUp, Math.min(rot, maxFall));
+    }
+
+    else if (!this.deadGrounded) {
+        const fallRotateSpeed = 0.02; 
+        this.bird.rotation = Math.min(this.bird.rotation + fallRotateSpeed, maxFall);
     }
   }
 
@@ -121,7 +128,7 @@ export class CharacterController implements IGameObject{
   private flap() {
     if (!this.bird) return;
 
-    this.velocityY = LayoutManager.I.layoutCurrentSize.height * this.jumpForce;
+    this.velocityY = this.jumpForce * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
     this.bird.rotation = -Math.PI / 6;
   }
 }
