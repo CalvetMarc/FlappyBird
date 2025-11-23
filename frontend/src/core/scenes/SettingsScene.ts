@@ -68,12 +68,12 @@ export class SettingsScene implements IScene {
     const aspectRelationBg: number = textureBgSize.width / textureBgSize.height;
     this.bgSprite = AssetsManager.I.getSprite("bigPanelGrey");
 
-    this.bgSprite.height = LayoutManager.I.layoutSize.height * 0.5;
+    this.bgSprite.height = LayoutManager.I.layoutVirtualSize.height * 0.5;
     this.bgSprite.width = this.bgSprite.height * aspectRelationBg;
     this.bgSprite.rotation = Math.PI * 0.5;
     this.bgSprite.anchor.set(0.5);
     this.bgSprite.zIndex = 5;
-    this.bgSprite.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.height * 0.43);
+    this.bgSprite.position.set(LayoutManager.I.layoutCurrentSize.width * 0.5, LayoutManager.I.layoutCurrentSize.height * 0.43);
 
     const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
     const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;

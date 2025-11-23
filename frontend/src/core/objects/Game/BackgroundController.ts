@@ -40,7 +40,7 @@ export class BackgroundController implements IGameObject {
     const delta = (dt / 1000);
 
     for (const piece of this.groundPieces) {
-      piece.x -= delta * (scrollSpeed);
+      piece.x -= delta * scrollSpeed ;
     }
 
     const firstSlice = this.groundPieces[0];
@@ -79,7 +79,7 @@ export class BackgroundController implements IGameObject {
   }
 
   private createBackground() {
-    const targetHeight = LayoutManager.I.layoutSize.height * 0.85;
+    const targetHeight = LayoutManager.I.layoutVirtualSize.height * 0.85;
     const targetWidth = targetHeight;
 
     this.background = AssetsManager.I.getSprite("bgNoon") as Sprite;
@@ -95,12 +95,12 @@ export class BackgroundController implements IGameObject {
     const textureSize: Size = AssetsManager.I.getTextureSize("groundDay", 0);
     const sliceAspectRatio = textureSize.width / textureSize.height;
 
-    const sliceHeight = LayoutManager.I.layoutSize.height * 0.15;    
+    const sliceHeight = LayoutManager.I.layoutVirtualSize.height * 0.15;    
     const sliceWidth = sliceHeight * sliceAspectRatio;    
 
-    const sliceY = LayoutManager.I.layoutSize.height * (1 - 0.15);
+    const sliceY = LayoutManager.I.layoutCurrentSize.height * (1 - 0.15);
     let currentX = 0;
-    const endX = LayoutManager.I.layoutSize.width;
+    const endX = LayoutManager.I.layoutCurrentSize.width;
 
     while (currentX < endX + sliceWidth) {
       const piece = this.createRandomPiece(new Rectangle(currentX, sliceY, sliceWidth, sliceHeight));

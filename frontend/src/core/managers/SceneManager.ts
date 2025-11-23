@@ -104,8 +104,10 @@ export class SceneManager extends SingletonBase<SceneManager> {
     } 
 
     this.current = next;
+
     LayoutManager.I.gameContainer.addChild(this.current.containerGame);
     LayoutManager.I.uiContainer.addChild(this.current.containerUi);
+
     this.current.onEnter();
   }
 

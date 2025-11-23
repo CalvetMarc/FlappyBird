@@ -1,4 +1,4 @@
-import { Bounds, Container, Graphics, Rectangle, Size } from "pixi.js";
+import { Bounds, Container, Graphics, Rectangle, Size, Point } from "pixi.js";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { GameManager } from "./GameManager";
 
@@ -104,5 +104,8 @@ export class LayoutManager extends SingletonBase<LayoutManager> {
   public get uiContainer(): Container { return this._uiContainer; }
   
   public get layoutBounds(): Bounds{ return new Bounds(this._gameLeft, this._gameTop, this._gameRight, this._gameBottom);}
-  public get layoutSize(): Size { return { width: this._gameWidth, height: this._gameHeight }; }
+  public get layoutVirtualSize(): Size { return { width: this._initialGameSize.width, height: this._initialGameSize.height }; }
+  public get layoutCurrentSize(): Size { return { width: this._gameWidth, height: this._gameHeight }; }
+
+  public get layoutScale(): Point { return new Point(this._gameWidth / this._initialGameSize.width, this._gameHeight / this._initialGameSize.height)} 
 }

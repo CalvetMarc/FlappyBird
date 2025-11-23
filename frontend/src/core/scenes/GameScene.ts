@@ -100,9 +100,9 @@ export class GameScene implements IScene {
 
   private async createScoreText() {
     
-    this.scoreText = AssetsManager.I.getText("0", "vcrHeavy", 64);
+    this.scoreText = AssetsManager.I.getText("0", "vcrHeavy", LayoutManager.I.layoutVirtualSize.width * 0.1);
     this.scoreText!.anchor.set(0.5);
-    this.scoreText.position.set(LayoutManager.I.layoutSize.width * 0.5, LayoutManager.I.layoutSize.width * 0.075);
+    this.scoreText.position.set(LayoutManager.I.layoutVirtualSize.width * 0.5, LayoutManager.I.layoutVirtualSize.height * 0.075);
 
     this.containerUi.addChild(this.scoreText);
   }

@@ -47,7 +47,7 @@ export class CharacterController implements IGameObject{
     }
 
     if (!this.isDead || (this.isDead && !this.deadGrounded)) {
-      this.velocityY += this.gravity * delta * LayoutManager.I.layoutSize.height;
+      this.velocityY += this.gravity * delta * LayoutManager.I.layoutCurrentSize.height;
       this.bird.y += this.velocityY * delta;
     }
 
@@ -101,8 +101,8 @@ export class CharacterController implements IGameObject{
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 12;
 
-    this.bird.position = {x: LayoutManager.I.layoutSize.width * 0.5, y: LayoutManager.I.layoutSize.height * 0.614};
-    this.bird.scale.set(LayoutManager.I.layoutSize.width * 0.0044);
+    this.bird.position = {x: LayoutManager.I.layoutVirtualSize.width * 0.5, y: LayoutManager.I.layoutVirtualSize.height * 0.614};
+    this.bird.scale.set(LayoutManager.I.layoutVirtualSize.width * 0.0044);
 
     this.container.addChild(this.bird);
   }
@@ -121,7 +121,7 @@ export class CharacterController implements IGameObject{
   private flap() {
     if (!this.bird) return;
 
-    this.velocityY = LayoutManager.I.layoutSize.height * this.jumpForce;
+    this.velocityY = LayoutManager.I.layoutCurrentSize.height * this.jumpForce;
     this.bird.rotation = -Math.PI / 6;
   }
 }
