@@ -57,6 +57,15 @@ export class Toggle extends Container {
     }
   }
 
+  public freeResources(): void{
+    this.labelComponent.freeResources();
+    this.bgSprite.removeChild(this.iconSprite);
+    AssetsManager.I.releaseSprite(this.iconSprite);
+    this.removeChildren();
+    this.bgSprite.removeAllListeners();
+    AssetsManager.I.releaseSprite(this.bgSprite);
+  }
+
   private onPointerDown(){    
     this.currentValue = !this.currentValue;
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);

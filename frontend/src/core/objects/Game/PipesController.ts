@@ -85,7 +85,12 @@ export class PipesController implements IGameObject{
   }
 
   public async onDestroy(): Promise<void> {
-      //Todo
+    for(const obstacle of this.obstacles){
+      for (const spr of obstacle.upPipe.concat(obstacle.downPipe)) {
+        spr.removeFromParent();
+        AssetsManager.I.releaseSprite(spr);
+      }
+    }
   }
 
  public setScroll(move: boolean){

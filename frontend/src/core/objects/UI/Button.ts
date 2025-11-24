@@ -11,15 +11,7 @@ export class Button extends Container {
   private initScale: number;
   private iconIsOneFrame: boolean;
 
-  constructor(
-    buttonScale: number,
-    iconAssetName: string,
-    callback: () => void,
-    iconTintHex: number = 0xffffff,
-    iconIsOneFrame: boolean = false,
-    iconRotationRadians: number = 0,
-    iconScale: number = 0.6
-  ) {
+  constructor(buttonScale: number, iconAssetName: string, callback: () => void, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
 
     this.bgSprite = AssetsManager.I.getSprite("button", 0);
@@ -59,6 +51,14 @@ export class Button extends Container {
     if (debug) {
       this.debugBounds();
     }
+  }
+
+  public freeResources(): void{
+    this.bgSprite.removeChildren();
+    AssetsManager.I.releaseSprite(this.iconSprite);
+    this.removeChildren();
+    this.bgSprite.removeAllListeners();
+    AssetsManager.I.releaseSprite(this.bgSprite);
   }
 
   private onPointerDown() {

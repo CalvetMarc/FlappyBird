@@ -25,7 +25,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
 
     this.transitions = {
       play: () => {
-        if (this.current instanceof MainMenuScene) {
+        if (this.current instanceof MainMenuScene || this.current instanceof GameOverScene) {
           this.setScene(GameScene, true);
         } else if (this.current instanceof PauseScene) {
           this.setScene(GameScene, false);
@@ -52,18 +52,17 @@ export class SceneManager extends SingletonBase<SceneManager> {
           this.setScene(MainMenuScene, true);
         }
         else if (this.current instanceof GameOverScene) {
-          this.destroyFromPool(GameScene);
           this.setScene(MainMenuScene, true);
         }
       },
       ranking: () => {
-        if (this.current instanceof GameScene || this.current instanceof MainMenuScene) {
+        if (this.current instanceof MainMenuScene) {
           this.setScene(RankingScene, false);
         }
       },
       gameover: () => {
         if (this.current instanceof GameScene) {
-          this.setScene(GameOverScene, false);
+          this.setScene(GameOverScene, true);
         }
       },
     };

@@ -15,6 +15,8 @@ export class GameScene implements IScene {
   private score: number = 0;     
   private pipesController!: PipesController;   
   private characterController!: CharacterController;
+
+  private elapsedTime: number;
   
   public containerGame: Container;
   public containerUi: Container;
@@ -24,6 +26,7 @@ export class GameScene implements IScene {
     this.containerUi = new Container();
     this.containerGame.sortableChildren = true;    
     this.containerUi.sortableChildren = true;
+    this.elapsedTime = 0;
   }
 
   public async onInit(): Promise<void> {
@@ -46,6 +49,7 @@ export class GameScene implements IScene {
     this.containerUi.alpha = 0;
     const startTime = performance.now();
     const duration = 400;
+    this.elapsedTime = 0;
 
     const fadeIn = (now: number) => {
       const t = Math.min((now - startTime) / duration, 1);
@@ -56,6 +60,10 @@ export class GameScene implements IScene {
   }
 
   public onUpdate(dt: Milliseconds): void {
+    if(this.characterController.isAlive){
+      this.elapsedTime += dt / 1000;
+    }
+
     this.characterController.onUpdate(dt);
     this.pipesController.onUpdate(dt);    
     
@@ -67,6 +75,7 @@ export class GameScene implements IScene {
       this.characterController.groundTouched(groundBounds);
       this.pipesController.setScroll(false);
       GameManager.I.sessionData.lastScore = this.score;
+      GameManager.I.sessionData.lastGameTime = this.elapsedTime;
       GameManager.I.backgroundController.setScrolling(false);
       TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500, () => SceneManager.I.fire("gameover"));
       return;
@@ -90,7 +99,10 @@ export class GameScene implements IScene {
   }
 
   public async onExit(): Promise<void> {
-    // Todo
+    this.scoreText.removeFromParent();
+    AssetsManager.I.releaseText(this.scoreText);
+    this.pipesController.onDestroy();
+    this.characterController.onDestroy();
   }
 
   public async onDestroy(): Promise<void> {

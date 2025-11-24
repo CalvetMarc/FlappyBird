@@ -9,7 +9,8 @@ export class RankingScene implements IScene {
   public containerUi: Container;
   
   public constructor() {
-    
+    this.containerGame = new Container();
+    this.containerUi = new Container();
   }
 
   public async onInit(): Promise<void> {

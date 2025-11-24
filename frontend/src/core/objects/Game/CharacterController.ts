@@ -72,8 +72,8 @@ export class CharacterController implements IGameObject{
     window.removeEventListener("pointerdown", this.handleInput);
     window.removeEventListener("keydown", this.handleKey);
 
-    this.bird?.destroy({ texture: true, textureSource: true });
-    this.container.destroy({ children: true, texture: true, textureSource: true });
+    this.bird.removeFromParent();
+    AssetsManager.I.releaseSprite(this.bird);
   }
 
   public get birdBounds(): Bounds {
@@ -102,6 +102,10 @@ export class CharacterController implements IGameObject{
     if (!this.isDead) this.kill();
     this.deadGrounded = true;
   } 
+
+  public get isAlive(): boolean{
+    return !this.isDead;
+  }
 
   private async loadBird() {
     this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0);

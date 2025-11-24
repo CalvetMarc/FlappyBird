@@ -24,4 +24,11 @@ export class Label extends Container {
     this.labelBgSprite.addChild(this.labelText);
     this.addChild(this.labelBgSprite);
   }
+
+  public freeResources(): void{
+    this.labelBgSprite.removeChildren();
+    AssetsManager.I.releaseText(this.labelText);
+    this.removeChildren();
+    AssetsManager.I.releaseSprite(this.labelBgSprite);
+  }
 } 

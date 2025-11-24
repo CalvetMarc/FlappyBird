@@ -13,12 +13,11 @@ export class GameOverScene implements IScene {
   private titleText!: BitmapText;
   private bgSprite!: Sprite;
   private titleBgSprite!: Sprite;
-  private closeBtn!: Button;
+  private restartBtn!: Button;
+  private exitBtn!: Button;
 
   private scoreLabelComponent!: DataField;
-  private scoreData!: BitmapText;
   private timeLabelComponent!: DataField;
-  private timeData!: BitmapText;
   private rankingReachedLabelComponent!: DataField;
 
   public containerGame: Container;
@@ -40,8 +39,36 @@ export class GameOverScene implements IScene {
 
   public onUpdate(dt: number): void {}
   public async onExit(): Promise<void> {}
-  public async onDestroy(): Promise<void> {}
-  public onResize(width: number, height: number): void {}
+
+  public async onDestroy(): Promise<void> {
+    this.scoreLabelComponent.removeFromParent();
+    this.containerUi.addChild(this.scoreLabelComponent);
+    this.scoreLabelComponent.freeResources();
+
+    this.timeLabelComponent.removeFromParent();
+    this.containerUi.addChild(this.timeLabelComponent);
+    this.timeLabelComponent.freeResources();
+
+    this.rankingReachedLabelComponent.removeFromParent();
+    this.containerUi.addChild(this.rankingReachedLabelComponent);
+    this.rankingReachedLabelComponent.freeResources();
+
+    this.restartBtn.removeFromParent();
+    this.containerUi.addChild(this.restartBtn);
+    this.restartBtn.freeResources();
+
+    this.exitBtn.removeFromParent();
+    this.containerUi.addChild(this.exitBtn);
+    this.exitBtn.freeResources();
+
+    this.titleBgSprite.removeChild();
+    AssetsManager.I.releaseText(this.titleText);
+    AssetsManager.I.releaseSprite(this.titleBgSprite);
+    
+    this.bgSprite.removeChildren();
+    this.bgSprite.removeFromParent();
+    AssetsManager.I.releaseSprite(this.bgSprite);
+  }  
 
   private async loadAssets() {
     this.createPanelBg();
@@ -106,11 +133,18 @@ export class GameOverScene implements IScene {
   }
   
   private createButtons() {  
-    this.closeBtn = new Button(0.35, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
-    this.closeBtn.position.x = 40;
-    this.closeBtn.rotation = -Math.PI * 0.5;
+    this.exitBtn = new Button(0.35, "exit", () => SceneManager.I.fire("menu"), 0xff0044);
+    this.exitBtn.position.x = 40;
+    this.exitBtn.position.y = 8;
+    this.exitBtn.rotation = -Math.PI * 0.5;
 
-    this.bgSprite.addChild(this.closeBtn);
+    this.restartBtn = new Button(0.35, "restart", () => SceneManager.I.fire("play"), 0x0c0807);
+    this.restartBtn.position.x = 40;
+    this.restartBtn.position.y = -8;
+    this.restartBtn.rotation = -Math.PI * 0.5;
+
+    this.bgSprite.addChild(this.exitBtn);
+    this.bgSprite.addChild(this.restartBtn);
   }
 
   private formatTime(totalSeconds: number): string {

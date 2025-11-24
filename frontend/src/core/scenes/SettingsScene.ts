@@ -53,7 +53,29 @@ export class SettingsScene implements IScene {
   }
 
   public async onDestroy(): Promise<void> {
-    //TODO
+    this.audioToggle.removeFromParent();
+    this.containerUi.addChild(this.audioToggle);
+    this.audioToggle.freeResources();
+
+    this.dayCycleToggle.removeFromParent();
+    this.containerUi.addChild(this.dayCycleToggle);
+    this.dayCycleToggle.freeResources();
+
+    this.speedProgToggle.removeFromParent();
+    this.containerUi.addChild(this.speedProgToggle);
+    this.speedProgToggle.freeResources();
+
+    this.closeBtn.removeFromParent();
+    this.containerUi.addChild(this.closeBtn);
+    this.closeBtn.freeResources();
+
+    this.titleBgSprite.removeChild();
+    AssetsManager.I.releaseText(this.titleText);
+    AssetsManager.I.releaseSprite(this.titleBgSprite);
+    
+    this.bgSprite.removeChildren();
+    this.bgSprite.removeFromParent();
+    AssetsManager.I.releaseSprite(this.bgSprite);
   }
 
   private async loadAssets() {
@@ -61,7 +83,6 @@ export class SettingsScene implements IScene {
     this.createToggles();
     this.createButton();
   }
-
 
   private createSettingsBg() { 
     const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelGrey");

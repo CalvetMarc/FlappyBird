@@ -245,6 +245,21 @@ export const manifest: AssetsManifest = {
           ]
         },
 
+        restart: {
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
+          frames: [
+            { x: 136, y: 68, w: 34, h: 34 },
+            { x: 170, y: 68, w: 34, h: 34 }
+          ]
+        },
+        exit: {
+          src: "/assets/ui/icon_pack_by_mewily_32px32_1_margin.png",
+          frames: [
+            { x: 34, y: 0, w: 34, h: 34 },
+            { x: 68, y: 0, w: 34, h: 34 }
+          ]
+        },
+
         bigPanelGrey: {
           src: "/assets/ui/Spritesheet_UI_Flat.png",
           frames: [{ x: 32, y: 32, w: 96, h: 64 }]

@@ -4,7 +4,7 @@ import { SceneManager } from "../managers/SceneManager";
 import { GameManager } from "../managers/GameManager";
 import { TweenManager, Tween, CreatedTween } from "../managers/TweenManager";
 import { ms } from "../time/TimeUnits";
-import { UniqueId } from "../objects/IdProvider";
+import { IdProvider, UniqueId } from "../objects/IdProvider";
 import { Button } from "../objects/UI/Button";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
@@ -73,7 +73,18 @@ export class MainMenuScene implements IScene {
   }
 
   public async onDestroy(): Promise<void> {    
-    TweenManager.I.KillTween(this.logoTweenID);
+    TweenManager.I.KillTween(this.logoTweenID); 
+
+    this.playBtn.freeResources();
+    this.settingsBtn.freeResources();
+    this.rankingBtn.freeResources();
+    this.nextBtn.freeResources();
+    this.prevBtn.freeResources();
+
+    this.logo.removeFromParent();
+    AssetsManager.I.releaseSprite(this.logo);
+    this.bird.removeFromParent();
+    AssetsManager.I.releaseSprite(this.bird);   
   }
 
   private createLogo() {
