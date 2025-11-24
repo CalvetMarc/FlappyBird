@@ -8,7 +8,7 @@ import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
-const scrollSpeed = 0.32;
+const scrollSpeed = 0.37;
 const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
 
 

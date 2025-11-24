@@ -20,7 +20,7 @@ export class PipesController implements IGameObject{
   private gamePipes: Obstacle[] = [];
 
   private pipeSpeed = 0.25;
-  private pipeInterval = 3000;
+  private pipeInterval = 1500;
   private pipeTimer = 0;
   private maxPipeTiles = 15;
   private bottomTopTilesGapMargin = 5;
@@ -52,7 +52,8 @@ export class PipesController implements IGameObject{
     const deltaSeconds = dt / 1000;
     this.pipeTimer += dt;
 
-    if (this.pipeTimer >= this.pipeInterval) {
+    const pipeScaledInterval = this.pipeInterval;
+    if (this.pipeTimer >= pipeScaledInterval) {
       this.pipeTimer = 0;
       this.CreateObstacle();
     }

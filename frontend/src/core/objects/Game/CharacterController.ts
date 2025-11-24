@@ -7,7 +7,7 @@ import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 
-const sensitivity = 0.0022;  
+const sensitivity = 1.7;  
 
 export class CharacterController implements IGameObject{
   private bird!: Sprite;  
@@ -58,7 +58,7 @@ export class CharacterController implements IGameObject{
 
 
     if (!this.isDead) {
-        const rot = this.velocityY * sensitivity;
+        const rot = (this.velocityY / (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x)) * sensitivity;
         this.bird.rotation = Math.max(minUp, Math.min(rot, maxFall));
     }
 
