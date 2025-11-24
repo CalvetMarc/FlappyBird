@@ -2,7 +2,6 @@ import { Application, Container, Sprite, Texture, Rectangle, Assets, Bounds } fr
 import { LAYERS } from "../../abstractions/IScene";
 import { IGameObject } from "../../abstractions/IGameObject";
 import { Milliseconds } from "../../time/TimeUnits";
-import pipeUrl from "../../../../public/assets/tiles/SimpleStyle1.png"
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { GameManager } from "../../managers/GameManager";

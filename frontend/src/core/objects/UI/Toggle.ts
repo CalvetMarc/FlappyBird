@@ -1,20 +1,21 @@
 import { Sprite, Graphics, Container, ColorMatrixFilter, BitmapText } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
+import { Label } from "./Label";
 import { LayoutManager } from "../../managers/LayoutManager";
 
 const debug = false;
 
 export class Toggle extends Container {
   private bgSprite: Sprite;
-  private labelBgSprite: Sprite;
 
   private iconAssetNameOn: string;
   private iconAssetNameOff: string;
   private iconSprite: Sprite;  
   private currentValue: boolean;
-  private labelText: BitmapText;
 
-  constructor(label: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, 
+  private labelComponent: Label;
+
+  constructor(labelText: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, 
     textTintHex: number = 0x222222, boolean = false, iconRotationRadians: number = 0, iconScale: number = 2) {
     super();
 
@@ -23,25 +24,14 @@ export class Toggle extends Container {
     this.iconAssetNameOff = iconAssetNameOff;
     this.iconAssetNameOn = iconAssetNameOn;
     
-    this.labelBgSprite = AssetsManager.I.getSprite("title2up", 0);
-    this.labelBgSprite.anchor = 0.5;
-    this.labelBgSprite.scale.y = 0.7;
-    this.labelBgSprite.zIndex = 1;
-
-    this.labelText = AssetsManager.I.getText(label, "vcrBase", fontSize);
-    this.labelText.anchor.set(0, 0.5);
-    this.labelText.tint = textTintHex;    
-    this.labelText.zIndex = 2;  
-    this.labelText.scale.y = 2 - this.labelBgSprite.scale.y;
-    this.labelText.position.set(this.labelBgSprite.width * -0.41, -2);
-
+    this.labelComponent = new Label(labelText, fontSize, textTintHex);
 
     this.bgSprite = AssetsManager.I.getSprite("smallPanelGrey2", 0);
     this.bgSprite.anchor = 0.5;
     this.bgSprite.scale.set(fontSize / 30);
     this.bgSprite.eventMode = "static";
     this.bgSprite.cursor = "pointer";
-    this.bgSprite.position.set(this.labelBgSprite.width * 0.38, -1);    
+    this.bgSprite.position.set(this.labelComponent.width * 0.38, -1);    
     this.bgSprite.zIndex = 2;
 
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? iconAssetNameOn : iconAssetNameOff, 0);
@@ -56,8 +46,7 @@ export class Toggle extends Container {
 
     this.bgSprite.addChild(this.iconSprite);
     this.addChild(this.bgSprite);
-    this.labelBgSprite.addChild(this.labelText);
-    this.addChild(this.labelBgSprite);
+    this.addChild(this.labelComponent);
 
     this.bgSprite.on("pointerdown", () => this.onPointerDown());
 

@@ -70,6 +70,7 @@ export class Button extends Container {
 
     this.iconSprite.position = { x: 0, y: -1.5 };
     this.bgSprite = AssetsManager.I.getSprite("button", 2, this.bgSprite);
+    
   }
 
   private onPointerUp(callback: () => void) {
@@ -80,7 +81,7 @@ export class Button extends Container {
     }
 
     this.iconSprite.position = { x: 0, y: -3.5 };
-    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);
+    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);    
 
     setTimeout(() => callback(), 40);
   }

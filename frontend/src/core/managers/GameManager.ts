@@ -6,16 +6,20 @@ import { AssetsManager } from "./AssetsManager";
 import { LayoutManager } from "./LayoutManager";
 import { BackgroundController } from "../objects/Game/BackgroundController";
 
+export type SessionInfo = {
+  lastScore: number;
+  lastGameTime: number;
+  name: string;
+}
 
 export class GameManager extends SingletonBase<GameManager> { 
-
-  public lastScore: number;
+  public sessionData: SessionInfo;
   private appBackground!: BackgroundController 
   private app!: Application;
 
   private constructor() {
     super();
-    this.lastScore = 0;
+    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
   }
 
   public async start(): Promise<void> {

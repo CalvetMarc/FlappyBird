@@ -1,92 +1,130 @@
-import { Container, Sprite, Texture, Assets, Rectangle, Text } from "pixi.js";
+import { Container, Sprite, BitmapText, Size } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
+import { Button } from "../objects/UI/Button";
+import { LayoutManager } from "../managers/LayoutManager";
+import { AssetsManager } from "../managers/AssetsManager";
 import { SceneManager } from "../managers/SceneManager";
+import { DataField } from "../objects/UI/DataField";
 import { sendScore } from "../../SessionManager";
 import { GameManager } from "../managers/GameManager";
-import uiUrl from "../../../public/assets/ui/UiCozyFree.png";
 
 export class GameOverScene implements IScene {
+
+  private titleText!: BitmapText;
+  private bgSprite!: Sprite;
+  private titleBgSprite!: Sprite;
+  private closeBtn!: Button;
+
+  private scoreLabelComponent!: DataField;
+  private scoreData!: BitmapText;
+  private timeLabelComponent!: DataField;
+  private timeData!: BitmapText;
+  private rankingReachedLabelComponent!: DataField;
 
   public containerGame: Container;
   public containerUi: Container;
 
   public constructor() {
-    
+    this.containerGame = new Container();
+    this.containerUi = new Container();
   }
 
   public async onInit(): Promise<void> {
-
-    const uiTexture = await Assets.load(uiUrl);
-    await document.fonts.load('48px "Minecraft"');
-
-    // ---- RECUT DEL SPRITE (25px + 25px) ----
-    const baseRect = new Rectangle(164, 167, 47, 80);
-
-    // Part superior (25px)
-    const topTex = new Texture({
-      source: uiTexture.source,
-      frame: new Rectangle(
-        baseRect.x,
-        baseRect.y,
-        baseRect.width,
-        25
-      )
-    });
-
-    // Part inferior (25px)
-    const bottomTex = new Texture({
-      source: uiTexture.source,
-      frame: new Rectangle(
-        baseRect.x,
-        baseRect.y + baseRect.height - 25, // 167 + 80 - 25 = 222
-        baseRect.width,
-        25
-      )
-    });
-
-    const topSprite = new Sprite(topTex);
-    const bottomSprite = new Sprite(bottomTex);
-
-    bottomSprite.y = topSprite.height;
-
-    const combined = new Container();
-    combined.addChild(topSprite);
-    combined.addChild(bottomSprite);
-
-    // Nova alçada = 25px + 25px = 50px
-    const newHeight = 50;
-    const scale = newHeight / baseRect.width;
-
-    combined.width = BackgroundManager.I.bgRect.width / 3;
-    combined.height = combined.width * scale;
-
-    combined.position.set(
-      BackgroundManager.I.bgRect.x + BackgroundManager.I.bgRect.width / 2,
-      BackgroundManager.I.bgRect.y + BackgroundManager.I.bgRect.height / 2
-    );
-
-    this.container.addChild(combined);
+    await this.loadAssets();    
   }
 
   public async onEnter(): Promise<void> {
 
-    const resultat = await sendScore(GameManager.I.lastScore);
-    console.log("Resposta del backend:", resultat);
-
-    const resultText = new Text(
-      resultat?.inRanking
-        ? "🏆 Has entrat al ranking!"
-        : "Game Over",
-      { fontSize: 32, fill: 0xffffff }
-    );
-
-    resultText.anchor.set(0.5);
-    resultText.position.set(360, 200);
-    this.container.addChild(resultText);
+    
   }
 
   public onUpdate(dt: number): void {}
   public async onExit(): Promise<void> {}
   public async onDestroy(): Promise<void> {}
   public onResize(width: number, height: number): void {}
+
+  private async loadAssets() {
+    this.createPanelBg();
+    this.createLabels();
+    this.createButtons();
+  }
+
+  private createPanelBg() { 
+    const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelBlue");
+    const aspectRelationBg: number = textureBgSize.width / textureBgSize.height;
+    this.bgSprite = AssetsManager.I.getSprite("bigPanelBlue");
+
+    this.bgSprite.height = LayoutManager.I.layoutVirtualSize.height * 0.5;
+    this.bgSprite.width = this.bgSprite.height * aspectRelationBg;
+    this.bgSprite.rotation = Math.PI * 0.5;
+    this.bgSprite.anchor.set(0.5);
+    this.bgSprite.zIndex = 5;
+    this.bgSprite.position.set(LayoutManager.I.layoutCurrentSize.width * 0.5, LayoutManager.I.layoutCurrentSize.height * 0.43);
+
+    const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
+    const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;
+    this.titleBgSprite = AssetsManager.I.getSprite("title1up");
+
+    const width = this.titleBgSprite.width * 1.1;
+    const height = width * aspectRelationTitleBg;
+    this.titleBgSprite.width = width;
+    this.titleBgSprite.height = height;
+    this.titleBgSprite.rotation = -Math.PI * 0.5;
+    this.titleBgSprite.anchor.set(0.5);
+    this.titleBgSprite.zIndex = 5;
+    this.titleBgSprite.position.set(-39, 0);
+    
+    this.titleText = AssetsManager.I.getText("Game Over", "vcrHeavy", 8.5);
+    this.titleText.anchor.set(0.5);
+    this.titleText.zIndex = 6;
+    this.titleText.position.set(0.5, -3);
+    this.titleText.tint = 0x0090f0;
+    
+    this.titleBgSprite.addChild(this.titleText);
+    this.bgSprite.addChild(this.titleBgSprite);    
+    this.containerUi.addChild(this.bgSprite);
+  }
+
+  private createLabels(){
+    this.scoreLabelComponent = new DataField("Score: ", GameManager.I.sessionData.lastScore.toString(), 7, 0x222222, 0x0000ff);
+    this.bgSprite.addChild(this.scoreLabelComponent);
+    this.scoreLabelComponent.rotation = -Math.PI * 0.5;
+    this.scoreLabelComponent.position.set(-15, 0);
+    this.scoreLabelComponent.scale.set(0.95);
+
+    this.timeLabelComponent = new DataField("Time: ", this.formatTime(GameManager.I.sessionData.lastGameTime), 7, 0x222222, 0x0000ff);
+    this.bgSprite.addChild(this.timeLabelComponent);
+    this.timeLabelComponent.rotation = -Math.PI * 0.5;
+    this.timeLabelComponent.position.set(3, 0);
+    this.timeLabelComponent.scale.set(0.95);
+
+    this.rankingReachedLabelComponent = new DataField("Ranking: ", "No", 7, 0x222222, 0x0000ff);
+    this.bgSprite.addChild(this.rankingReachedLabelComponent);
+    this.rankingReachedLabelComponent.rotation = -Math.PI * 0.5;
+    this.rankingReachedLabelComponent.position.set(21, 0);
+    this.rankingReachedLabelComponent.scale.set(0.95);
+  }
+  
+  private createButtons() {  
+    this.closeBtn = new Button(0.35, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn.position.x = 40;
+    this.closeBtn.rotation = -Math.PI * 0.5;
+
+    this.bgSprite.addChild(this.closeBtn);
+  }
+
+  private formatTime(totalSeconds: number): string {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    const parts: string[] = [];
+
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0 || hours > 0) parts.push(`${minutes}min`);
+    parts.push(`${seconds}s`);
+
+    return parts.join(" ");
+  }
+
 }

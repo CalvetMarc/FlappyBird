@@ -66,7 +66,7 @@ export class GameScene implements IScene {
     if (isTouchingGround) {
       this.characterController.groundTouched(groundBounds);
       this.pipesController.setScroll(false);
-      GameManager.I.lastScore = this.score;
+      GameManager.I.sessionData.lastScore = this.score;
       GameManager.I.backgroundController.setScrolling(false);
       TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500, () => SceneManager.I.fire("gameover"));
       return;
