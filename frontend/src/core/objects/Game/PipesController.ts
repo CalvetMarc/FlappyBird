@@ -20,10 +20,12 @@ export class PipesController implements IGameObject{
   private gamePipes: Obstacle[] = [];
 
   private pipeSpeed = 0.25;
-  private pipeInterval = 1500;
+  private pipeInterval = 2000;
   private pipeTimer = 0;
   private maxPipeTiles = 15;
-  private bottomTopTilesGapMargin = 5;
+  private minTilesPerPipe = 2;
+  private upGapSlots = 3;
+  private downGapSlots = 2;
   private nextToScoreIdx = -1;
 
   private move!: boolean;
@@ -130,20 +132,21 @@ export class PipesController implements IGameObject{
     const pipeTileHeight = (LayoutManager.I.layoutVirtualSize.height - (groundTilesBounds.maxY - groundTilesBounds.minY)) / this.maxPipeTiles;
     const pipeTileWidth = pipeTileHeight * aspectRelationPipeTile;
 
-    const gapSlot = this.randomInteger(this.bottomTopTilesGapMargin + 1, this.maxPipeTiles - this.bottomTopTilesGapMargin + 1);
+    const gapSlot = this.randomInteger(this.minTilesPerPipe + this.upGapSlots - 1, (this.maxPipeTiles) - (this.minTilesPerPipe + this.downGapSlots));
+    console.log(gapSlot);
     const startX =  LayoutManager.I.layoutVirtualSize.width;
 
     const upPipe: Sprite[] = [];
     const downPipe: Sprite[] = [];
 
-    upPipe.push(this.makePipe("greenPipe", 4, startX, pipeTileHeight * (gapSlot - 3), pipeTileWidth, pipeTileHeight));
-    upPipe.push(this.makePipe("greenPipe", 3, startX, pipeTileHeight * (gapSlot - 4), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe("greenPipe", 4, startX, pipeTileHeight * (gapSlot - this.upGapSlots), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe("greenPipe", 3, startX, pipeTileHeight * (gapSlot - (this.upGapSlots + 1)), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot - 4; i > 0; i--) {
       upPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i - 1), pipeTileWidth, pipeTileHeight));
     }
 
-    downPipe.push(this.makePipe("greenPipe", 0, startX, pipeTileHeight * (gapSlot + 2), pipeTileWidth, pipeTileHeight));
-    downPipe.push(this.makePipe("greenPipe", 1, startX, pipeTileHeight * (gapSlot + 3), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe("greenPipe", 0, startX, pipeTileHeight * (gapSlot + this.downGapSlots), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe("greenPipe", 1, startX, pipeTileHeight * (gapSlot + (this.downGapSlots + 1)), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot + 3; i < this.maxPipeTiles - 1; i++) {
       downPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
