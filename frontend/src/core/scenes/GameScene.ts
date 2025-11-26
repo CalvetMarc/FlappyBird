@@ -99,15 +99,14 @@ export class GameScene implements IScene {
   }
 
   public async onExit(): Promise<void> {
+    
+  }
+
+  public async onDestroy(): Promise<void> {
     this.scoreText.removeFromParent();
     AssetsManager.I.releaseText(this.scoreText);
     this.pipesController.onDestroy();
     this.characterController.onDestroy();
-  }
-
-  public async onDestroy(): Promise<void> {
-    this.pipesController?.onDestroy();
-    this.characterController?.onDestroy();
   }
 
   private async createScoreText() {

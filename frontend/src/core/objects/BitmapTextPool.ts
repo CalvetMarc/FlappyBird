@@ -10,6 +10,10 @@ export class BitmapTextPool extends Pool<BitmapText> {
           style: { fontFamily: "default", fontSize: 32 }
         }),
       bt => {
+        bt.removeFromParent();
+        bt.removeChildren();
+        bt.removeAllListeners();
+        bt.tint = 0xFFFFFF;
         bt.text = "";
         bt.visible = false;
         bt.alpha = 1;

@@ -29,7 +29,9 @@ export class GameOverScene implements IScene {
   }
 
   public async onInit(): Promise<void> {
-    await this.loadAssets();    
+    this.createPanelBg();
+    this.createLabels();
+    this.createButtons();  
   }
 
   public async onEnter(): Promise<void> {
@@ -38,9 +40,12 @@ export class GameOverScene implements IScene {
   }
 
   public onUpdate(dt: number): void {}
-  public async onExit(): Promise<void> {}
+  public async onExit(): Promise<void> {
+    GameManager.I.backgroundController.setScrolling(true);
+  }
 
   public async onDestroy(): Promise<void> {
+    
     this.scoreLabelComponent.removeFromParent();
     this.containerUi.addChild(this.scoreLabelComponent);
     this.scoreLabelComponent.freeResources();
@@ -69,12 +74,6 @@ export class GameOverScene implements IScene {
     this.bgSprite.removeFromParent();
     AssetsManager.I.releaseSprite(this.bgSprite);
   }  
-
-  private async loadAssets() {
-    this.createPanelBg();
-    this.createLabels();
-    this.createButtons();
-  }
 
   private createPanelBg() { 
     const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelBlue");
