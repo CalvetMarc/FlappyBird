@@ -1,17 +1,18 @@
 export abstract class Pool<T> {
-  private pool: T[] = [];
+  public pool: T[] = [];
 
-  constructor(private readonly create: () => T, private readonly reset: (obj: T) => void, private readonly hide: (obj: T) => void = () => {}) {}
+  constructor(private readonly create: () => T, public readonly reset: (obj: T) => void, private readonly show: (obj: T) => void = () => {}) {}
 
   get(): T {
     const obj = this.pool.pop() ?? this.create();
-    this.reset(obj);
+    this.show(obj);
     return obj;
   }
 
   release(obj: T) {
-    this.hide(obj);
+    this.reset(obj);   
     this.pool.push(obj);
   }
+
 }
 

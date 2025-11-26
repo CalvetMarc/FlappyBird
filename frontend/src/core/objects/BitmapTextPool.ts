@@ -10,13 +10,13 @@ export class BitmapTextPool extends Pool<BitmapText> {
           style: { fontFamily: "default", fontSize: 32 }
         }),
       bt => {
-        bt.visible = true;
+        bt.text = "";
+        bt.visible = false;
         bt.alpha = 1;
         bt.scale.set(1);
       },
       bt => {
-        bt.text = "";
-        bt.visible = false;
+        bt.visible = true;
       }
     );
   }

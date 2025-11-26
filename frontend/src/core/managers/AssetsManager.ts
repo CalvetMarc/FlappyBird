@@ -7,7 +7,7 @@ import { BitmapTextPool } from "../objects/BitmapTextPool";
 
 export class AssetsManager extends SingletonBase<AssetsManager> {
   private textures: Map<string, Texture[]> = new Map();
-  private spritePool: SpritePool;
+   spritePool: SpritePool;
   private textPool: BitmapTextPool;
 
   private constructor() {
@@ -61,11 +61,19 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     const frames = this.textures.get(asset);
     if (!frames) throw new Error(`Frames not found for asset: textures/${asset}`);
 
-    if (!sprite) return this.spritePool.getForTexture(frames[frame]);
+    if (!sprite) {
+      sprite = this.spritePool.getForTexture(frames[frame]);
+      sprite.scale.set(1);
+    }
+    else{
+      //const prevScale = sprite.scale;
+      sprite.texture = frames[frame];
+      //sprite.scale = prevScale;
+    }
 
-    sprite.texture = frames[frame];
     return sprite;
   }
+
 
   public getFrameCount(asset: string): number {
     const frames = this.textures.get(asset);

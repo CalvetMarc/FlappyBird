@@ -10,6 +10,7 @@ export class Label extends Container {
     super();    
     
     this.labelBgSprite = AssetsManager.I.getSprite("title2up", 0);
+    //console.log(this.labelBgSprite.scale);
     this.labelBgSprite.anchor = 0.5;
     this.labelBgSprite.scale.y = 0.7;
     this.labelBgSprite.zIndex = 1;

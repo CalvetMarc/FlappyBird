@@ -6,27 +6,43 @@ export class SpritePool extends Pool<Sprite> {
     super(
       () => new Sprite(),
       (sprite) => {
-        sprite.visible = true;
+        sprite.removeFromParent();
+        sprite.removeChildren();
+        sprite.removeAllListeners();
+
+        // Visual state
+        sprite.visible = false;
         sprite.alpha = 1;
+        sprite.position.set(0, 0);
         sprite.rotation = 0;
         sprite.scale.set(1);
-        sprite.position.set(0, 0);
-        sprite.anchor?.set?.(0);
+        sprite.skew.set(0, 0);
+        sprite.anchor.set(0);
         sprite.tint = 0xFFFFFF;
-        sprite.zIndex = 0; 
+        sprite.zIndex = 0;
+
+        // Interaction
         sprite.eventMode = "auto";
         sprite.cursor = "auto";
+        sprite.interactive = false; 
+        sprite.hitArea = null;
+
+        // Texture
+        sprite.texture = Texture.EMPTY;
+        sprite.width = 0;
+        sprite.height = 0;
+
+        // Filters and mask
         if (sprite.filters) {
           for (const f of sprite.filters) {
-            if (f.destroy) {
-              f.destroy();   
-            }
+            f.destroy?.();
           }
         }
         sprite.filters = null;
+        sprite.mask = null;
       },
       (sprite) => {
-        sprite.visible = false;
+        sprite.visible = true;
       }
     );
   }

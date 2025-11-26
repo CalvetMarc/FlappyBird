@@ -137,7 +137,7 @@ export class PipesController implements IGameObject{
     const pipeTileWidth = pipeTileHeight * aspectRelationPipeTile;
 
     const gapSlot = this.randomInteger(this.minTilesPerPipe + this.upGapSlots - 1, (this.maxPipeTiles) - (this.minTilesPerPipe + this.downGapSlots));
-    console.log(gapSlot);
+    //console.log(gapSlot);
     const startX =  LayoutManager.I.layoutVirtualSize.width;
 
     const upPipe: Sprite[] = [];

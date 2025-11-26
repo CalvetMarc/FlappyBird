@@ -38,7 +38,6 @@ export class CharacterController implements IGameObject{
 
   public onUpdate(dt: Milliseconds) {
     if (!this.bird) return;
-    console.log(this.isDead);
     const delta = dt / 1000;
 
     this.frameTimer += dt;
@@ -113,7 +112,10 @@ export class CharacterController implements IGameObject{
     this.bird.zIndex = 12;
 
     this.bird.position = {x: LayoutManager.I.layoutVirtualSize.width * 0.5, y: LayoutManager.I.layoutVirtualSize.height * 0.614};
-    this.bird.scale.set(LayoutManager.I.layoutVirtualSize.width * 0.0044);
+    const scale = LayoutManager.I.layoutVirtualSize.width * 0.0044;
+    this.bird.scale.set(scale);
+    console.log(this.bird.width);
+    console.log(this.bird.height);
 
     this.container.addChild(this.bird);
   }

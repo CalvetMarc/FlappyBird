@@ -26,7 +26,8 @@ export class SceneManager extends SingletonBase<SceneManager> {
     this.transitions = {
       play: () => {
         if (this.current instanceof MainMenuScene || this.current instanceof GameOverScene) {
-          this.setScene(GameScene, true);
+          this.clearPool();
+          this.setScene(GameScene, false);
         } else if (this.current instanceof PauseScene) {
           this.setScene(GameScene, false);
         }
@@ -51,8 +52,9 @@ export class SceneManager extends SingletonBase<SceneManager> {
           this.destroyFromPool(GameScene);
           this.setScene(MainMenuScene, true);
         }
-        else if (this.current instanceof GameOverScene) {
-          this.setScene(MainMenuScene, true);
+        else if (this.current instanceof GameOverScene) {       
+          this.clearPool();   
+          this.setScene(MainMenuScene, false);
         }
       },
       ranking: () => {
@@ -75,6 +77,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
 
   public update(dt: Milliseconds): void {
     this.current?.onUpdate(dt);
+    //console.log(this.scenePool.size);
   }
 
   public fire(event: SceneEvent): void {
@@ -129,4 +132,10 @@ export class SceneManager extends SingletonBase<SceneManager> {
     return false;
   }
 
+  private async clearPool(){
+    for(const scene of this.scenePool){
+      await scene.onDestroy();
+    }
+    this.scenePool.clear();
+  }
 }
