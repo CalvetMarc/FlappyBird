@@ -24,10 +24,17 @@ export class CreatedTween {
   private elapsedTime: Milliseconds = ms(0);
   private state: TWEEN_STATE;
 
+  public readonly finished: Promise<void>;
+  private _resolveFinish!: () => void;
+
   constructor(id: UniqueId, tween: Tween) {
     this.id = id;
     this.tween = tween;
     this.state = tween.waitTime > 0 ? "WAIT" : "ACTIVE";
+
+    this.finished = new Promise<void>((resolve) => {
+      this._resolveFinish = resolve;
+    });
   }
 
   public updateTween(dt: Milliseconds): void {
@@ -47,6 +54,7 @@ export class CreatedTween {
 
     if (this.elapsedTime >= this.tween.duration) {
       this.tween.onComplete?.();
+      this._resolveFinish();
       this.state = "FINISHED";
     }
   }
@@ -179,7 +187,7 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   //PREMADE
 
-  public fadeTo(targetObject: ViewContainer[], finalValue: number, duration: number, waitTime: number = 0, onComplete?: () => void): number {
+  public fadeTo(targetObject: ViewContainer[], finalValue: number, duration: number, waitTime: number = 0, onComplete?: () => void): CreatedTween {
     const start = targetObject[0].alpha;
 
     return TweenManager.I.AddTween(<Tween<ViewContainer[]>>{

@@ -7,11 +7,14 @@ import { SceneManager } from "../managers/SceneManager";
 import { DataField } from "../objects/UI/DataField";
 import { sendScore } from "../../SessionManager";
 import { GameManager } from "../managers/GameManager";
+import { TweenManager } from "../managers/TweenManager";
+import { UniqueId } from "../objects/IdProvider";
 
 export class GameOverScene implements IScene {
 
   private titleText!: BitmapText;
   private bgSprite!: Sprite;
+  private bird?: Sprite;
   private titleBgSprite!: Sprite;
   private restartBtn!: Button;
   private exitBtn!: Button;
@@ -20,22 +23,29 @@ export class GameOverScene implements IScene {
   private timeLabelComponent!: DataField;
   private rankingReachedLabelComponent!: DataField;
 
+  private birdPreview: boolean;
+
   public containerGame: Container;
   public containerUi: Container;
 
   public constructor() {
     this.containerGame = new Container();
     this.containerUi = new Container();
+    this.birdPreview = false;    
   }
 
   public async onInit(): Promise<void> {
     this.createPanelBg();
     this.createLabels();
     this.createButtons();  
+
+    this.containerGame.alpha = 0;
+    this.containerUi.alpha = 0;
   }
 
   public async onEnter(): Promise<void> {
-    GameManager.I.forcePointerMove();    
+    this.birdPreview = false;
+    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished;   
   }
 
   public onUpdate(dt: number): void {}
@@ -44,6 +54,17 @@ export class GameOverScene implements IScene {
     GameManager.I.backgroundController.setScrolling(true);
     this.restartBtn.resetVisuals();
     this.exitBtn.resetVisuals();
+
+    if(this.birdPreview){
+      this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0);
+      this.bird!.anchor.set(0.5);
+      this.bird!.zIndex = 12;
+      this.bird!.position = {x: LayoutManager.I.layoutCurrentSize.width * 0.5, y: LayoutManager.I.layoutCurrentSize.height * 0.614};
+      this.bird!.scale.set(LayoutManager.I.layoutVirtualSize.width * 0.0044);
+      this.containerGame.addChild(this.bird!);    
+    }
+
+    await TweenManager.I.fadeTo([this.containerUi], 0, 800).finished;   
   }
 
   public async onDestroy(): Promise<void> {
@@ -67,6 +88,11 @@ export class GameOverScene implements IScene {
     this.exitBtn.removeFromParent();
     this.containerUi.addChild(this.exitBtn);
     this.exitBtn.freeResources();
+
+    if(this.bird){
+      this.bird.removeFromParent();
+      AssetsManager.I.releaseSprite(this.bird);
+    }    
 
     this.titleBgSprite.removeChild();
     AssetsManager.I.releaseText(this.titleText);
@@ -134,12 +160,12 @@ export class GameOverScene implements IScene {
   }
   
   private createButtons() {  
-    this.exitBtn = new Button(0.35, "exit", () => SceneManager.I.fire("menu"), 0xff0044);
+    this.exitBtn = new Button(0.30, "exit", () => { this.birdPreview = false; SceneManager.I.fire("menu"); }, 0xff0044);
     this.exitBtn.position.x = 40;
     this.exitBtn.position.y = 8;
     this.exitBtn.rotation = -Math.PI * 0.5;
 
-    this.restartBtn = new Button(0.35, "restart", () => SceneManager.I.fire("play"), 0x0c0807);
+    this.restartBtn = new Button(0.30, "restart", () => { this.birdPreview = true; SceneManager.I.fire("play") }, 0x0c0807);
     this.restartBtn.position.x = 40;
     this.restartBtn.position.y = -8;
     this.restartBtn.rotation = -Math.PI * 0.5;

@@ -33,7 +33,9 @@ export class SettingsScene implements IScene {
   }
 
   public async onInit(): Promise<void> {
-    await this.loadAssets();
+    this.createSettingsBg();
+    this.createToggles();
+    this.createButton();
   }
 
   public onEnter(): void {
@@ -79,12 +81,6 @@ export class SettingsScene implements IScene {
     this.bgSprite.removeChildren();
     this.bgSprite.removeFromParent();
     AssetsManager.I.releaseSprite(this.bgSprite);
-  }
-
-  private async loadAssets() {
-    this.createSettingsBg();
-    this.createToggles();
-    this.createButton();
   }
 
   private createSettingsBg() { 
@@ -146,7 +142,7 @@ export class SettingsScene implements IScene {
 
   private createButton() {
 
-    this.closeBtn = new Button(0.35, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
 

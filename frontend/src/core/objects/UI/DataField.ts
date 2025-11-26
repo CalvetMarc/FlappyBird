@@ -7,10 +7,10 @@ export class DataField extends Container {
   private dataLabelText: BitmapText;
   private labelComponent: Label;
 
-  constructor(label: string, dataLabel: string, fontSize: number, textTintHex: number = 0x222222, dataTextTintHex: number = 0x222222) {
+  constructor(label: string, dataLabel: string, fontSize: number, textTintHex: number = 0x222222, dataTextTintHex: number = 0x222222, scaleY: number = 0.7) {
     super();    
     
-    this.labelComponent = new Label(label, fontSize, textTintHex);
+    this.labelComponent = new Label(label, fontSize, textTintHex, scaleY);
     this.addChild(this.labelComponent);
 
     this.dataLabelText = AssetsManager.I.getText(dataLabel, "vcrBase", fontSize);

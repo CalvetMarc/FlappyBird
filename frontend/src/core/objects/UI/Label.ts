@@ -6,13 +6,13 @@ export class Label extends Container {
   private labelBgSprite: Sprite;
   private labelText: BitmapText;
 
-  constructor(label: string, fontSize: number, textTintHex: number = 0x222222) {
+  constructor(label: string, fontSize: number, textTintHex: number = 0x222222, scaleY: number = 0.7) {
     super();    
     
     this.labelBgSprite = AssetsManager.I.getSprite("title2up", 0);
     //console.log(this.labelBgSprite.scale);
     this.labelBgSprite.anchor = 0.5;
-    this.labelBgSprite.scale.y = 0.7;
+    this.labelBgSprite.scale.y = scaleY;
     this.labelBgSprite.zIndex = 1;
 
     this.labelText = AssetsManager.I.getText(label, "vcrBase", fontSize);

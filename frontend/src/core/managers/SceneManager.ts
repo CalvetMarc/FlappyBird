@@ -27,8 +27,9 @@ export class SceneManager extends SingletonBase<SceneManager> {
       play: () => {
         if (this.current instanceof MainMenuScene || this.current instanceof GameOverScene) {
           this.clearPool();
-          this.setScene(GameScene, false);
+          this.setScene(GameScene, true);
         } else if (this.current instanceof PauseScene) {
+          this.destroyFromPool(SettingsScene);
           this.setScene(GameScene, false);
         }
       },
@@ -54,7 +55,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
         }
         else if (this.current instanceof GameOverScene) {       
           this.clearPool();   
-          this.setScene(MainMenuScene, false);
+          this.setScene(MainMenuScene, true);
         }
       },
       ranking: () => {
@@ -77,7 +78,6 @@ export class SceneManager extends SingletonBase<SceneManager> {
 
   public update(dt: Milliseconds): void {
     this.current?.onUpdate(dt);
-    //console.log(this.scenePool.size);
   }
 
   public fire(event: SceneEvent): void {

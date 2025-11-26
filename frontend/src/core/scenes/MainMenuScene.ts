@@ -59,9 +59,7 @@ export class MainMenuScene implements IScene {
     this.fadeTo(1, 500, 100);
   }
 
-  public onUpdate(dt: number): void { 
-      console.log(`Mouse: ${GameManager.I.mousePos}, PlayBtn: ${this.playBtn.position}`);
-  }
+  public onUpdate(dt: number): void { }
 
 
   public async onExit(): Promise<void> {

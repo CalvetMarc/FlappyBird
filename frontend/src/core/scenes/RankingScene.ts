@@ -1,9 +1,23 @@
-import { Container, Graphics, Text } from "pixi.js";
+import { Container, Sprite, BitmapText, Size, Graphics } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
+import { Button } from "../objects/UI/Button";
+import { DataField } from "../objects/UI/DataField";
+import { GameManager } from "../managers/GameManager";
+import { TweenManager } from "../managers/TweenManager";
+import { AssetsManager } from "../managers/AssetsManager";
+import { LayoutManager } from "../managers/LayoutManager";
 
+const isTest: boolean = true;
 
 export class RankingScene implements IScene {
+  
+  private titleText!: BitmapText;
+  private bgSprite!: Sprite;
+  private titleBgSprite!: Sprite;
+  private closeBtn!: Button;
+
+  private ranking: DataField[] = [];
   
   public containerGame: Container;
   public containerUi: Container;
@@ -11,15 +25,23 @@ export class RankingScene implements IScene {
   public constructor() {
     this.containerGame = new Container();
     this.containerUi = new Container();
+
+    this.containerGame.sortableChildren = true;
+    this.containerUi.sortableChildren = true;
   }
 
   public async onInit(): Promise<void> {
-    
+    this.createPanelBg();
+    this.createLabels();
+    this.createButton();  
   }
 
   /** Called when the scene becomes active */
-  public onEnter(): void {
-    
+  public async onEnter(): Promise<void> {
+    this.containerGame.alpha = 0;
+    this.containerUi.alpha = 0;
+    GameManager.I.forcePointerMove();
+    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 500).finished;  
   }
 
   /** Called every frame */
@@ -36,10 +58,102 @@ export class RankingScene implements IScene {
     
   }
 
-  public onResize(width: number, height: number): void {
+  private createPanelBg(): void{
+    const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelOrange");
+    const aspectRelationBg: number = textureBgSize.width / textureBgSize.height;
+    this.bgSprite = AssetsManager.I.getSprite("bigPanelOrange");
+
+    this.bgSprite.height = LayoutManager.I.layoutVirtualSize.height * 0.5;
+    this.bgSprite.width = this.bgSprite.height * aspectRelationBg;
+    this.bgSprite.rotation = Math.PI * 0.5;
+    this.bgSprite.anchor.set(0.5);
+    this.bgSprite.zIndex = 5;
+    this.bgSprite.position.set(LayoutManager.I.layoutCurrentSize.width * 0.5, LayoutManager.I.layoutCurrentSize.height * 0.43);
+
+    const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
+    const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;
+    this.titleBgSprite = AssetsManager.I.getSprite("title1up");
+
+    const width = this.titleBgSprite.width * 1.1;
+    const height = width * aspectRelationTitleBg;
+    this.titleBgSprite.width = width;
+    this.titleBgSprite.height = height;
+    this.titleBgSprite.rotation = -Math.PI * 0.5;
+    this.titleBgSprite.anchor.set(0.5);
+    this.titleBgSprite.zIndex = 5;
+    this.titleBgSprite.position.set(-39, 0);
     
+    this.titleText = AssetsManager.I.getText("Ranking", "vcrHeavy", 9.5);
+    this.titleText.anchor.set(0.5);
+    this.titleText.zIndex = 6;
+    this.titleText.position.set(0.5, -3);
+    this.titleText.tint = 0xC00000;
+    
+    this.titleBgSprite.addChild(this.titleText);
+    this.bgSprite.addChild(this.titleBgSprite);    
+    this.containerUi.addChild(this.bgSprite);
   }
 
-  /** Called if the SceneManager decides to fully destroy this scene */
+  private createLabels(){
+    if(isTest){
+      const textureSize: Size = AssetsManager.I.getTextureSize("textPage");    
+
+      const betweenMask = new Graphics();
+      betweenMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52).fill(0xffffff);
+
+      for(let i = 0; i < 5; i++){
+        const sprite = AssetsManager.I.getSprite("textPage");
+        this.bgSprite.addChild(sprite);
+
+        sprite.anchor = 0.5;
+        sprite.rotation = -Math.PI * 0.5;
+
+        let startY = i !== 4 ? -15 + i * 11 : - 8 + i * 7.9;
+        sprite.position.set(startY, 0); //5.5
+
+        sprite.scale.set(0.85, 0.7);
+
+        let currentMask: Graphics;
+
+        if(i === 0){
+          currentMask = new Graphics();
+          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65).fill(0xffffff);
+        } 
+        else if(i === 4){
+          currentMask = new Graphics();
+          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7).fill(0xffffff);
+        }
+        else{
+          currentMask = betweenMask.clone(false);
+        }
+
+        sprite.addChild(currentMask);
+        sprite.mask = currentMask;
+      }
+
+      for(let i = 0; i < 10; i++){
+        const df: DataField = new DataField(`${i+1} - Guest${i}`, `${(10-i)*100}`, 4, 0x000000, 0x0000ff, 0.33);
+        this.bgSprite.addChild(df);        
+        df.rotation = -Math.PI * 0.5;
+        df.position.set(-25 + (i * 8), 0);
+        df.scale.set(0.95);
+        df.alpha = 0;
+
+        this.ranking.push(df);        
+      }
+    }
+    else{
+
+    }
+
+  }
+
+  private createButton() {
+    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn.position.x = 40;
+    this.closeBtn.rotation = -Math.PI * 0.5;
+
+    this.bgSprite.addChild(this.closeBtn);
+  }
  
 }
