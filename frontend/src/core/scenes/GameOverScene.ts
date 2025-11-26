@@ -35,13 +35,15 @@ export class GameOverScene implements IScene {
   }
 
   public async onEnter(): Promise<void> {
-
-    
+    GameManager.I.forcePointerMove();    
   }
 
   public onUpdate(dt: number): void {}
+
   public async onExit(): Promise<void> {
     GameManager.I.backgroundController.setScrolling(true);
+    this.restartBtn.resetVisuals();
+    this.exitBtn.resetVisuals();
   }
 
   public async onDestroy(): Promise<void> {

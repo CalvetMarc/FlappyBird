@@ -1,4 +1,4 @@
-import { Application, TextureSource } from "pixi.js";
+import { Application, TextureSource, Point } from "pixi.js";
 import { SceneManager } from "./SceneManager";
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { Milliseconds, ms } from "../time/TimeUnits";
@@ -16,10 +16,12 @@ export class GameManager extends SingletonBase<GameManager> {
   public sessionData: SessionInfo;
   private appBackground!: BackgroundController 
   private app!: Application;
+  public mousePos: Point;
 
   private constructor() {
     super();
     this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
+    this.mousePos = new Point(0,0);
   }
 
   public async start(): Promise<void> {
@@ -31,6 +33,8 @@ export class GameManager extends SingletonBase<GameManager> {
     document.body.appendChild(this.app.canvas);
 
     Object.assign(this.app.canvas.style, { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "block" });
+
+    this.initMouseTracking();
 
     await LayoutManager.I.start();
     
@@ -50,12 +54,39 @@ export class GameManager extends SingletonBase<GameManager> {
     SceneManager.I.update(dt);
   }
 
+  private initMouseTracking(){
+    this.app.canvas.addEventListener("pointermove", e => {
+        const rect = this.app.canvas.getBoundingClientRect();
+        this.mousePos.x = e.clientX - rect.left;
+        this.mousePos.y = e.clientY - rect.top;
+    });
+  }
+
+  public forcePointerMove() {
+    const canvas = this.app.canvas;
+    const rect = canvas.getBoundingClientRect();
+
+    const clientX = rect.left + this.mousePos.x;
+    const clientY = rect.top + this.mousePos.y;
+
+    const ev = new PointerEvent("pointermove", {
+      clientX,
+      clientY,
+      bubbles: true,
+      cancelable: true,
+      pointerId: 1,
+      pointerType: "mouse"
+    });
+
+    canvas.dispatchEvent(ev);
+  }
+
   public get gameApp(): Application {
     return this.app;
   }
 
   public get backgroundController(): BackgroundController{
     return this.appBackground;
-  }
-    
+  }  
+
 }

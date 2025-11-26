@@ -1,4 +1,4 @@
-import { Sprite, Graphics, Container, ColorMatrixFilter } from "pixi.js";
+import { Sprite, Graphics, Container, ColorMatrixFilter, FederatedPointerEvent } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { LayoutManager } from "../../managers/LayoutManager";
 
@@ -59,6 +59,11 @@ export class Button extends Container {
     this.removeChildren();
     this.bgSprite.removeAllListeners();
     AssetsManager.I.releaseSprite(this.bgSprite);
+  }
+
+  public resetVisuals(){
+     this.bgSprite.tint = 0xFFFFFF;        
+     this.iconSprite.tint = 0xFFFFFF;
   }
 
   private onPointerDown() {

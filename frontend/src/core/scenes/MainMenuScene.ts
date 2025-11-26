@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, Rectangle, BitmapText } from "pixi.js";
+import { Container, Sprite, Texture, Rectangle, BitmapText, Point } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { GameManager } from "../managers/GameManager";
@@ -23,6 +23,8 @@ export class MainMenuScene implements IScene {
   private baseY = 0;
   private elapsed = 0;
 
+  private mousePosOnExit: Point;
+
   private birdFadeOf: boolean;
 
   private logoTweenID!: UniqueId; 
@@ -36,6 +38,7 @@ export class MainMenuScene implements IScene {
     this.containerGame.sortableChildren = true;
     this.containerUi.sortableChildren = true;
     this.birdFadeOf = true;   
+    this.mousePosOnExit = new Point(0, 0);
   }
 
   public async onInit(): Promise<void> {
@@ -51,13 +54,21 @@ export class MainMenuScene implements IScene {
 
   public onEnter(): void {
     this.containerUi.alpha = 0;
-    this.birdFadeOf = true;
+    this.birdFadeOf = true;    
+    GameManager.I.forcePointerMove();
     this.fadeTo(1, 500, 100);
   }
 
-  public onUpdate(dt: number): void {  }
+  public onUpdate(dt: number): void { 
+      console.log(`Mouse: ${GameManager.I.mousePos}, PlayBtn: ${this.playBtn.position}`);
+  }
+
 
   public async onExit(): Promise<void> {
+    this.playBtn.resetVisuals();
+    this.settingsBtn.resetVisuals();
+    this.rankingBtn.resetVisuals();
+
     await new Promise<void>((resolve) => {
       if (!this.birdFadeOf && this.bird) {
         this.containerUi.removeChild(this.bird);

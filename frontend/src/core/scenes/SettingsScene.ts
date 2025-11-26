@@ -39,12 +39,15 @@ export class SettingsScene implements IScene {
   public onEnter(): void {
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
+    GameManager.I.forcePointerMove();
     this.fadeTo(1, 500, 100);
   }
 
   public onUpdate(dt: number): void {}
 
   public async onExit(): Promise<void> {
+    this.closeBtn.resetVisuals();
+
     await new Promise<void>((resolve) => {
       this.fadeTo(0, 400, 0, () => {
         resolve();
