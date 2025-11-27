@@ -90,7 +90,8 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
   }
 
   public releaseSprite(sprite: Sprite) {
-    this.spritePool.release(sprite);
+    if(sprite)
+      this.spritePool.release(sprite);
   }
 
   // ---------- BITMAP TEXT ----------
@@ -99,6 +100,7 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
   }
 
   public releaseText(bt: BitmapText) {
-    this.textPool.release(bt);
+    if(bt)
+      this.textPool.release(bt);
   }
 }

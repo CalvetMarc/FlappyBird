@@ -53,11 +53,37 @@ export class RankingScene implements IScene {
 
   /** Called before scene is removed or pooled */
   public async onExit(): Promise<void> {
-    
+    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 500).finished; 
   }
 
   public async onDestroy(): Promise<void> {
-    
+    this.closeBtn.freeResources();
+    this.closeBtn.removeFromParent();
+    this.closeBtn.removeChildren();
+
+    for(const field of this.ranking){
+      field.freeResources();
+    }
+    this.ranking = [];
+
+    for(const bg of this.boardBgs){
+      bg.removeFromParent();
+      bg.removeChildren();
+      AssetsManager.I.releaseSprite(bg);
+    }
+
+    this.titleText.removeFromParent();
+    this.titleText.removeChildren();
+    AssetsManager.I.releaseText(this.titleText);
+
+    this.bgSprite.removeFromParent();
+    this.bgSprite.removeChildren();
+    AssetsManager.I.releaseSprite(this.bgSprite);
+   
+
+    this.titleBgSprite.removeFromParent();
+    this.titleBgSprite.removeChildren();
+    AssetsManager.I.releaseSprite(this.titleBgSprite);
   }
 
   private createPanelBg(): void{

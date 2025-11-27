@@ -53,6 +53,7 @@ export class RankingField extends Container {
         entry.removeChildren();
         AssetsManager.I.releaseText(entry);
     }
+    this.rankingEntryTexts = [];
   }
   private formatTime(totalSeconds: number): string {
     const hours = Math.floor(totalSeconds / 3600);
