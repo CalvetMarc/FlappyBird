@@ -38,11 +38,12 @@ export class SettingsScene implements IScene {
     this.createButton();
   }
 
-  public onEnter(): void {
+  public async onEnter(): Promise<void> {
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
     GameManager.I.forcePointerMove();
-    this.fadeTo(1, 500, 100);
+
+    await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100).finished;
   }
 
   public onUpdate(dt: number): void {}
@@ -50,11 +51,7 @@ export class SettingsScene implements IScene {
   public async onExit(): Promise<void> {
     this.closeBtn.resetVisuals();
 
-    await new Promise<void>((resolve) => {
-      this.fadeTo(0, 400, 0, () => {
-        resolve();
-      });
-    });
+    await TweenManager.I.fadeTo([this.containerUi], 0, 400).finished;
   }
 
   public async onDestroy(): Promise<void> {
@@ -147,25 +144,6 @@ export class SettingsScene implements IScene {
     this.closeBtn.rotation = -Math.PI * 0.5;
 
     this.bgSprite.addChild(this.closeBtn);
-  }
-
-  private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {
-
-    const start = this.containerUi.alpha;
-
-    TweenManager.I.AddTween(<Tween<Container>>{
-    
-      waitTime: ms(waitTime),
-      duration: ms(duration),
-      context: this.containerUi!,
-      tweenFunction: function (elapsed) {
-        const t = TweenManager.easeOutCubic(elapsed, this.duration);
-        const v = start + (target - start) * t;
-        this.context.alpha = v;
-
-        if (elapsed >= ms(duration)) onComplete?.();
-      }    
-    });
   }
 
 }

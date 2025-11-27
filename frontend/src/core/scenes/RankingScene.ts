@@ -137,7 +137,7 @@ export class RankingScene implements IScene {
         sprite.rotation = -Math.PI * 0.5;
 
         let startY = i !== 4 ? -15 + i * 11 : - 8 + i * 7.9;
-        sprite.position.set(startY, 0); //5.5
+        sprite.position.set(startY, 0); 
 
         sprite.scale.set(0.85, 0.7);
 
@@ -164,7 +164,7 @@ export class RankingScene implements IScene {
           const pos = i * 2 + (j + 1);
           console.log(pos);
           const entry: SessionInfo = {name: `Guest${pos}`, lastScore: (10-pos)*100, lastGameTime: 1 + (2*(10-pos)*100) };
-          const rankingField: RankingField = new RankingField(sprite, j + 1, pos, entry, 4, [3,3,3], 0xffffff, [0x707070, 0xFF0000, 0x0000FF]);
+          const rankingField: RankingField = new RankingField(sprite, j + 1, pos, entry, 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
           rankingField.zIndex = 100000;
           
           this.ranking.push(rankingField);   

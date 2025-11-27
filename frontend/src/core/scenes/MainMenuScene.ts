@@ -52,11 +52,11 @@ export class MainMenuScene implements IScene {
     this.containerUi.alpha = 0;
   }
 
-  public onEnter(): void {
+  public async onEnter(): Promise<void> {
     this.containerUi.alpha = 0;
     this.birdFadeOf = true;    
     GameManager.I.forcePointerMove();
-    this.fadeTo(1, 500, 100);
+    await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100);
   }
 
   public onUpdate(dt: number): void { }
@@ -67,18 +67,18 @@ export class MainMenuScene implements IScene {
     this.settingsBtn.resetVisuals();
     this.rankingBtn.resetVisuals();
 
-    await new Promise<void>((resolve) => {
-      if (!this.birdFadeOf && this.bird) {
-        this.containerUi.removeChild(this.bird);
-        this.containerGame.addChild(this.bird);
-      }
-      
-      this.fadeTo(0, 500, 0, () => {
+    if(this.bird && !this.birdFadeOf){
+      this.containerUi.removeChild(this.bird);
+      this.containerGame.addChild(this.bird);
+    }
+
+    await TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
+      if(this.bird && !this.birdFadeOf){
         this.containerGame.removeChild(this.bird);
         this.containerUi.addChild(this.bird);
-        resolve();
-      });
-    });
+      }
+    }).finished;
+
   }
 
   public async onDestroy(): Promise<void> {    
@@ -170,27 +170,11 @@ export class MainMenuScene implements IScene {
       duration: duration,
       context: this.logo!,
       tweenFunction: function (elapsed) {
-        const t = Number(elapsed) / Number(this.duration); // LINEAL ⇒ 0..1
+        const t = Number(elapsed) / Number(this.duration); 
         const offset = Math.sin(t * Math.PI * 2) * amplitude; 
         this.context.y = baseY + offset;
       }
     }).id;
   }
 
-
-  private fadeTo(target: number, duration: number, waitTime: number, onComplete?: () => void) {
-    const start = this.containerUi.alpha;
-
-    TweenManager.I.AddTween(<Tween<Container>>{
-      waitTime: ms(waitTime),
-      duration: ms(duration),
-      context: this.containerUi!,
-      tweenFunction: function (elapsed) {
-        const t = TweenManager.easeOutCubic(elapsed, this.duration);
-        const v = start + (target - start) * t;
-        this.context.alpha = v;
-        if (elapsed >= ms(duration)) onComplete?.();
-      },
-    });
-  }
 }

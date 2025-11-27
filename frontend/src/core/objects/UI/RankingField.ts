@@ -12,7 +12,7 @@ export class RankingField extends Container {
 
     super();        
 
-    let bmt: BitmapText = AssetsManager.I.getText(`${rankingPos.toString()}`, "vcrHeavy", posFontSize);
+    let bmt: BitmapText = AssetsManager.I.getText(`${rankingPos.toString()}`, "vcrBase", posFontSize);
     bmt.tint = posTintHex;
     bmt.anchor.set(0, 0.5);
     bg.addChild(bmt);

@@ -9,7 +9,8 @@ export class PauseScene implements IScene {
   public containerUi: Container;
   
   constructor() {
-    
+    this.containerGame = new Container();
+    this.containerUi = new Container();
   }
 
   public async onInit(): Promise<void> {

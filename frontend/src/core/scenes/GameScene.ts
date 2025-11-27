@@ -45,18 +45,9 @@ export class GameScene implements IScene {
     this.pipesController.setScroll(true);
   }
 
-  public onEnter(): void {
-    this.containerUi.alpha = 0;
-    const startTime = performance.now();
-    const duration = 400;
-    this.elapsedTime = 0;
-
-    const fadeIn = (now: number) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      this.containerUi.alpha = t;
-      if (t < 1) requestAnimationFrame(fadeIn);
-    };
-    requestAnimationFrame(fadeIn);
+  public async onEnter(): Promise<void> {
+    this.containerUi.alpha = 0;   
+    await TweenManager.I.fadeTo([this.containerUi], 1, 400).finished;    
   }
 
   public onUpdate(dt: Milliseconds): void {
