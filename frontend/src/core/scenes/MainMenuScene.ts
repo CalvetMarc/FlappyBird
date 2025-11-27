@@ -100,11 +100,11 @@ export class MainMenuScene implements IScene {
     this.logo = AssetsManager.I.getSprite("logo", 0);
     this.logoBaseW = this.logo.texture.width;
 
-    const scale = (LayoutManager.I.layoutVirtualSize.width / 3) / this.logoBaseW;
+    const scale = ((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 3) / this.logoBaseW;
     this.logo.scale.set(scale);
 
     this.logo.anchor.set(0.5);
-    this.logo.position.set(LayoutManager.I.layoutCurrentSize.width * 0.5, LayoutManager.I.layoutCurrentSize.height * 0.125);
+    this.logo.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.125);
     this.baseY = this.logo.position.y;
 
     this.logo.zIndex = 10;
@@ -112,17 +112,17 @@ export class MainMenuScene implements IScene {
   }  
 
   private createButtons() {
-    const buttonsYPos = LayoutManager.I.layoutCurrentSize.height * 0.77;
-    const buttonsXSpacing = LayoutManager.I.layoutCurrentSize.width / 4;
+    const buttonsYPos =(LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.77;
+    const buttonsXSpacing = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 4;
 
     this.playBtn = new Button(2.5, "play", () => {this.birdFadeOf = false; SceneManager.I.fire("play");});
-    this.playBtn.position = {x: LayoutManager.I.layoutCurrentSize.width * 0.5, y: buttonsYPos};
+    this.playBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, y: buttonsYPos};
 
     this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), 0x0c0807);
-    this.settingsBtn.position = {x: LayoutManager.I.layoutCurrentSize.width * 0.5 - buttonsXSpacing, y: buttonsYPos};
+    this.settingsBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 - buttonsXSpacing, y: buttonsYPos};
 
     this.rankingBtn = new Button(2.5, "ranking", () => SceneManager.I.fire("ranking"), 0xff8800);
-    this.rankingBtn.position = {x: LayoutManager.I.layoutCurrentSize.width * 0.5 + buttonsXSpacing, y: buttonsYPos};
+    this.rankingBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 + buttonsXSpacing, y: buttonsYPos};
     
     this.containerUi.addChild(this.playBtn, this.settingsBtn, this.rankingBtn);
   };
@@ -132,14 +132,14 @@ export class MainMenuScene implements IScene {
     this.bird.anchor.set(0.5);
     this.bird.zIndex = 12;
 
-    this.bird.position = {x: LayoutManager.I.layoutCurrentSize.width * 0.5, y: LayoutManager.I.layoutCurrentSize.height * 0.614};
-    this.bird.scale.set(LayoutManager.I.layoutVirtualSize.width * 0.0044);
+    this.bird.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, y: (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.614};
+    this.bird.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.0044);
 
     this.containerUi.addChild(this.bird);    
   }
 
   private createSideButtons() {    
-    const distFromCenter = LayoutManager.I.layoutCurrentSize.width / 10;
+    const distFromCenter = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 10;
 
     this.nextBtn = new Button(1.5, "smallArrow", () => {
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex + 1) % 7;
@@ -162,7 +162,7 @@ export class MainMenuScene implements IScene {
 
     const baseY = this.logo.y;
 
-    const amplitude = LayoutManager.I.layoutCurrentSize.height * 0.015;
+    const amplitude = (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.015;
     const duration = ms(2000);
 
     this.logoTweenID = TweenManager.I.AddLoopTween(<Tween<Container>>{

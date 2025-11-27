@@ -18,7 +18,7 @@ export class Button extends Container {
     this.bgSprite.anchor = 0.5;
     this.bgSprite.eventMode = "static";
     this.bgSprite.cursor = "pointer";
-    this.bgSprite.setSize(LayoutManager.I.layoutCurrentSize.width / 25);
+    this.bgSprite.setSize((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 25);
 
     this.iconSprite = AssetsManager.I.getSprite(iconAssetName, 0);
     this.iconSprite.anchor = 0.5;

@@ -113,7 +113,7 @@ export class GameOverScene implements IScene {
     this.bgSprite.rotation = Math.PI * 0.5;
     this.bgSprite.anchor.set(0.5);
     this.bgSprite.zIndex = 5;
-    this.bgSprite.position.set(LayoutManager.I.layoutCurrentSize.width * 0.5, LayoutManager.I.layoutCurrentSize.height * 0.43);
+    this.bgSprite.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.43);
 
     const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
     const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;
