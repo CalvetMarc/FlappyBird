@@ -1,0 +1,16 @@
+{
+  "name": "flappybird-api",
+  "version": "1.0.0",
+  "description": "Azure Functions backend for ranking",
+  "scripts": {
+    "start": "func start",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "@azure/cosmos": "^4.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
