@@ -5,7 +5,9 @@
     "outDir": "dist",
     "rootDir": ".",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node"],   
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",

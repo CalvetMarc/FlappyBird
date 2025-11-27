@@ -7,10 +7,11 @@
     "build": "tsc -p ."
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0",
-    "@azure/cosmos": "^4.1.0"
+    "@azure/cosmos": "^4.1.0",
+    "@azure/functions": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "^18.19.130",
     "typescript": "^5.0.0"
   }
 }

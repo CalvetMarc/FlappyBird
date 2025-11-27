@@ -1,34 +1,19 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 
-const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
-): Promise<void> {
-  try {
+app.http("getRanking", {
+  methods: ["GET"],
+  authLevel: "anonymous",
+  handler: async (req: HttpRequest): Promise<HttpResponseInit> => {
     const client = new CosmosClient(process.env.COSMOS_CONN!);
     const container = client.database("flappy").container("ranking");
 
-    const query = `
-      SELECT * 
-      FROM c 
-      ORDER BY c.lastScore DESC 
-      OFFSET 0 LIMIT 10
-    `;
-
+    const query = "SELECT * FROM c ORDER BY c.score DESC OFFSET 0 LIMIT 10";
     const { resources } = await container.items.query(query).fetchAll();
 
-    context.res = {
+    return {
       status: 200,
-      body: resources
-    };
-
-  } catch (err) {
-    context.res = {
-      status: 500,
-      body: { error: "Error getting ranking", details: err }
+      jsonBody: resources
     };
   }
-};
-
-export default httpTrigger;
+});
