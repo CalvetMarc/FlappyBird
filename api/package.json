@@ -1,17 +1,20 @@
 {
   "name": "flappybird-api",
   "version": "1.0.0",
-  "description": "Azure Functions backend for ranking",
+  "main": "dist/index.js",
+  "license": "MIT",
   "scripts": {
-    "start": "func start",
     "build": "tsc -p ."
   },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
-    "@azure/cosmos": "^4.1.0",
-    "@azure/functions": "^4.0.0"
+    "@azure/functions": "^4.3.0",
+    "@azure/cosmos": "^3.17.3"
   },
   "devDependencies": {
-    "@types/node": "^18.19.130",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
   }
 }
