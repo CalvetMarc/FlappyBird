@@ -7,9 +7,9 @@ import { LayoutManager } from "./LayoutManager";
 import { BackgroundController } from "../objects/Game/BackgroundController";
 
 export type SessionInfo = {
+  name: string;
   lastScore: number;
   lastGameTime: number;
-  name: string;
 }
 
 export class GameManager extends SingletonBase<GameManager> { 

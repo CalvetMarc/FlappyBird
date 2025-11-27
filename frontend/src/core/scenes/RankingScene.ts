@@ -3,10 +3,11 @@ import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { Button } from "../objects/UI/Button";
 import { DataField } from "../objects/UI/DataField";
-import { GameManager } from "../managers/GameManager";
+import { GameManager, SessionInfo } from "../managers/GameManager";
 import { TweenManager } from "../managers/TweenManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
+import { RankingField } from "../objects/UI/RankingField";
 
 const isTest: boolean = true;
 
@@ -17,7 +18,8 @@ export class RankingScene implements IScene {
   private titleBgSprite!: Sprite;
   private closeBtn!: Button;
 
-  private ranking: DataField[] = [];
+  private boardBgs: Sprite[] = [];
+  private ranking: RankingField[] = [];
   
   public containerGame: Container;
   public containerUi: Container;
@@ -129,21 +131,24 @@ export class RankingScene implements IScene {
 
         sprite.addChild(currentMask);
         sprite.mask = currentMask;
+
+        this.boardBgs.push(sprite)
+
+        for(let j = 0; j < 2; j++){
+          const pos = i * 2 + (j + 1);
+          console.log(pos);
+          const entry: SessionInfo = {name: `Guest${pos}`, lastScore: (10-pos)*100, lastGameTime: 1 + (2*(10-pos)*100) };
+          const rankingField: RankingField = new RankingField(sprite, j + 1, pos, entry, 4, [3,3,3], 0xffffff, [0x707070, 0xFF0000, 0x0000FF]);
+          rankingField.zIndex = 100000;
+          
+          this.ranking.push(rankingField);   
+        }
+
       }
 
-      for(let i = 0; i < 10; i++){
-        const df: DataField = new DataField(`${i+1} - Guest${i}`, `${(10-i)*100}`, 4, 0x000000, 0x0000ff, 0.33);
-        this.bgSprite.addChild(df);        
-        df.rotation = -Math.PI * 0.5;
-        df.position.set(-25 + (i * 8), 0);
-        df.scale.set(0.95);
-        df.alpha = 0;
-
-        this.ranking.push(df);        
-      }
     }
     else{
-
+      
     }
 
   }
@@ -154,6 +159,6 @@ export class RankingScene implements IScene {
     this.closeBtn.rotation = -Math.PI * 0.5;
 
     this.bgSprite.addChild(this.closeBtn);
-  }
+  }  
  
 }
