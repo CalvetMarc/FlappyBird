@@ -1,47 +1,51 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 
 interface SessionInfo {
-  name: string;
-  lastScore: number;
+    name: string;
+    lastScore: number;
 }
 
-const httpTrigger: AzureFunction = async function (
-  context: Context,
-  req: HttpRequest
-): Promise<void> {
-  const body = req.body as SessionInfo;
+app.http("postRanking", {
+    methods: ["POST"],
+    authLevel: "anonymous",
+    handler: async (req: HttpRequest): Promise<HttpResponseInit> => {
 
-  if (!body?.name || typeof body.lastScore !== "number") {
-    context.res = { status: 400, body: { error: "Invalid body" } };
-    return;
-  }
+        const body = await req.json() as SessionInfo;
 
-  const client = new CosmosClient(process.env.COSMOS_CONN!);
-  const container = client.database("flappy").container("ranking");
+        if (!body?.name || typeof body.lastScore !== "number") {
+            return { status: 400, jsonBody: { error: "Invalid body" } };
+        }
 
-  // obtenir existents
-  const { resources } = await container.items.query("SELECT * FROM c").fetchAll();
+        const client = new CosmosClient(process.env.COSMOS_CONN!);
+        const container = client.database("flappy").container("ranking");
 
-  const sorted = [...resources, body]
-    .sort((a, b) => b.lastScore - a.lastScore)
-    .slice(0, 10);
+        // Llegeix tots
+        const { resources } = await container.items
+            .query("SELECT * FROM c")
+            .fetchAll();
 
-  // esborrar i reescriure
-  for (const r of resources) {
-    await container.item(r.id, r.id).delete();
-  }
+        // Ordena
+        const sorted = [...resources, body]
+            .sort((a, b) => b.lastScore - a.lastScore)
+            .slice(0, 10);
 
-  for (const r of sorted) {
-    await container.items.create(r);
-  }
+        // Esborra i recrea
+        for (const r of resources) {
+            await container.item(r.id, r.id).delete();
+        }
 
-  const hasEntered = sorted.some(x => x.name === body.name && x.lastScore === body.lastScore);
+        for (const r of sorted) {
+            await container.items.create(r);
+        }
 
-  context.res = {
-    status: 200,
-    body: { success: hasEntered }
-  };
-};
+        const hasEntered = sorted.some(x =>
+            x.name === body.name && x.lastScore === body.lastScore
+        );
 
-export default httpTrigger;
+        return {
+            status: 200,
+            jsonBody: { success: hasEntered }
+        };
+    }
+});
