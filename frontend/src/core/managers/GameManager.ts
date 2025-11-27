@@ -12,16 +12,24 @@ export type SessionInfo = {
   lastGameTime: number;
 }
 
+export type GameSettings = {
+  audioEnabled: boolean;
+  dayCycleEnabled: boolean;
+  speedRampEnabled: boolean;
+}
+
 export class GameManager extends SingletonBase<GameManager> { 
+  public mousePos: Point;
   public sessionData: SessionInfo;
+  public settings: GameSettings;
   private appBackground!: BackgroundController 
   private app!: Application;
-  public mousePos: Point;
 
   private constructor() {
     super();
-    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
     this.mousePos = new Point(0,0);
+    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
+    this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
   }
 
   public async start(): Promise<void> {

@@ -13,9 +13,11 @@ export class Toggle extends Container {
   private iconSprite: Sprite;  
   private currentValue: boolean;
 
+  private onPress: () => void;
+
   private labelComponent: Label;
 
-  constructor(labelText: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, initValue: boolean = true, 
+  constructor(labelText: string, iconAssetNameOn: string, iconAssetNameOff: string, toggleScale: number,  fontSize: number, onPress: () => void ,initValue: boolean = true, 
     textTintHex: number = 0x222222, boolean = false, iconRotationRadians: number = 0, iconScale: number = 2) {
     super();
 
@@ -52,6 +54,8 @@ export class Toggle extends Container {
 
     this.scale.set(toggleScale);
 
+    this.onPress = onPress;
+
     if(debug){
       this.debugBounds();
     }
@@ -69,6 +73,7 @@ export class Toggle extends Container {
   private onPointerDown(){    
     this.currentValue = !this.currentValue;
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
+    this.onPress();
   }
 
   private debugBounds(){

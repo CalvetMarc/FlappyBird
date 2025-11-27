@@ -66,9 +66,7 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
       sprite.scale.set(1);
     }
     else{
-      //const prevScale = sprite.scale;
       sprite.texture = frames[frame];
-      //sprite.scale = prevScale;
     }
 
     return sprite;
