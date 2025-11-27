@@ -1,51 +1,50 @@
 import { app, HttpRequest, HttpResponseInit } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 
-interface SessionInfo {
+const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING!);
+const database = client.database("Flappy");
+const container = database.container("Rankings");
+
+interface RankingInput {
     name: string;
-    lastScore: number;
+    score: number;
 }
 
 app.http("postRanking", {
     methods: ["POST"],
     authLevel: "anonymous",
     handler: async (req: HttpRequest): Promise<HttpResponseInit> => {
+        try {
+            const body = await req.json() as RankingInput;
 
-        const body = await req.json() as SessionInfo;
+            if (!body || !body.name || typeof body.score !== "number") {
+                return {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ error: "Invalid body format" })
+                };
+            }
 
-        if (!body?.name || typeof body.lastScore !== "number") {
-            return { status: 400, jsonBody: { error: "Invalid body" } };
+            const item = {
+                id: crypto.randomUUID(),
+                name: body.name,
+                score: body.score,
+                createdAt: new Date().toISOString()
+            };
+
+            await container.items.create(item);
+
+            return {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ success: true })
+            };
+        } catch (e: any) {
+            return {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ error: e.message ?? String(e) })
+            };
         }
-
-        const client = new CosmosClient(process.env.COSMOS_CONN!);
-        const container = client.database("flappy").container("ranking");
-
-        // Llegeix tots
-        const { resources } = await container.items
-            .query("SELECT * FROM c")
-            .fetchAll();
-
-        // Ordena
-        const sorted = [...resources, body]
-            .sort((a, b) => b.lastScore - a.lastScore)
-            .slice(0, 10);
-
-        // Esborra i recrea
-        for (const r of resources) {
-            await container.item(r.id, r.id).delete();
-        }
-
-        for (const r of sorted) {
-            await container.items.create(r);
-        }
-
-        const hasEntered = sorted.some(x =>
-            x.name === body.name && x.lastScore === body.lastScore
-        );
-
-        return {
-            status: 200,
-            jsonBody: { success: hasEntered }
-        };
     }
 });
