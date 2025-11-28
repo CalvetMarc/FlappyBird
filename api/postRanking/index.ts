@@ -29,6 +29,7 @@ const postRanking: AzureFunction = async (context: Context, req: HttpRequest) =>
     };
 
   } catch (err) {
+    context.log("COSMOS ERROR RAW:", err);
     const e = err as Error;
     context.res = {
       status: 500,
