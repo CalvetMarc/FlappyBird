@@ -185,8 +185,8 @@ export class RankingScene implements IScene {
       const sprite = this.boardBgs[i];
       for(let j = 0; j < 2; j++){
         const pos = i * 2 + (j + 1);
-        this.ranking[pos].fillEntry(sprite, j + 1, pos, rakingInfo[pos], 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
-        this.ranking[pos].zIndex = 100000;        
+        this.ranking[pos - 1].fillEntry(sprite, j + 1, pos, rakingInfo[pos - 1], 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
+        this.ranking[pos - 1].zIndex = 100000;        
       }
 
     }

@@ -12,7 +12,7 @@ export class RankingField extends Container {
   }
 
   public fillEntry(bg: Sprite, yPosIdx: number, rankingPos: number, playerInfo: SessionInfo, posFontSize: number, sessionEntriesSize: number[] = [3, 3, 3], 
-    posTintHex: number = 0x222222, sessionEntriesTintHex: number[] = [0x222222, 0x222222, 0x222222]) {
+    posTintHex: number = 0x222222, sessionEntriesTintHex: number[] = [0x222222, 0x222222, 0x222222]): void {
 
     let bmt: BitmapText = AssetsManager.I.getText(`${rankingPos.toString()}`, "vcrBase", posFontSize);
     bmt.tint = posTintHex;
