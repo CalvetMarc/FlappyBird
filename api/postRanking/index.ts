@@ -1,25 +1,40 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { CosmosClient } from "@azure/cosmos";
+import { v4 as uuid } from "uuid";
 
-const postRanking: AzureFunction = async function (context: Context, req: HttpRequest) {
+const postRanking: AzureFunction = async (context: Context, req: HttpRequest) => {
+  try {
+    const conn = process.env.COSMOS_CONN;
+    if (!conn) throw new Error("Missing COSMOS_CONN");
 
-  const allowedOrigin = "https://white-pebble-036454303.3.azurestaticapps.net";
+    const client = new CosmosClient(conn);
+    const database = client.database("flappydp");
+    const container = database.container("ranking");
 
-  const origin = req.headers["origin"] || req.headers["referer"];
+    const body = req.body;
 
-  if (!origin || !origin.startsWith(allowedOrigin)) {
-    context.res = {
-      status: 401,
-      body: { error: "Unauthorized origin" }
+    const item = {
+      id: uuid(),
+      name: body.name,
+      lastScore: body.lastScore,
+      lastGameTime: body.lastGameTime,
+      createdAt: new Date().toISOString()
     };
-    return;
+
+    await container.items.create(item);
+
+    context.res = {
+      status: 200,
+      body: { ok: true }
+    };
+
+   } catch (err) {
+    const e = err as Error;
+    context.res = {
+      status: 500,
+      body: { error: e.message }
+    };
   }
-
-  const body = req.body;
-
-  context.res = {
-    status: 200,
-    body: { ok: true, received: body }
-  };
 };
 
 export default postRanking;
