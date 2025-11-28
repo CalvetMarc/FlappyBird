@@ -23,6 +23,9 @@ export class DataField extends Container {
     this.addChild(this.labelComponent);
 
   }
+  public updateValueText(valueText: string){
+    this.labelComponent.updateText(valueText);
+  }
   public freeResources(): void{
     this.removeChild(this.dataLabelText);
     AssetsManager.I.releaseText(this.dataLabelText);

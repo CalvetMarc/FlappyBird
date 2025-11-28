@@ -49,7 +49,7 @@ export class GameOverScene implements IScene {
     this.birdPreview = false;
     const [_, didEnter] = await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished, sendScore(GameManager.I.sessionData)]);   
     this.enterRanking = didEnter;
-    console.log(didEnter);
+    this.rankingReachedLabelComponent.updateValueText(this.enterRanking ? "Yes" : "No");
   }
 
   public onUpdate(dt: number): void {}
