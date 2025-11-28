@@ -1,5 +1,5 @@
 export async function sendScore(data: { name: string; lastScore: number; lastGameTime: number;}) {
-  const res = await fetch("/.auth/function/call/postRanking", {
+  const res = await fetch("/api/postRanking", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
