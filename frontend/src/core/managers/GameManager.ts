@@ -19,6 +19,7 @@ export type GameSettings = {
 }
 
 export class GameManager extends SingletonBase<GameManager> { 
+  public lastEnteredRanking: boolean;
   public mousePos: Point;
   public sessionData: SessionInfo;
   public settings: GameSettings;
@@ -27,6 +28,7 @@ export class GameManager extends SingletonBase<GameManager> {
 
   private constructor() {
     super();
+    this.lastEnteredRanking = false;
     this.mousePos = new Point(0,0);
     this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Juan" };
     this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };

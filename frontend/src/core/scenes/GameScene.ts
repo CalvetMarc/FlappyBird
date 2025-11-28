@@ -5,10 +5,10 @@ import { CharacterController } from "../objects/Game/CharacterController";
 import { Tween, CreatedTween, TweenManager } from "../managers/TweenManager";
 import { Milliseconds, ms, s } from "../time/TimeUnits";
 import { GameManager } from "../managers/GameManager";
-import { startSession } from "../../SessionManager";
 import { SceneManager } from "../managers/SceneManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { AssetsManager } from "../managers/AssetsManager";
+import { sendScore } from "../../SessionManager";
 
 export class GameScene implements IScene {
   private scoreText!: BitmapText; 
@@ -30,12 +30,6 @@ export class GameScene implements IScene {
   }
 
   public async onInit(): Promise<void> {
-    /*
-    const ok = await startSession();
-    if (!ok) {
-      console.error("No s'ha pogut iniciar la sessió amb el backend");
-      return;
-    }*/
    this.pipesController = new PipesController();
    this.characterController = new CharacterController();
    await Promise.all([this.pipesController.onCreate(), this.characterController.onCreate(), this.createScoreText()]);
@@ -68,7 +62,7 @@ export class GameScene implements IScene {
       GameManager.I.sessionData.lastScore = this.score;
       GameManager.I.sessionData.lastGameTime = this.elapsedTime;
       GameManager.I.backgroundController.setScrolling(false);
-      TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500, () => SceneManager.I.fire("gameover"));
+      SceneManager.I.fire("gameover");      
       return;
     }
     
@@ -90,7 +84,8 @@ export class GameScene implements IScene {
   }
 
   public async onExit(): Promise<void> {
-    
+    const [_, didEnter] = await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500).finished, sendScore(GameManager.I.sessionData)]);
+    GameManager.I.lastEnteredRanking = didEnter;
   }
 
   public async onDestroy(): Promise<void> {

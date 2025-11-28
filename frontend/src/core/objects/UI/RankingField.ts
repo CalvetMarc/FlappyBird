@@ -24,7 +24,7 @@ export class RankingField extends Container {
     bmt.scale.set(bmt.parent ? 2 - bmt.parent.scale.x : 1, bmt.parent ? 2 - bmt.parent.scale.y : 1);
 
     for(const [key, value] of Object.entries(playerInfo)){
-        const fixedValue: string = value === -1 ? "-------" : (key === "lastGameTime" ? this.formatTime(value as number) : value.toString());
+        const fixedValue: string = value === -1 ? "-----" : (key === "lastGameTime" ? this.formatTime(value as number) : value.toString());
         bmt = AssetsManager.I.getText(fixedValue, "vcrBase", sessionEntriesSize[this.rankingEntryTexts.length - 1]);
         bmt.tint = sessionEntriesTintHex[this.rankingEntryTexts.length - 1];
         bg.addChild(bmt);

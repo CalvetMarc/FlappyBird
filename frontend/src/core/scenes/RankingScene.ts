@@ -197,7 +197,7 @@ export class RankingScene implements IScene {
     const result = [...list];
     while (result.length < 10) {
       result.push({
-        name: "-------",
+        name: "-----",
         lastScore: -1,
         lastGameTime: -1
       });
