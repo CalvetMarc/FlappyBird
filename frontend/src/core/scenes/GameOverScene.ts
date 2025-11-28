@@ -45,7 +45,7 @@ export class GameOverScene implements IScene {
 
   public async onEnter(): Promise<void> {
     this.birdPreview = false;
-    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished;   
+    await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished, sendScore(GameManager.I.sessionData)]);   
   }
 
   public onUpdate(dt: number): void {}

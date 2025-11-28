@@ -1,0 +1,15 @@
+{
+  "routes": [
+    {
+      "route": "/api/postRanking",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/api/getRanking",
+      "allowedRoles": ["anonymous"]
+    }
+  ],
+  "auth": {
+    "rolesSource": "staticwebapp"
+  }
+}
