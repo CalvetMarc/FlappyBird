@@ -8,6 +8,7 @@ import { IdProvider, UniqueId } from "../objects/IdProvider";
 import { Button } from "../objects/UI/Button";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
+import { getRanking } from "../../SessionManager";
 
 export class MainMenuScene implements IScene {
   private playBtn!: Button;
@@ -26,6 +27,7 @@ export class MainMenuScene implements IScene {
   private mousePosOnExit: Point;
 
   private birdFadeOf: boolean;
+  private preloadRanking: boolean;
 
   private logoTweenID!: UniqueId; 
 
@@ -39,6 +41,7 @@ export class MainMenuScene implements IScene {
     this.containerUi.sortableChildren = true;
     this.birdFadeOf = true;   
     this.mousePosOnExit = new Point(0, 0);
+    this.preloadRanking = false;
   }
 
   public async onInit(): Promise<void> {
@@ -55,6 +58,7 @@ export class MainMenuScene implements IScene {
   public async onEnter(): Promise<void> {
     this.containerUi.alpha = 0;
     this.birdFadeOf = true;    
+    this.preloadRanking = false;
     GameManager.I.forcePointerMove();
     await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100);
   }
@@ -72,12 +76,23 @@ export class MainMenuScene implements IScene {
       this.containerGame.addChild(this.bird);
     }
 
-    await TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
-      if(this.bird && !this.birdFadeOf){
-        this.containerGame.removeChild(this.bird);
-        this.containerUi.addChild(this.bird);
-      }
-    }).finished;
+    if(this.preloadRanking){      
+      const [_, rankingInfo] = await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
+        if(this.bird && !this.birdFadeOf){
+          this.containerGame.removeChild(this.bird);
+          this.containerUi.addChild(this.bird);
+        }
+      }).finished ,getRanking()])
+      GameManager.I.lastLoadedRankingInfo = rankingInfo;
+    }
+    else{
+      await TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
+        if(this.bird && !this.birdFadeOf){
+          this.containerGame.removeChild(this.bird);
+          this.containerUi.addChild(this.bird);
+        }
+      }).finished;
+    }   
 
   }
 
@@ -121,7 +136,7 @@ export class MainMenuScene implements IScene {
     this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), 0x0c0807);
     this.settingsBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 - buttonsXSpacing, y: buttonsYPos};
 
-    this.rankingBtn = new Button(2.5, "ranking", () => SceneManager.I.fire("ranking"), 0xff8800);
+    this.rankingBtn = new Button(2.5, "ranking", () => {this.preloadRanking = true; SceneManager.I.fire("ranking");}, 0xff8800);
     this.rankingBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 + buttonsXSpacing, y: buttonsYPos};
     
     this.containerUi.addChild(this.playBtn, this.settingsBtn, this.rankingBtn);

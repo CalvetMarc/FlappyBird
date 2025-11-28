@@ -45,8 +45,8 @@ export class RankingScene implements IScene {
     this.containerUi.alpha = 0;
     GameManager.I.forcePointerMove();
 
-    const rankingInfo = await getRanking();
-    this.fillRankingEntries(this.normalizeRanking(rankingInfo));
+    //const rankingInfo = await getRanking();
+    this.fillRankingEntries(this.normalizeRanking(GameManager.I.lastLoadedRankingInfo));
 
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 500).finished;  
   }
