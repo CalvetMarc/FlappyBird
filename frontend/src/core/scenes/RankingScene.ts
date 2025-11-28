@@ -8,6 +8,7 @@ import { TweenManager } from "../managers/TweenManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { RankingField } from "../objects/UI/RankingField";
+import { getRanking } from "../../SessionManager";
 
 const isTest: boolean = true;
 
@@ -43,6 +44,10 @@ export class RankingScene implements IScene {
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
     GameManager.I.forcePointerMove();
+
+    const rankingInfo = await getRanking();
+    this.fillRankingEntries(this.normalizeRanking(rankingInfo));
+
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 500).finished;  
   }
 
@@ -161,12 +166,7 @@ export class RankingScene implements IScene {
         this.boardBgs.push(sprite)
 
         for(let j = 0; j < 2; j++){
-          const pos = i * 2 + (j + 1);
-          console.log(pos);
-          const entry: SessionInfo = {name: `Guest${pos}`, lastScore: (10-pos)*100, lastGameTime: 1 + (2*(10-pos)*100) };
-          const rankingField: RankingField = new RankingField(sprite, j + 1, pos, entry, 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
-          rankingField.zIndex = 100000;
-          
+          const rankingField = new RankingField();          
           this.ranking.push(rankingField);   
         }
 
@@ -178,6 +178,35 @@ export class RankingScene implements IScene {
     }
 
   }
+
+  private fillRankingEntries(rakingInfo: SessionInfo[]){
+
+    for(let i = 0; i < 5; i++){
+      const sprite = this.boardBgs[i];
+      for(let j = 0; j < 2; j++){
+        const pos = i * 2 + (j + 1);
+        this.ranking[pos].fillEntry(sprite, j + 1, pos, rakingInfo[pos], 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
+        this.ranking[pos].zIndex = 100000;        
+      }
+
+    }
+
+  }
+
+  private normalizeRanking(list: SessionInfo[]) : SessionInfo[]{
+    const result = [...list];
+    while (result.length < 10) {
+      result.push({
+        name: "-------",
+        lastScore: -1,
+        lastGameTime: -1
+      });
+    }
+
+    return result;
+  }
+
+
 
   private createButton() {
     this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);

@@ -7,10 +7,12 @@ import { SessionInfo } from "../../managers/GameManager";
 export class RankingField extends Container {
   private rankingEntryTexts: BitmapText[] = [];
 
-  constructor(bg: Sprite, yPosIdx: number, rankingPos: number, playerInfo: SessionInfo, posFontSize: number, sessionEntriesSize: number[] = [3, 3, 3], 
-    posTintHex: number = 0x222222, sessionEntriesTintHex: number[] = [0x222222, 0x222222, 0x222222]) {
+  constructor(){
+    super();
+  }
 
-    super();        
+  public fillEntry(bg: Sprite, yPosIdx: number, rankingPos: number, playerInfo: SessionInfo, posFontSize: number, sessionEntriesSize: number[] = [3, 3, 3], 
+    posTintHex: number = 0x222222, sessionEntriesTintHex: number[] = [0x222222, 0x222222, 0x222222]) {
 
     let bmt: BitmapText = AssetsManager.I.getText(`${rankingPos.toString()}`, "vcrBase", posFontSize);
     bmt.tint = posTintHex;
@@ -22,7 +24,8 @@ export class RankingField extends Container {
     bmt.scale.set(bmt.parent ? 2 - bmt.parent.scale.x : 1, bmt.parent ? 2 - bmt.parent.scale.y : 1);
 
     for(const [key, value] of Object.entries(playerInfo)){
-        bmt = AssetsManager.I.getText(key != "lastGameTime" ? value.toString() : this.formatTime(value as number), "vcrBase", sessionEntriesSize[this.rankingEntryTexts.length - 1]);
+        const fixedValue: string = value === -1 ? "-------" : (key === "lastGameTime" ? this.formatTime(value as number) : value.toString());
+        bmt = AssetsManager.I.getText(fixedValue, "vcrBase", sessionEntriesSize[this.rankingEntryTexts.length - 1]);
         bmt.tint = sessionEntriesTintHex[this.rankingEntryTexts.length - 1];
         bg.addChild(bmt);
 
