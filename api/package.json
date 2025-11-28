@@ -1,8 +1,6 @@
 {
   "name": "flappybird-api",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "license": "MIT",
   "scripts": {
     "build": "tsc -p ."
   },
@@ -10,12 +8,12 @@
     "node": "18.x"
   },
   "dependencies": {
+    "@azure/functions": "4.3.0",
+    "@azure/cosmos": "3.15.0",
     "@azure/core-auth": "1.5.0",
     "@azure/core-rest-pipeline": "1.9.2",
-    "@azure/core-tracing": "1.1.0",
     "@azure/core-util": "1.1.1",
-    "@azure/cosmos": "3.15.0",
-    "@azure/functions": "4.3.0",
+    "@azure/core-tracing": "1.1.0",
     "@azure/logger": "1.0.4"
   },
   "devDependencies": {
