@@ -33,17 +33,6 @@ jobs:
           cd frontend
           npm run build
 
-      # ----- BUILD API FUNCTIONS ------
-      - name: Install API deps
-        run: |
-          cd api
-          npm ci
-
-      - name: Build API
-        run: |
-          cd api
-          npm run build
-
       # ----- DEPLOY ------
       - name: Azure SWA Deploy
         uses: Azure/static-web-apps-deploy@v1
@@ -54,4 +43,3 @@ jobs:
           app_location: "frontend"
           output_location: "dist"
           api_location: "api"
-
