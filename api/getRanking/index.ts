@@ -10,9 +10,16 @@ const getRanking: AzureFunction = async (context: Context, req: HttpRequest) => 
     const database = client.database("flappydb"); 
     const container = database.container("ranking");
 
-    const { resources } = await container.items
-      .query("SELECT * FROM c ORDER BY c.lastScore DESC")
-      .fetchAll();
+    const query = `
+      SELECT 
+        c.name, 
+        c.lastScore, 
+        c.lastGameTime
+      FROM c
+      ORDER BY c.lastScore DESC
+    `;
+
+    const { resources } = await container.items.query(query).fetchAll();
 
     context.res = {
       status: 200,
