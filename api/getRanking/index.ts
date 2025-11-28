@@ -5,6 +5,7 @@ const getRanking: AzureFunction = async (context: Context, req: HttpRequest) => 
   try {
     const conn = process.env.COSMOS_CONN;
     context.log("CONNECTION STRING:", conn ? "OK" : "NOT FOUND");
+    context.log("CONNECTION STRING:", process.env.COSMOS_CONN);
 
     if (!conn) throw new Error("Missing COSMOS_CONN");
 
