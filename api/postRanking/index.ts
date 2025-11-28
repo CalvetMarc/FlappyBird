@@ -8,7 +8,7 @@ const postRanking: AzureFunction = async (context: Context, req: HttpRequest) =>
     if (!conn) throw new Error("Missing COSMOS_CONN");
 
     const client = new CosmosClient(conn);
-    const database = client.database("flappydp");
+    const database = client.database("flappydb"); 
     const container = database.container("ranking");
 
     const body = req.body;
@@ -28,7 +28,7 @@ const postRanking: AzureFunction = async (context: Context, req: HttpRequest) =>
       body: { ok: true }
     };
 
-   } catch (err) {
+  } catch (err) {
     const e = err as Error;
     context.res = {
       status: 500,

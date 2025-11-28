@@ -2,15 +2,12 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 
 const getRanking: AzureFunction = async (context: Context, req: HttpRequest) => {
-  context.log("CONNECTION STRING:", process.env.COSMOS_CONN);
   try {
     const conn = process.env.COSMOS_CONN;
-    context.log("CONNECTION STRING:", conn ? "OK" : "NOT FOUND");
-
     if (!conn) throw new Error("Missing COSMOS_CONN");
 
     const client = new CosmosClient(conn);
-    const database = client.database("flappydp");
+    const database = client.database("flappydb"); 
     const container = database.container("ranking");
 
     const { resources } = await container.items
@@ -29,7 +26,6 @@ const getRanking: AzureFunction = async (context: Context, req: HttpRequest) => 
       body: { error: e.message }
     };
   }
-
 };
 
 export default getRanking;
