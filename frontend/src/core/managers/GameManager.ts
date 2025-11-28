@@ -28,7 +28,7 @@ export class GameManager extends SingletonBase<GameManager> {
   private constructor() {
     super();
     this.mousePos = new Point(0,0);
-    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
+    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Marc" };
     this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
   }
 

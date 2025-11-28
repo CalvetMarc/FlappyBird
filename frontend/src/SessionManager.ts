@@ -1,4 +1,6 @@
-export async function sendScore(data: { name: string; lastScore: number; lastGameTime: number;}) {
+import { SessionInfo } from "./core/managers/GameManager";
+
+export async function sendScore(data: SessionInfo): Promise<boolean> {
   console.log(JSON.stringify(data))
   const res = await fetch("/api/postRanking", {
     method: "POST",
@@ -8,4 +10,23 @@ export async function sendScore(data: { name: string; lastScore: number; lastGam
 
   const json = await res.json();
   console.log("SERVER RESPONSE:", json);
+  return json.enterRanking;
+}
+
+export async function getRanking(): Promise<SessionInfo[]> {
+  const res = await fetch("/api/getRanking", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const json = await res.json();
+  console.log("RANKING RESPONSE:", json);
+
+  if (!Array.isArray(json)) return [];
+
+  return json.map(item => ({
+    name: item.name,
+    lastScore: item.lastScore,
+    lastGameTime: item.lastGameTime
+  })) as SessionInfo[];
 }
