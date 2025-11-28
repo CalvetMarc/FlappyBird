@@ -2,10 +2,10 @@ import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
 
 const getRanking: AzureFunction = async (context: Context, req: HttpRequest) => {
+  context.log("CONNECTION STRING:", process.env.COSMOS_CONN);
   try {
     const conn = process.env.COSMOS_CONN;
     context.log("CONNECTION STRING:", conn ? "OK" : "NOT FOUND");
-    context.log("CONNECTION STRING:", process.env.COSMOS_CONN);
 
     if (!conn) throw new Error("Missing COSMOS_CONN");
 
