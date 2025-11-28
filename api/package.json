@@ -7,7 +7,7 @@
     "build": "tsc -p ."
   },
   "engines": {
-    "node": "18.x"
+    "node": "20"
   },
   "dependencies": {
     "@azure/cosmos": "^3.15.0",
