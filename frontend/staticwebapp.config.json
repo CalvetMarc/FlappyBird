@@ -8,8 +8,5 @@
       "route": "/api/getRanking",
       "allowedRoles": ["anonymous"]
     }
-  ],
-  "auth": {
-    "rolesSource": "staticwebapp"
-  }
+  ]
 }
