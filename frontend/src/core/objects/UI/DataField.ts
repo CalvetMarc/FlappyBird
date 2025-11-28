@@ -24,7 +24,7 @@ export class DataField extends Container {
 
   }
   public updateValueText(valueText: string){
-    this.labelComponent.updateText(valueText);
+    this.dataLabelText.text = valueText;
   }
   public freeResources(): void{
     this.removeChild(this.dataLabelText);
