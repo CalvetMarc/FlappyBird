@@ -24,6 +24,7 @@ export class GameOverScene implements IScene {
   private rankingReachedLabelComponent!: DataField;
 
   private birdPreview: boolean;
+  private enterRanking: boolean;
 
   public containerGame: Container;
   public containerUi: Container;
@@ -32,6 +33,7 @@ export class GameOverScene implements IScene {
     this.containerGame = new Container();
     this.containerUi = new Container();
     this.birdPreview = false;    
+    this.enterRanking = false;
   }
 
   public async onInit(): Promise<void> {
@@ -45,7 +47,8 @@ export class GameOverScene implements IScene {
 
   public async onEnter(): Promise<void> {
     this.birdPreview = false;
-    await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished, sendScore(GameManager.I.sessionData)]);   
+    const [_, didEnter] = await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 450).finished, sendScore(GameManager.I.sessionData)]);   
+    this.enterRanking = didEnter;
   }
 
   public onUpdate(dt: number): void {}
@@ -152,7 +155,7 @@ export class GameOverScene implements IScene {
     this.timeLabelComponent.position.set(3, 0);
     this.timeLabelComponent.scale.set(0.95);
 
-    this.rankingReachedLabelComponent = new DataField("Ranking: ", "No", 7, 0x222222, 0x0000ff);
+    this.rankingReachedLabelComponent = new DataField("Ranking: ", this.enterRanking ? "Yes" : "No", 7, 0x222222, 0x0000ff);
     this.bgSprite.addChild(this.rankingReachedLabelComponent);
     this.rankingReachedLabelComponent.rotation = -Math.PI * 0.5;
     this.rankingReachedLabelComponent.position.set(21, 0);
