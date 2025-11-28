@@ -1,6 +1,6 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import { v4 as uuid } from "uuid";
+import crypto from "node:crypto";
 
 const postRanking: AzureFunction = async (context: Context, req: HttpRequest) => {
   try {
@@ -14,7 +14,7 @@ const postRanking: AzureFunction = async (context: Context, req: HttpRequest) =>
     const body = req.body;
 
     const item = {
-      id: uuid(),
+      id: crypto.randomUUID(),
       name: body.name,
       lastScore: body.lastScore,
       lastGameTime: body.lastGameTime,
