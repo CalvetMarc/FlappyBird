@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, Rectangle, BitmapText, Point } from "pixi.js";
+import { Container, Sprite, Texture, Rectangle, BitmapText, Point, Graphics, Triangle } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { GameManager } from "../managers/GameManager";
@@ -9,6 +9,7 @@ import { Button } from "../objects/UI/Button";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { getRanking } from "../../SessionManager";
+import { EditableField } from "../objects/UI/EditableField";
 
 export class MainMenuScene implements IScene {
   private playBtn!: Button;
@@ -16,15 +17,19 @@ export class MainMenuScene implements IScene {
   private rankingBtn!: Button;
   private nextBtn!: Button;
   private prevBtn!: Button;
+  private pill!: Graphics;
+  private pillSpike!: Graphics;
+  private editableField!: EditableField;
 
   private logo!: Sprite;  
   private bird!: Sprite;
+
+  private bmName!: BitmapText
 
   private logoBaseW = 0;
   private baseY = 0;
   private elapsed = 0;
 
-  private mousePosOnExit: Point;
 
   private birdFadeOf: boolean;
   private preloadRanking: boolean;
@@ -40,25 +45,27 @@ export class MainMenuScene implements IScene {
     this.containerGame.sortableChildren = true;
     this.containerUi.sortableChildren = true;
     this.birdFadeOf = true;   
-    this.mousePosOnExit = new Point(0, 0);
     this.preloadRanking = false;
   }
 
   public async onInit(): Promise<void> {
    
     this.createLogo();
+    this.createNamePill();
     this.createButtons();
     this.createBird();
     this.createSideButtons();
-    this.startLogoFloat();
+    this.startLogoFloat();   
 
     this.containerUi.alpha = 0;
+
   }
 
   public async onEnter(): Promise<void> {
     this.containerUi.alpha = 0;
     this.birdFadeOf = true;    
     this.preloadRanking = false;
+    this.editableField.refreshVisuals();
     GameManager.I.forcePointerMove();
     await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100);
   }
@@ -125,6 +132,33 @@ export class MainMenuScene implements IScene {
     this.logo.zIndex = 10;
     this.containerUi.addChild(this.logo);
   }  
+
+  private createNamePill(){
+    const pillWidth = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.25;
+    const pillHeight = (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.06;
+    const pillX = ((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5) - (pillWidth * 0.5);
+    const pillY = ((LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.52) - (pillHeight * 0.5);
+    const radius = pillHeight * 0.5; 
+
+    this.pill = new Graphics().roundRect(pillX, pillY, pillWidth, pillHeight, radius).fill(0xFF6F61);   
+
+    const pillSpikeBase = pillWidth * 0.2;
+    this.pillSpike = new Graphics();
+    this.pillSpike.moveTo(pillSpikeBase * 0.5, pillSpikeBase).lineTo(pillSpikeBase, pillSpikeBase * 0.5).lineTo(0, pillSpikeBase * 0.5).closePath().fill(0xFF6F61);
+    this.pillSpike.position = {x: (pillX + (pillWidth * 0.5)) - pillSpikeBase * 0.5 , y: pillY + pillHeight - (pillSpikeBase * 0.5)};
+
+    this.pill.addChild(this.pillSpike);
+    this.containerUi.addChild(this.pill);
+
+    this.bmName = AssetsManager.I.getText(GameManager.I.sessionData.name, "vcrBase")
+    this.bmName.position = { x: (pillX + (pillWidth * 0.5)) - (this.bmName.width * 0.5), y: (pillY + (pillHeight * 0.5))-+ (this.bmName.height * 0.5) }
+    this.bmName.tint = 0x2F4858; 
+
+
+    this.containerUi.addChild(this.bmName);
+
+    this.editableField = new EditableField(this.bmName, this.pill, 9);
+  }
 
   private createButtons() {
     const buttonsYPos =(LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.77;
