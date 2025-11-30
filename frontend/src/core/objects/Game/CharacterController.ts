@@ -6,6 +6,7 @@ import { IGameObject } from "../../abstractions/IGameObject";
 import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
+import { sound } from "@pixi/sound";
 
 const sensitivity = 1.7;  
 
@@ -22,7 +23,12 @@ export class CharacterController implements IGameObject{
   private isDead = false;
   private deadGrounded = false;
 
+  private elapsed: number = 0;
+  private lastInputTime: number = 0;
+  private canSwoosh = true;
+
   public container: Container;
+  public detectInputs: boolean = false;
 
   public constructor() {
     this.container = new Container();
@@ -34,11 +40,19 @@ export class CharacterController implements IGameObject{
     await this.loadBird();
     window.addEventListener("pointerdown", this.handleInput);
     window.addEventListener("keydown", this.handleKey);
+    this.detectInputs = false;
   }
 
   public onUpdate(dt: Milliseconds) {
-    if (!this.bird) return;
     const delta = dt / 1000;
+    this.elapsed += delta;
+
+    if (!this.bird) return;
+
+    if(this.canSwoosh && this.elapsed - this.lastInputTime >= 0.9){
+      sound.play("swoosh");
+      this.canSwoosh = false;
+    }
 
     this.frameTimer += dt;
     if (!this.isDead && this.frameTimer >= this.frameInterval) {
@@ -82,6 +96,11 @@ export class CharacterController implements IGameObject{
 
   public kill() {
     if (this.isDead) return;
+
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("hit");  
+    }
+
     this.isDead = true;
     GameManager.I.backgroundController.setScrolling(false);
   }
@@ -89,6 +108,12 @@ export class CharacterController implements IGameObject{
   public groundTouched(rect: Bounds) {
     if (!this.bird) return;
 
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("hit");  
+      setTimeout(() => {
+        sound.play("die"); 
+      }, 500);
+    }
     this.velocityY = 0;
     this.gravity = 0;
 
@@ -121,11 +146,11 @@ export class CharacterController implements IGameObject{
   }
 
   private handleInput = () => {
-    if (!this.isDead) this.flap();
+    if (this.detectInputs && !this.isDead) this.flap();
   };
 
   private handleKey = (e: KeyboardEvent) => {
-    if (e.code === "Space" && !this.isDead) {
+    if (this.detectInputs && e.code === "Space" && !this.isDead) {
       e.preventDefault();
       this.flap();
     }
@@ -134,6 +159,14 @@ export class CharacterController implements IGameObject{
   private flap() {
     if (!this.bird) return;
 
+    this.lastInputTime = this.elapsed;
+    this.canSwoosh = true;
+
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("flap");
+      }, 50);
+    }
     this.velocityY = this.jumpForce * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
     this.bird.rotation = -Math.PI / 6;
   }

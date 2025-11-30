@@ -1,6 +1,8 @@
 import { Sprite, Graphics, Container, ColorMatrixFilter, FederatedPointerEvent } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { LayoutManager } from "../../managers/LayoutManager";
+import { GameManager } from "../../managers/GameManager";
+import { sound } from "@pixi/sound";
 
 const debug = false;
 
@@ -75,7 +77,10 @@ export class Button extends Container {
 
     this.iconSprite.position = { x: 0, y: -1.5 };
     this.bgSprite = AssetsManager.I.getSprite("button", 2, this.bgSprite);
-    
+
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("click");
+    }
   }
 
   private onPointerUp(callback: () => void) {

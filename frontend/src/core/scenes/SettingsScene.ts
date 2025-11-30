@@ -8,6 +8,7 @@ import { AssetsManager } from "../managers/AssetsManager";
 import { Toggle } from "../objects/UI/Toggle"
 import { Button } from "../objects/UI/Button";
 import { LayoutManager } from "../managers/LayoutManager";
+import { sound } from "@pixi/sound";
 
 
 export class SettingsScene implements IScene {
@@ -39,6 +40,11 @@ export class SettingsScene implements IScene {
   }
 
   public async onEnter(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("sttgs");
+      }, 150);
+    }
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
     GameManager.I.forcePointerMove();
@@ -49,6 +55,11 @@ export class SettingsScene implements IScene {
   public onUpdate(dt: number): void {}
 
   public async onExit(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("disappear");
+      }, 150);
+    }
     this.closeBtn.resetVisuals();
 
     await TweenManager.I.fadeTo([this.containerUi], 0, 400).finished;
@@ -117,7 +128,7 @@ export class SettingsScene implements IScene {
   }
 
   private createToggles() {
-    this.audioToggle = new Toggle("Audio", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.audioEnabled != GameManager.I.settings.audioEnabled }, GameManager.I.settings.audioEnabled);
+    this.audioToggle = new Toggle("Audio", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.audioEnabled = !GameManager.I.settings.audioEnabled }, GameManager.I.settings.audioEnabled);
     this.bgSprite.addChild(this.audioToggle);
     this.audioToggle.rotation = -Math.PI * 0.5;
     this.audioToggle.position.set(-15, 0);

@@ -16,6 +16,7 @@ type SceneClass<T extends IScene = IScene> = new () => T;
 export class SceneManager extends SingletonBase<SceneManager> {
   private current?: IScene;
   private scenePool: Set<IScene> = new Set();
+  private transitioning: boolean = false;
   public playerIndex = 0;
 
   private transitions: Record<SceneEvent, () => void>;
@@ -77,7 +78,9 @@ export class SceneManager extends SingletonBase<SceneManager> {
   }
 
   public update(dt: Milliseconds): void {
-    this.current?.onUpdate(dt);
+    if(!this.transitioning){
+      this.current?.onUpdate(dt);
+    }
   }
 
   public fire(event: SceneEvent): void {
@@ -85,6 +88,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
   }
 
   private async setScene<T extends IScene>(SceneType: SceneClass<T>, destroyCurrent: boolean): Promise<void> {
+    this.transitioning = true;
     if (this.current) {
       await this.current.onExit();
       LayoutManager.I.gameContainer.removeChild(this.current.containerGame);
@@ -110,7 +114,8 @@ export class SceneManager extends SingletonBase<SceneManager> {
     LayoutManager.I.gameContainer.addChild(this.current.containerGame);
     LayoutManager.I.uiContainer.addChild(this.current.containerUi);
 
-    this.current.onEnter();
+    await this.current.onEnter();
+    this.transitioning = false;
   }
 
   private takeSceneFromPool<T extends IScene>(SceneType: SceneClass<T>): T | undefined {

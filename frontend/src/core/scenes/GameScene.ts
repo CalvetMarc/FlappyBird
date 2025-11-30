@@ -9,6 +9,7 @@ import { SceneManager } from "../managers/SceneManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { sendScore } from "../../SessionManager";
+import { sound } from "@pixi/sound";
 
 export class GameScene implements IScene {
   private scoreText!: BitmapText; 
@@ -39,9 +40,22 @@ export class GameScene implements IScene {
     this.pipesController.setScroll(true);
   }
 
-  public async onEnter(): Promise<void> {
+  public async onEnter(): Promise<void> {  
     this.containerUi.alpha = 0;   
     await TweenManager.I.fadeTo([this.containerUi], 1, 400).finished;    
+
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("start");        
+      }, 300);
+    }
+
+    await TweenManager.I.fadeTo([this.containerGame], 0.4, 80, 300).finished;
+    await TweenManager.I.fadeTo([this.containerGame], 1.0, 80).finished;
+    await TweenManager.I.fadeTo([this.containerGame], 0.4, 80, 100).finished;
+    await TweenManager.I.fadeTo([this.containerGame], 1.0, 80).finished;
+
+    this.characterController.detectInputs = true;
   }
 
   public onUpdate(dt: Milliseconds): void {
@@ -86,6 +100,7 @@ export class GameScene implements IScene {
   public async onExit(): Promise<void> {
     const [_, didEnter] = await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500).finished, sendScore(GameManager.I.sessionData)]);
     GameManager.I.lastEnteredRanking = didEnter;
+    this.characterController.detectInputs = false;
   }
 
   public async onDestroy(): Promise<void> {
@@ -116,6 +131,10 @@ export class GameScene implements IScene {
   private incrementScore(): void {
     if(!this.scoreText) return;
     
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("point");
+    }
+
     this.score += 1; 
     this.scoreText.text = this.score;       
 

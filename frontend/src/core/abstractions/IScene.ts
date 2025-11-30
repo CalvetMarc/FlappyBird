@@ -13,7 +13,7 @@ export interface IScene {
   containerGame: Container;
   containerUi: Container;
   onInit(): Promise<void>;
-  onEnter(): void;
+  onEnter(): Promise<void>;
   onUpdate(dt: Milliseconds): void;
   onExit(): Promise<void>;
   onDestroy(): Promise<void>;

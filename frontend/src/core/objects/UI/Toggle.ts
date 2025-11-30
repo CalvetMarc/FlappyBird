@@ -1,7 +1,8 @@
 import { Sprite, Graphics, Container, ColorMatrixFilter, BitmapText } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { Label } from "./Label";
-import { LayoutManager } from "../../managers/LayoutManager";
+import { sound } from "@pixi/sound";
+import { GameManager } from "../../managers/GameManager";
 
 const debug = false;
 
@@ -70,7 +71,10 @@ export class Toggle extends Container {
     AssetsManager.I.releaseSprite(this.bgSprite);
   }
 
-  private onPointerDown(){    
+  private onPointerDown(){   
+    if(GameManager.I.settings.audioEnabled){ 
+      sound.play("interact");
+    }
     this.currentValue = !this.currentValue;
     this.iconSprite = AssetsManager.I.getSprite(this.currentValue ? this.iconAssetNameOn : this.iconAssetNameOff, 0, this.iconSprite);
     this.onPress();

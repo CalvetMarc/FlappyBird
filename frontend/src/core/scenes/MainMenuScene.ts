@@ -10,6 +10,7 @@ import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { getRanking } from "../../SessionManager";
 import { EditableField } from "../objects/UI/EditableField";
+import { sound } from "@pixi/sound";
 
 export class MainMenuScene implements IScene {
   private playBtn!: Button;
@@ -63,6 +64,11 @@ export class MainMenuScene implements IScene {
   }
 
   public async onEnter(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("appear");
+      }, 300);
+    }
     this.containerUi.alpha = 0;
     this.htmlInput.style.opacity = "0";
     this.birdFadeOf = true;    
@@ -77,6 +83,13 @@ export class MainMenuScene implements IScene {
 
 
   public async onExit(): Promise<void> {
+
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("disappear");
+      }, 150);
+    }
+    
     this.playBtn.resetVisuals();
     this.settingsBtn.resetVisuals();
     this.rankingBtn.resetVisuals();

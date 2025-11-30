@@ -18,7 +18,7 @@ export class PauseScene implements IScene {
   }
 
   /** Called when the scene becomes active */
-  public onEnter(): void {
+  public async onEnter(): Promise<void> {
     
   }
 

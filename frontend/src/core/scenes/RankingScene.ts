@@ -9,6 +9,7 @@ import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { RankingField } from "../objects/UI/RankingField";
 import { getRanking } from "../../SessionManager";
+import { sound } from "@pixi/sound";
 
 const isTest: boolean = true;
 
@@ -41,6 +42,11 @@ export class RankingScene implements IScene {
 
   /** Called when the scene becomes active */
   public async onEnter(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("ranking");
+      }, 300);
+    }
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
     GameManager.I.forcePointerMove();
@@ -58,6 +64,11 @@ export class RankingScene implements IScene {
 
   /** Called before scene is removed or pooled */
   public async onExit(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("disappear");
+      }, 150);
+    }
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 500).finished; 
   }
 

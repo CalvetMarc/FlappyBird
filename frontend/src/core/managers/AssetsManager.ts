@@ -1,5 +1,6 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
 import { Sprite, Texture, Assets, Rectangle, Size, BitmapText } from "pixi.js";
+import { sound } from "@pixi/sound";
 
 import { manifest } from "../../assets";
 import { SpritePool } from "../objects/SpritePool";
@@ -16,60 +17,80 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
     this.textPool = new BitmapTextPool();
   }
 
-  public async start(): Promise<void> {
-    await Assets.init({ manifest });
+public async start(): Promise<void> {
+  // 1) Inicialitzar manifest un cop
+  await Assets.init({ manifest });
 
-    for (const bundle of manifest.bundles) {
-      await Assets.loadBundle(bundle.name);
-    }
+  // 2) Carregar bundles individualment (una sola vegada)
+  const loadedTextures = await Assets.loadBundle("textures");
+  const loadedFonts = await Assets.loadBundle("fonts");
+  const loadedSfx = await Assets.loadBundle("sfx");
 
-    const fontsBundle = manifest.bundles.find(b => b.name === "fonts");
-    if (fontsBundle) {
-      const fontAssets = fontsBundle.assets as Record<string, any>;
+  // 3) Registrar SFX UNA SOLA VEGADA
+  const sfxBundle = manifest.bundles.find(b => b.name === "sfx");
+  if (sfxBundle) {
+    const sfxDefs = sfxBundle.assets as Record<string, string>;
 
-      for (const fontName in fontAssets) {
-        const src: string = fontAssets[fontName].src;
-
-        if (src.endsWith(".ttf") || src.endsWith(".otf") || src.endsWith(".woff") || src.endsWith(".woff2")) {
-          const fontFace = new FontFace(fontName, `url("${src}")`);
-          await fontFace.load();
-          document.fonts.add(fontFace);
-        }
+    for (const sfxName in sfxDefs) {
+      const src = sfxDefs[sfxName];
+      if (!sound.exists(sfxName)) {
+        sound.add(sfxName, src);
       }
-    }
-
-    const texturesBundle = manifest.bundles.find(b => b.name === "textures");
-    if (!texturesBundle) {
-      throw new Error('Bundle "textures" not found in manifest.');
-    }
-
-    const loadedTextures = await Assets.loadBundle("textures");
-    const assetsDef = texturesBundle.assets as Record<string, any>;
-
-    for (const assetName in loadedTextures) {
-      const entry = loadedTextures[assetName];
-      const def = assetsDef[assetName];
-      const key = assetName;
-
-      if (typeof entry === "string") continue;
-      if (!(entry instanceof Texture)) continue;
-
-      let frames: Texture[] = [];
-
-      if (def?.frames) {
-        frames = def.frames.map((f: any) =>
-          new Texture({
-            source: entry.source,
-            frame: new Rectangle(f.x, f.y, f.w, f.h),
-          })
-        );
-      } else {
-        frames = [entry];
-      }
-
-      this.textures.set(key, frames);
     }
   }
+
+  // 4) Registrar TTF com CSS fonts (no afecta bitmap)
+  const fontsBundle = manifest.bundles.find(b => b.name === "fonts");
+  if (fontsBundle) {
+    const fontAssets = fontsBundle.assets as Record<string, any>;
+
+    for (const fontName in fontAssets) {
+      const src: string = fontAssets[fontName].src;
+
+      if (
+        src.endsWith(".ttf") ||
+        src.endsWith(".otf") ||
+        src.endsWith(".woff") ||
+        src.endsWith(".woff2")
+      ) {
+        const fontFace = new FontFace(fontName, `url("${src}")`);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+      }
+    }
+  }
+
+  // 5) Processar TEXTURES una sola vegada
+  const texturesBundle = manifest.bundles.find(b => b.name === "textures");
+  if (!texturesBundle) {
+    throw new Error('Bundle "textures" not found in manifest.');
+  }
+
+  const assetsDef = texturesBundle.assets as Record<string, any>;
+
+  for (const assetName in loadedTextures) {
+    const entry = loadedTextures[assetName];
+    const def = assetsDef[assetName];
+
+    if (!(entry instanceof Texture)) continue;
+
+    let frames: Texture[] = [];
+
+    if (def?.frames) {
+      frames = def.frames.map((f: any) =>
+        new Texture({
+          source: entry.source,
+          frame: new Rectangle(f.x, f.y, f.w, f.h),
+        })
+      );
+    } else {
+      frames = [entry];
+    }
+
+    this.textures.set(assetName, frames);
+  }
+}
+
 
   // ---------- SPRITE ----------
   public getSprite(asset: string, frame: number = 0, sprite: Sprite | null = null): Sprite {

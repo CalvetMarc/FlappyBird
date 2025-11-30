@@ -361,7 +361,54 @@ export const manifest: AssetsManifest = {
     {
       name: "sfx",
       assets: {
-        // flap: { src: "/assets/sfx/flap.wav" }
+
+        // --- GAME ---
+
+        flap: {
+          src: "/assets/sfx/game/sfx_wing.wav"
+        },
+        hit: {
+          src: "/assets/sfx/game/sfx_hit.wav"
+        },
+        die: {
+          src: "/assets/sfx/game/sfx_die.wav"
+        },
+        point: {
+          src: "/assets/sfx/game/sfx_point.wav"
+        },
+        swoosh: {
+          src: "/assets/sfx/game/sfx_swooshing.wav"
+        },
+
+
+        // --- UI ---
+
+        click: {
+          src: "/assets/sfx/ui/click.wav"
+        },
+        appear: {
+          src: "/assets/sfx/ui/appear.wav"
+        },
+        disappear: {
+          src: "/assets/sfx/ui/disappear.wav"
+        },
+        ranking: {
+          src: "/assets/sfx/ui/soft-treble-win-fade-out-ending-sound-effect-416829.wav"
+        },
+        finish: {
+          src: "/assets/sfx/ui/soft-treble-fast-collect-fade-out-ending-sound-effect-416828.wav"
+        },
+        interact:{
+          src: "/assets/sfx/ui/interact.wav"
+        },
+        sttgs:{
+          src: "/assets/sfx/ui/metal-slam-5-189786.wav"
+        },
+        start:{
+          src: "/assets/sfx/ui/start.wav"
+        },
+        
+
       }
     }
   ]

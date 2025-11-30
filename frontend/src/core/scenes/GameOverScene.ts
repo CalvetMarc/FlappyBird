@@ -9,6 +9,7 @@ import { sendScore } from "../../SessionManager";
 import { GameManager } from "../managers/GameManager";
 import { TweenManager } from "../managers/TweenManager";
 import { UniqueId } from "../objects/IdProvider";
+import { sound } from "@pixi/sound";
 
 export class GameOverScene implements IScene {
 
@@ -46,6 +47,14 @@ export class GameOverScene implements IScene {
   }
 
   public async onEnter(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("finish");
+      }, 200);
+    }
+
+   
+
     this.birdPreview = false;    
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 350).finished;   
   }
@@ -53,6 +62,11 @@ export class GameOverScene implements IScene {
   public onUpdate(dt: number): void {}
 
   public async onExit(): Promise<void> {
+    if(GameManager.I.settings.audioEnabled){
+      setTimeout(() => {
+        sound.play("disappear");
+      }, 150);
+    }
     GameManager.I.backgroundController.setScrolling(true);
     this.restartBtn.resetVisuals();
     this.exitBtn.resetVisuals();
