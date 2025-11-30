@@ -348,6 +348,9 @@ export const manifest: AssetsManifest = {
         },
         vcrHeavy: {
           src: "/assets/fonts/vcr_osd_mono_heavyStroke/vcr_osd_mono_heavyStroke.fnt"
+        },
+        vcrTTF: {
+          src: "/assets/fonts/VCR_OSD_MONO_1.001.ttf"
         }
       }
     },

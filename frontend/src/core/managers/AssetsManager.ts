@@ -23,6 +23,21 @@ export class AssetsManager extends SingletonBase<AssetsManager> {
       await Assets.loadBundle(bundle.name);
     }
 
+    const fontsBundle = manifest.bundles.find(b => b.name === "fonts");
+    if (fontsBundle) {
+      const fontAssets = fontsBundle.assets as Record<string, any>;
+
+      for (const fontName in fontAssets) {
+        const src: string = fontAssets[fontName].src;
+
+        if (src.endsWith(".ttf") || src.endsWith(".otf") || src.endsWith(".woff") || src.endsWith(".woff2")) {
+          const fontFace = new FontFace(fontName, `url("${src}")`);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+        }
+      }
+    }
+
     const texturesBundle = manifest.bundles.find(b => b.name === "textures");
     if (!texturesBundle) {
       throw new Error('Bundle "textures" not found in manifest.');

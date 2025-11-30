@@ -202,4 +202,21 @@ export class TweenManager extends SingletonBase<TweenManager> {
       onComplete: onComplete
     });
   }
+
+  public fadeHtmlTo(target: HTMLInputElement[], finalValue: number, duration: number, waitTime: number = 0, onComplete?: () => void): CreatedTween {
+    const start = parseFloat(target[0].style.opacity || "1");
+
+    return TweenManager.I.AddTween(<Tween<HTMLInputElement[]>>{
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: target,
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+        const v = start + (finalValue - start) * t;
+        this.context.forEach(input => input.style.opacity = v.toString());
+      },
+      onComplete
+    });
+  }
+
 }

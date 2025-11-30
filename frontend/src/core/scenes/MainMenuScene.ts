@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, Rectangle, BitmapText, Point, Graphics, Triangle } from "pixi.js";
+import { Container, Sprite, Texture, Rectangle, BitmapText, Point, Graphics, Triangle, Size } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { GameManager } from "../managers/GameManager";
@@ -20,6 +20,7 @@ export class MainMenuScene implements IScene {
   private pill!: Graphics;
   private pillSpike!: Graphics;
   private editableField!: EditableField;
+  private htmlInput!: HTMLInputElement;
 
   private logo!: Sprite;  
   private bird!: Sprite;
@@ -63,14 +64,16 @@ export class MainMenuScene implements IScene {
 
   public async onEnter(): Promise<void> {
     this.containerUi.alpha = 0;
+    this.htmlInput.style.opacity = "0";
     this.birdFadeOf = true;    
     this.preloadRanking = false;
     this.editableField.refreshVisuals();
+    
     GameManager.I.forcePointerMove();
-    await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100);
+    await Promise.all([TweenManager.I.fadeTo([this.containerUi], 1, 500, 100), TweenManager.I.fadeHtmlTo([this.htmlInput], 1, 500, 100).finished]);
   }
 
-  public onUpdate(dt: number): void { }
+  public onUpdate(dt: number): void {}
 
 
   public async onExit(): Promise<void> {
@@ -89,16 +92,16 @@ export class MainMenuScene implements IScene {
           this.containerGame.removeChild(this.bird);
           this.containerUi.addChild(this.bird);
         }
-      }).finished ,getRanking()])
+      }).finished ,getRanking(), TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
       GameManager.I.lastLoadedRankingInfo = rankingInfo;
     }
     else{
-      await TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
+      await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500, 0, () => { 
         if(this.bird && !this.birdFadeOf){
           this.containerGame.removeChild(this.bird);
           this.containerUi.addChild(this.bird);
         }
-      }).finished;
+      }).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
     }   
 
   }
@@ -111,6 +114,8 @@ export class MainMenuScene implements IScene {
     this.rankingBtn.freeResources();
     this.nextBtn.freeResources();
     this.prevBtn.freeResources();
+
+    this.editableField.freeResources();
 
     this.logo.removeFromParent();
     AssetsManager.I.releaseSprite(this.logo);
@@ -149,15 +154,48 @@ export class MainMenuScene implements IScene {
 
     this.pill.addChild(this.pillSpike);
     this.containerUi.addChild(this.pill);
+   
+    this.htmlInput = document.createElement("input");
+    this.htmlInput.type = "text";
+    this.htmlInput.value = GameManager.I.sessionData.name;
+    this.htmlInput.style.letterSpacing = "0.5px";
 
-    this.bmName = AssetsManager.I.getText(GameManager.I.sessionData.name, "vcrBase")
-    this.bmName.position = { x: (pillX + (pillWidth * 0.5)) - (this.bmName.width * 0.5), y: (pillY + (pillHeight * 0.5))-+ (this.bmName.height * 0.5) }
-    this.bmName.tint = 0x2F4858; 
 
+    Object.assign(this.htmlInput.style, { 
+      position: "absolute", 
+      background: "transparent", 
+      color: "#2F4858",
+      border: "none", 
+      outline: "none", 
+      boxShadow: "none",  
+      pointerEvents: "auto", 
+      zIndex: "99999", 
+      fontFamily: "vcrTTF", 
+      textAlign: "center"
+    });
+    document.body.appendChild(this.htmlInput);
 
-    this.containerUi.addChild(this.bmName);
+    const reposEvent: () => void = () => {
 
-    this.editableField = new EditableField(this.bmName, this.pill, 9);
+        const width = (LayoutManager.I.layoutCurrentSize.width) * 0.25;
+        const posX = ((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5) - ((width / LayoutManager.I.layoutScale.x) * 0.5);
+        const height = (LayoutManager.I.layoutCurrentSize.height) * 0.06;
+        const posY = ((LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.52) - ((height / LayoutManager.I.layoutScale.y) * 0.48);        
+        const localPos = new Point(posX, posY + ((height / LayoutManager.I.layoutScale.y) * 0.2));
+
+        const globalPos = LayoutManager.I.uiContainer.toGlobal(localPos);
+        this.htmlInput.style.width = `${width}px`;
+        const fontSize = (LayoutManager.I.layoutCurrentSize.width) * 0.04;
+
+        Object.assign(this.htmlInput.style, {
+          left: `${globalPos.x}px`,
+          top: `${globalPos.y}px`,
+          fontSize: `${fontSize}px`,
+        });
+    }
+
+    this.editableField = new EditableField(this.htmlInput, this.pill, 8, reposEvent);
+    window.addEventListener("resize", reposEvent);
   }
 
   private createButtons() {
