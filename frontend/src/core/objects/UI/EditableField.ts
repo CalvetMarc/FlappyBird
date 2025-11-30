@@ -58,7 +58,7 @@ export class EditableField extends Container {
     }
 
     this.background.removeChildren();
-    AssetsManager.I.releaseSprite(this.background);
+    this.background.destroy({ children: true});
 
     this.htmlInput = null!;
     this.repositionEvent = () => {};
