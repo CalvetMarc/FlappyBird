@@ -160,19 +160,46 @@ export class MainMenuScene implements IScene {
     this.htmlInput.value = GameManager.I.sessionData.name;
     this.htmlInput.style.letterSpacing = "0.5px";
 
+    const fs = Math.round((LayoutManager.I.layoutCurrentSize.width) * 0.04);
+    this.htmlInput.style.fontSize = `${fs}px`;
+    this.htmlInput.style.lineHeight = `${fs}px`;
 
-    Object.assign(this.htmlInput.style, { 
-      position: "absolute", 
-      background: "transparent", 
+
+    Object.assign(this.htmlInput.style, {
+      position: "absolute",
+      background: "transparent",
       color: "#2F4858",
-      border: "none", 
-      outline: "none", 
-      boxShadow: "none",  
-      pointerEvents: "auto", 
-      zIndex: "99999", 
-      fontFamily: "vcrTTF", 
-      textAlign: "center"
+
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+
+      padding: "0",
+      margin: "0",
+      border: "none",
+      outline: "none",
+
+      lineHeight: "1",
+      boxSizing: "content-box",
+      borderRadius: "0",
+
+      backgroundColor: "transparent",
+
+      fontSmoothing: "none",
+      WebkitFontSmoothing: "none",
+      textRendering: "optimizeSpeed",
+
+      // IMPORTANT PER RECALCUL MMS
+      transformOrigin: "0 0",
+      
+      // Perquè Pixi pugui detectar pointerover/out
+      pointerEvents: "auto",
+
+      zIndex: "99999",
+      fontFamily: "vcrTTF",
+      textAlign: "center",
     });
+
     document.body.appendChild(this.htmlInput);
 
     const reposEvent: () => void = () => {
