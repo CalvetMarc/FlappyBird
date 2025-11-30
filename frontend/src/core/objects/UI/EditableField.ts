@@ -1,5 +1,6 @@
 import { Container, Point, Graphics } from "pixi.js";
 import { AssetsManager } from "../../managers/AssetsManager";
+import { GameManager } from "../../managers/GameManager";
 
 export class EditableField extends Container {
   private background: Graphics;
@@ -25,6 +26,7 @@ export class EditableField extends Container {
 
     this.onInputHandler = () => {
       htmlInput.value = htmlInput.value.slice(0, maxTextSize);
+      GameManager.I.sessionData.name = htmlInput.value;
       this.repositionEvent();
     };
 
@@ -33,6 +35,7 @@ export class EditableField extends Container {
     this.onBlurHandler = () => {
       if (htmlInput.value.length <= 0) {
         htmlInput.value = "Guest";
+        GameManager.I.sessionData.name = htmlInput.value;
         this.repositionEvent();
       }
     };
