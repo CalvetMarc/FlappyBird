@@ -189,10 +189,8 @@ export class MainMenuScene implements IScene {
       WebkitFontSmoothing: "none",
       textRendering: "optimizeSpeed",
 
-      // IMPORTANT PER RECALCUL MMS
       transformOrigin: "0 0",
-      
-      // Perquè Pixi pugui detectar pointerover/out
+
       pointerEvents: "auto",
 
       zIndex: "99999",

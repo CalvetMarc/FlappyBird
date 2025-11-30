@@ -4,11 +4,9 @@ import { AssetsManager } from "../../managers/AssetsManager";
 export class EditableField extends Container {
   private background: Graphics;
   private htmlInput!: HTMLInputElement;
+  private isHovering: boolean = false;
   repositionEvent!: () => void;
 
-  // Handlers guardats per poder desregistrar correctament
-  private onPointerOver!: () => void;
-  private onPointerOut!: () => void;
 
   private onInputHandler!: () => void;
   private onFocusHandler!: () => void;
@@ -22,15 +20,9 @@ export class EditableField extends Container {
     this.htmlInput = htmlInput;
 
     this.background.eventMode = "static";
+    
+    window.addEventListener("mousemove", this.onGlobalMouseMove);
 
-    // ---------- HANDLERS PIXI ----------
-    this.onPointerOver = () => this.onMouseEnter();
-    this.onPointerOut = () => this.onMouseExit();
-
-    this.background.on("pointerover", this.onPointerOver);
-    this.background.on("pointerout", this.onPointerOut);
-
-    // ---------- HANDLERS HTML ----------
     this.onInputHandler = () => {
       htmlInput.value = htmlInput.value.slice(0, maxTextSize);
       this.repositionEvent();
@@ -55,11 +47,8 @@ export class EditableField extends Container {
   }
 
   public freeResources(): void {
-    // PIXI
-    this.background.off("pointerover", this.onPointerOver);
-    this.background.off("pointerout", this.onPointerOut);
+    window.removeEventListener("mousemove", this.onGlobalMouseMove);
 
-    // HTML
     this.htmlInput.removeEventListener("input", this.onInputHandler);
     this.htmlInput.removeEventListener("focus", this.onFocusHandler);
     this.htmlInput.removeEventListener("blur", this.onBlurHandler);
@@ -71,7 +60,6 @@ export class EditableField extends Container {
     this.background.removeChildren();
     AssetsManager.I.releaseSprite(this.background);
 
-    // Reset referències
     this.htmlInput = null!;
     this.repositionEvent = () => {};
   }
@@ -84,4 +72,28 @@ export class EditableField extends Container {
   private onMouseExit() {
     this.background.alpha = 1;
   }
+
+  private onGlobalMouseMove = (e: MouseEvent) => {
+    const globalPoint = new Point(e.clientX, e.clientY);
+    const local = this.background.toLocal(globalPoint);
+
+    const bounds = this.background.getLocalBounds();
+
+    const isInside =
+      local.x >= bounds.x &&
+      local.x <= bounds.x + bounds.width &&
+      local.y >= bounds.y &&
+      local.y <= bounds.y + (bounds.height * 0.75);
+
+    if (isInside && !this.isHovering) {
+      this.isHovering = true;
+      this.onMouseEnter();
+    }
+
+    if (!isInside && this.isHovering) {
+      this.isHovering = false;
+      this.onMouseExit();
+    }
+  };
+
 }
