@@ -219,4 +219,27 @@ export class TweenManager extends SingletonBase<TweenManager> {
     });
   }
 
+  public moveTo(targetObject: ViewContainer[], finalX: number, finalY: number, duration: number, waitTime: number = 0, onComplete?: () => void): CreatedTween {
+
+    const startPositions = targetObject.map(obj => ({ x: obj.x, y: obj.y }));
+
+    return TweenManager.I.AddTween(<Tween<ViewContainer[]>>{
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: targetObject,
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+        
+        this.context.forEach((obj, i) => {
+          const start = startPositions[i];
+          obj.x = start.x + (finalX - start.x) * t;
+          obj.y = start.y + (finalY - start.y) * t;
+        });
+      },
+      onComplete
+    });
+
+  }
+
+
 }

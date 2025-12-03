@@ -63,12 +63,7 @@ export class RankingScene implements IScene {
   }
 
   /** Called before scene is removed or pooled */
-  public async onExit(): Promise<void> {
-    if(GameManager.I.settings.audioEnabled){
-      setTimeout(() => {
-        sound.play("disappear");
-      }, 150);
-    }
+  public async onExit(): Promise<void> {    
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 500).finished; 
   }
 
@@ -220,7 +215,7 @@ export class RankingScene implements IScene {
 
 
   private createButton() {
-    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), "exit1", 0x0c0807);
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
 

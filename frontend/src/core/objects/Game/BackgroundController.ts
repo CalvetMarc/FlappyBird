@@ -31,7 +31,7 @@ export class BackgroundController implements IGameObject {
     this.createBackground();
     this.createGroundPieces();
     this.container.sortableChildren = true;
-    this.setScrolling(true);
+    this.setScrolling(false);
   }  
 
   public onUpdate(dt: Milliseconds) {

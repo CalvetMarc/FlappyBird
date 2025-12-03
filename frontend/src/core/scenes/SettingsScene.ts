@@ -54,12 +54,7 @@ export class SettingsScene implements IScene {
 
   public onUpdate(dt: number): void {}
 
-  public async onExit(): Promise<void> {
-    if(GameManager.I.settings.audioEnabled){
-      setTimeout(() => {
-        sound.play("disappear");
-      }, 150);
-    }
+  public async onExit(): Promise<void> {   
     this.closeBtn.resetVisuals();
 
     await TweenManager.I.fadeTo([this.containerUi], 0, 400).finished;
@@ -150,7 +145,7 @@ export class SettingsScene implements IScene {
 
   private createButton() {
 
-    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), 0x0c0807);
+    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), "exit1", 0x0c0807);
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
 

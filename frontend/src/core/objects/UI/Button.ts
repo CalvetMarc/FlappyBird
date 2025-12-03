@@ -12,8 +12,9 @@ export class Button extends Container {
   private iconSprite: Sprite;  
   private initScale: number;
   private iconIsOneFrame: boolean;
+  private soundName: string;
 
-  constructor(buttonScale: number, iconAssetName: string, callback: () => void, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
+  constructor(buttonScale: number, iconAssetName: string, callback: () => void, soundName: string = "click", iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
 
     this.bgSprite = AssetsManager.I.getSprite("button", 0);
@@ -49,6 +50,7 @@ export class Button extends Container {
 
     this.iconName = iconAssetName;
     this.iconIsOneFrame = iconIsOneFrame;
+    this.soundName = soundName;
 
     if (debug) {
       this.debugBounds();
@@ -79,7 +81,7 @@ export class Button extends Container {
     this.bgSprite = AssetsManager.I.getSprite("button", 2, this.bgSprite);
 
     if(GameManager.I.settings.audioEnabled){
-      sound.play("click");
+      sound.play(this.soundName);
     }
   }
 

@@ -19,5 +19,5 @@ export interface IScene {
   onDestroy(): Promise<void>;
 }
 
-const sceneEvents = ["play", "pause", "settings", "menu", "ranking", "gameover"] as const;
+const sceneEvents = ["play", "splash", "settings", "menu", "ranking", "gameover"] as const;
 export type SceneEvent = (typeof sceneEvents)[number];

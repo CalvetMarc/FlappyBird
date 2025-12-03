@@ -37,7 +37,7 @@ export class CharacterController implements IGameObject{
   }
 
   public async onCreate() {
-    await this.loadBird();
+    this.loadBird();
     window.addEventListener("pointerdown", this.handleInput);
     window.addEventListener("keydown", this.handleKey);
     this.detectInputs = false;
@@ -87,6 +87,7 @@ export class CharacterController implements IGameObject{
 
     this.bird.removeFromParent();
     AssetsManager.I.releaseSprite(this.bird);
+    AssetsManager.I.removeSpriteReference("player");
   }
 
   public get birdBounds(): Bounds {
@@ -131,17 +132,20 @@ export class CharacterController implements IGameObject{
     return !this.isDead;
   }
 
-  private async loadBird() {
-    this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0);
-    this.bird.anchor.set(0.5);
-    this.bird.zIndex = 12;
+  private loadBird() {
+    this.bird = AssetsManager.I.getSpriteFromReference("player");
+    if(this.bird){
+      this.bird.removeFromParent();
+    }
+    else{
+      this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0);
+      this.bird.anchor.set(0.5);
+      this.bird.zIndex = 12;
 
-    this.bird.position = {x: LayoutManager.I.layoutVirtualSize.width * 0.5, y: LayoutManager.I.layoutVirtualSize.height * 0.614};
-    const scale = LayoutManager.I.layoutVirtualSize.width * 0.0044;
-    this.bird.scale.set(scale);
-    console.log(this.bird.width);
-    console.log(this.bird.height);
-
+      this.bird.position = {x: LayoutManager.I.layoutVirtualSize.width * 0.5, y: LayoutManager.I.layoutVirtualSize.height * 0.614};
+      const scale = LayoutManager.I.layoutVirtualSize.width * 0.0044;
+      this.bird.scale.set(scale);
+    }
     this.container.addChild(this.bird);
   }
 

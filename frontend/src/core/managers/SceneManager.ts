@@ -1,7 +1,7 @@
 import { Application, Container } from "pixi.js";
 import { MainMenuScene } from "../scenes/MainMenuScene";
 import { GameScene } from "../scenes/GameScene";
-import { PauseScene } from "../scenes/PauseScene";
+import { SplashScene } from "../scenes/SplashScene";
 import { SettingsScene } from "../scenes/SettingsScene";
 import { RankingScene } from "../scenes/RankingScene";
 import { SingletonBase } from "../abstractions/SingletonBase";
@@ -29,26 +29,18 @@ export class SceneManager extends SingletonBase<SceneManager> {
         if (this.current instanceof MainMenuScene || this.current instanceof GameOverScene) {
           this.clearPool();
           this.setScene(GameScene, true);
-        } else if (this.current instanceof PauseScene) {
-          this.destroyFromPool(SettingsScene);
-          this.setScene(GameScene, false);
-        }
+        } 
       },
-      pause: () => {
-        if (this.current instanceof GameScene || this.current instanceof SettingsScene) {
-          this.setScene(PauseScene, false);
-        }
+      splash: () => {
+        
       },
       settings: () => {
-        if (this.current instanceof MainMenuScene || this.current instanceof PauseScene) {
+        if (this.current instanceof MainMenuScene) {
           this.setScene(SettingsScene, false);
         }
       },
       menu: () => {
-        if (this.current instanceof PauseScene) {
-          this.destroyFromPool(GameScene);
-          this.setScene(MainMenuScene, false);
-        } else if (this.current instanceof SettingsScene) {
+        if (this.current instanceof SettingsScene) {
           this.setScene(MainMenuScene, false);
         } else if (this.current instanceof RankingScene) {
           this.destroyFromPool(GameScene);
@@ -57,6 +49,9 @@ export class SceneManager extends SingletonBase<SceneManager> {
         else if (this.current instanceof GameOverScene) {       
           this.clearPool();   
           this.setScene(MainMenuScene, true);
+        }
+        else if (this.current instanceof SplashScene) {       
+          this.setScene(MainMenuScene, true);          
         }
       },
       ranking: () => {
@@ -74,7 +69,7 @@ export class SceneManager extends SingletonBase<SceneManager> {
 
   public async start(): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 700));
-    this.setScene(MainMenuScene, false);
+    this.setScene(SplashScene, false);
   }
 
   public update(dt: Milliseconds): void {

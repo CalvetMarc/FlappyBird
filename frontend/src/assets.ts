@@ -407,6 +407,21 @@ export const manifest: AssetsManifest = {
         start:{
           src: "/assets/sfx/ui/start.wav"
         },
+        woosh1:{
+          src: "/assets/sfx/ui/woosh1.wav"
+        },
+        woosh2:{
+          src: "/assets/sfx/ui/woosh2.wav"
+        },
+        enter:{
+          src: "/assets/sfx/ui/entergame.wav"
+        },
+         exit1:{
+          src: "/assets/sfx/ui/exit1.wav"
+        },
+         exit2:{
+          src: "/assets/sfx/ui/exit2.wav"
+        },
         
 
       }

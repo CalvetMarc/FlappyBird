@@ -1,7 +1,6 @@
 import { SessionInfo } from "./core/managers/GameManager";
 
 export async function sendScore(data: SessionInfo): Promise<boolean> {
-  console.log(JSON.stringify(data))
   const res = await fetch("/api/postRanking", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -9,7 +8,6 @@ export async function sendScore(data: SessionInfo): Promise<boolean> {
   });
 
   const json = await res.json();
-  console.log("SERVER RESPONSE:", json);
   return json.enterRanking;
 }
 
@@ -20,7 +18,6 @@ export async function getRanking(): Promise<SessionInfo[]> {
   });
 
   const json = await res.json();
-  console.log("RANKING RESPONSE:", json);
 
   if (!Array.isArray(json)) return [];
 

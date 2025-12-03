@@ -8,7 +8,8 @@ import { BitmapTextPool } from "../objects/BitmapTextPool";
 
 export class AssetsManager extends SingletonBase<AssetsManager> {
   private textures: Map<string, Texture[]> = new Map();
-   spritePool: SpritePool;
+  private spritePool: SpritePool;
+  private spritesHolder: Map<string, Sprite> = new Map();;
   private textPool: BitmapTextPool;
 
   private constructor() {
@@ -126,6 +127,22 @@ public async start(): Promise<void> {
   public releaseSprite(sprite: Sprite) {
     if(sprite)
       this.spritePool.release(sprite);
+  }
+
+  public saveSpriteReference(key: string, value: Sprite): void{
+    if(this.spritesHolder.has(key)) return;
+
+    this.spritesHolder.set(key, value);
+  }
+
+  public getSpriteFromReference(key: string): Sprite | undefined{
+    return this.spritesHolder.get(key)
+  }
+
+  public removeSpriteReference(key: string): void{
+    if(!this.spritesHolder.has(key)) return;
+
+    this.spritesHolder.delete(key);
   }
 
   // ---------- BITMAP TEXT ----------
