@@ -145,12 +145,11 @@ export class SettingsScene implements IScene {
   }
 
   private createButton() {
-
-    this.closeBtn = new Button(0.25, "cross", () => SceneManager.I.fire("menu"), "exit1", 0x0c0807);
+    this.closeBtn = new Button(2.2 / this.bgSprite.scale.x, "cross", () => SceneManager.I.fire("menu"), "exit1", 0x0c0807);
+    this.bgSprite.addChild(this.closeBtn);
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
 
-    this.bgSprite.addChild(this.closeBtn);
   }
 
 }
