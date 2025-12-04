@@ -72,13 +72,10 @@ export class CharacterController implements IGameObject{
 
     if (!this.isDead) {
         const rot = (this.velocityY / (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x)) * sensitivity;
-        const targetRot = Math.max(minUp, Math.min(rot, maxFall));
-        this.bird.rotation += (targetRot - this.bird.rotation) * 0.2; // o 0.15–0.25
-
+        this.bird.rotation = Math.max(minUp, Math.min(rot, maxFall));
     }
-
     else if (!this.deadGrounded) {
-        const fallRotateSpeed = 0.02; 
+        const fallRotateSpeed = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.00005; //0.02
         this.bird.rotation = Math.min(this.bird.rotation + fallRotateSpeed, maxFall);
     }
   }
