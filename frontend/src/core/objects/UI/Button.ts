@@ -57,6 +57,16 @@ export class Button extends Container {
     }
   }
 
+  public onStart(): void{
+    const localPos = this.toLocal(GameManager.I.mousePosition);
+    const inside: boolean = this.bgSprite.containsPoint(localPos);
+
+    if(inside){
+      GameManager.I.gameApp.view.style.cursor = "pointer";
+      this.onPointerOver();
+    }
+  }
+
   public freeResources(): void{
     this.bgSprite.removeChildren();
     AssetsManager.I.releaseSprite(this.iconSprite);

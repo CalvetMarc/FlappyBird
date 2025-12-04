@@ -53,7 +53,8 @@ export class GameOverScene implements IScene {
       }, 200);
     }
 
-   
+    this.exitBtn.onStart();
+    this.restartBtn.onStart();
 
     this.birdPreview = false;    
     await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 350).finished;   

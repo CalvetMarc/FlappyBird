@@ -88,12 +88,10 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   private update(delta: Milliseconds): void {
     for (const [id, tween] of this.activeTweens) {
-      // si està encadenat a un tween anterior actiu → espera
       if (tween.preChainedId !== undefined && this.activeTweens.has(tween.preChainedId)) {
         continue;
       }
 
-      // eliminació
       if (tween.getState() === "FINISHED") {
         this.idProvider.release(tween.id);
         this.activeTweens.delete(id);

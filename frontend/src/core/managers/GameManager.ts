@@ -30,7 +30,7 @@ export class GameManager extends SingletonBase<GameManager> {
   private constructor() {
     super();
     this.lastEnteredRanking = false;
-    this.mousePos = new Point(0,0);
+    this.mousePos = new Point(NaN, NaN);
     this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
     this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
   }
@@ -42,6 +42,7 @@ export class GameManager extends SingletonBase<GameManager> {
     await this.app.init({backgroundColor: "#10161A", antialias: false });
 
     document.body.appendChild(this.app.canvas);
+    this.preventZoom();
 
     Object.assign(this.app.canvas.style, { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "block" });
 
@@ -65,31 +66,31 @@ export class GameManager extends SingletonBase<GameManager> {
     SceneManager.I.update(dt);
   }
 
+  private preventZoom() {
+    window.addEventListener("wheel", (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && (e.key === "+" || e.key === "-" || e.key === "=")) {
+        e.preventDefault();
+      }
+    });
+
+    window.addEventListener("gesturestart", (e) => e.preventDefault());
+    window.addEventListener("gesturechange", (e) => e.preventDefault());
+    window.addEventListener("gestureend", (e) => e.preventDefault());
+  }
+
+
   private initMouseTracking(){
     this.app.canvas.addEventListener("pointermove", e => {
         const rect = this.app.canvas.getBoundingClientRect();
         this.mousePos.x = e.clientX - rect.left;
         this.mousePos.y = e.clientY - rect.top;
     });
-  }
-
-  public forcePointerMove() {
-    const canvas = this.app.canvas;
-    const rect = canvas.getBoundingClientRect();
-
-    const clientX = rect.left + this.mousePos.x;
-    const clientY = rect.top + this.mousePos.y;
-
-    const ev = new PointerEvent("pointermove", {
-      clientX,
-      clientY,
-      bubbles: true,
-      cancelable: true,
-      pointerId: 1,
-      pointerType: "mouse"
-    });
-
-    canvas.dispatchEvent(ev);
   }
 
   public get gameApp(): Application {
@@ -99,5 +100,9 @@ export class GameManager extends SingletonBase<GameManager> {
   public get backgroundController(): BackgroundController{
     return this.appBackground;
   }  
+
+  public get mousePosition(): Point{
+    return this.mousePos;
+  }
 
 }

@@ -75,8 +75,13 @@ export class MainMenuScene implements IScene {
     this.birdFadeOf = true;    
     this.preloadRanking = false;
     this.editableField.refreshVisuals();
+
+    this.playBtn.onStart();
+    this.settingsBtn.onStart();
+    this.rankingBtn.onStart();
+    this.nextBtn.onStart();
+    this.prevBtn.onStart();
     
-    GameManager.I.forcePointerMove();
     await Promise.all([TweenManager.I.fadeTo([this.containerUi], 1, 500, 100), TweenManager.I.fadeHtmlTo([this.htmlInput], 1, 500, 100).finished]);
     this.logo.removeFromParent();
     this.containerUi.addChild(this.logo);

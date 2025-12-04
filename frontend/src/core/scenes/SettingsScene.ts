@@ -47,7 +47,8 @@ export class SettingsScene implements IScene {
     }
     this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
-    GameManager.I.forcePointerMove();
+
+    this.closeBtn.onStart();
 
     await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100).finished;
   }
