@@ -55,9 +55,13 @@ export class SplashScene implements IScene {
 
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    sound.play("woosh1");
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("woosh1");
+    }
     await TweenManager.I.moveTo([this.authorParent], (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) + (this.authorParent.getChildAt(0).width * 0.5), this.authorParent.position.y, 300).finished;
-    sound.play("woosh1");
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("woosh1");
+    }
     await TweenManager.I.moveTo([this.hint], -this.hint.width, this.hint.position.y, 600).finished;
     GameManager.I.backgroundController.setScrolling(true);
 
@@ -135,7 +139,9 @@ export class SplashScene implements IScene {
   } 
 
   private interactForContinue = () =>{
-    sound.play("enter");
+    if(GameManager.I.settings.audioEnabled){
+      sound.play("enter");
+    }
     GameManager.I.gameApp.stage.eventMode = "auto";
     GameManager.I.gameApp.stage.removeListener("pointerdown", this.interactForContinue);
     window.removeEventListener("keydown", this.interactForContinue);
