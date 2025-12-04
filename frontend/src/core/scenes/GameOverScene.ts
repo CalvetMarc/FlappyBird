@@ -62,12 +62,7 @@ export class GameOverScene implements IScene {
 
   public onUpdate(dt: number): void {}
 
-  public async onExit(): Promise<void> {
-    if(GameManager.I.settings.audioEnabled){
-      setTimeout(() => {
-        sound.play("disappear");
-      }, 150);
-    }
+  public async onExit(): Promise<void> {    
     GameManager.I.backgroundController.setScrolling(true);
     this.restartBtn.resetVisuals();
     this.exitBtn.resetVisuals();
