@@ -144,16 +144,17 @@ export class MainMenuScene implements IScene {
     if(this.logo){
       this.logo.removeFromParent();
     }
-    else{
+    else{    
       this.logo = AssetsManager.I.getSprite("logo", 0);
-      this.logoBaseW = this.logo.texture.width;
-
-      const scale = ((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 3) / this.logoBaseW;
+      const logoBaseW = this.logo.texture.width;
+      
+      const scale = ((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) / 2) / logoBaseW;
       this.logo.scale.set(scale);
-
+      
       this.logo.anchor.set(0.5);
-      this.logo.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.125);
+      this.logo.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.2);
       this.baseY = this.logo.position.y;
+      
     }
 
     this.logo.zIndex = 10;

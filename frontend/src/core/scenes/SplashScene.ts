@@ -99,7 +99,7 @@ export class SplashScene implements IScene {
 
     const baseScale = author.scale;
     
-    const amplitude = 0.002;
+    const amplitude = 0.003;
     const duration = ms(1400);
 
     this.authorTweenID = TweenManager.I.AddLoopTween(<Tween<Container>>{
