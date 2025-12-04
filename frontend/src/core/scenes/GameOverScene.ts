@@ -175,12 +175,12 @@ export class GameOverScene implements IScene {
   }
   
   private createButtons() {  
-    this.exitBtn = new Button(2.5 / this.bgSprite.scale.x, "exit", () => { this.birdPreview = false; SceneManager.I.fire("menu"); }, "exit1", 0xff0044);
+    this.exitBtn = new Button(2.5 / this.bgSprite.scale.x, "exit", () => { this.birdPreview = false; SceneManager.I.fire("menu"); }, "exit1", true, 0xff0044);
     this.exitBtn.position.x = 40;
     this.exitBtn.position.y = 8;
     this.exitBtn.rotation = -Math.PI * 0.5;
 
-    this.restartBtn = new Button(2.5 / this.bgSprite.scale.x, "restart", () => { this.birdPreview = true; SceneManager.I.fire("play") }, "click", 0x0c0807);
+    this.restartBtn = new Button(2.5 / this.bgSprite.scale.x, "restart", () => { this.birdPreview = true; SceneManager.I.fire("play") }, "click", true, 0x0c0807);
     this.restartBtn.position.x = 40;
     this.restartBtn.position.y = -8;
     this.restartBtn.rotation = -Math.PI * 0.5;

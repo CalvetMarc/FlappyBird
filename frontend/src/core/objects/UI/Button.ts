@@ -14,8 +14,9 @@ export class Button extends Container {
   private iconIsOneFrame: boolean;
   private soundName: string;
   private enabled: boolean;
+  private disableAfterClick: boolean;
 
-  constructor(buttonScale: number, iconAssetName: string, callback: () => void, soundName: string = "click", iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
+  constructor(buttonScale: number, iconAssetName: string, callback: () => void, soundName: string = "click", disableAfterClick: boolean = true, iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
 
     this.bgSprite = AssetsManager.I.getSprite("button", 0);
@@ -53,6 +54,7 @@ export class Button extends Container {
     this.iconIsOneFrame = iconIsOneFrame;
     this.soundName = soundName;
     this.enabled = false;
+    this.disableAfterClick = disableAfterClick;
 
     if (debug) {
       this.debugBounds();
@@ -117,7 +119,9 @@ export class Button extends Container {
     this.iconSprite.position = { x: 0, y: -3.5 };
     this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);   
     
-    this.enabled = false;
+    if(this.disableAfterClick){
+      this.enabled = false;
+    }
 
     setTimeout(() => callback(), 40);
   }

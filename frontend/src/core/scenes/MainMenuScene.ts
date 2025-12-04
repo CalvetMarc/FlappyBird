@@ -261,10 +261,10 @@ export class MainMenuScene implements IScene {
     this.playBtn = new Button(2.5, "play", () => { this.birdFadeOf = false; SceneManager.I.fire("play"); });
     this.playBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, y: buttonsYPos};
 
-    this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), "click", 0x0c0807);
+    this.settingsBtn = new Button(2.5, "settings", () => SceneManager.I.fire("settings"), "click", true, 0x0c0807);
     this.settingsBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 - buttonsXSpacing, y: buttonsYPos};
 
-    this.rankingBtn = new Button(2.5, "ranking", () => {this.preloadRanking = true; SceneManager.I.fire("ranking");}, "click", 0xff8800);
+    this.rankingBtn = new Button(2.5, "ranking", () => {this.preloadRanking = true; SceneManager.I.fire("ranking");}, "click", true, 0xff8800);
     this.rankingBtn.position = {x: (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5 + buttonsXSpacing, y: buttonsYPos};
     
     this.containerUi.addChild(this.playBtn, this.settingsBtn, this.rankingBtn);
@@ -287,11 +287,11 @@ export class MainMenuScene implements IScene {
     this.nextBtn = new Button(1.5, "smallArrow", () => {
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex + 1) % 7;
       this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    }, "click", 0xffffff, true, 0, 2);
+    }, "click", false, 0xffffff, true, 0, 2);
     this.prevBtn = new Button(1.5, "smallArrow", () => {     
       SceneManager.I.playerIndex = (SceneManager.I.playerIndex - 1 + 7) % 7;
       this.bird = AssetsManager.I.getSprite("bird" + (SceneManager.I.playerIndex + 1).toString(), 0, this.bird);
-    }, "click", 0xffffff, true, Math.PI, 2);
+    }, "click", false, 0xffffff, true, Math.PI, 2);
 
     this.prevBtn.position = {x: this.bird.position.x - distFromCenter, y: this.bird.position.y * 1.008};
     this.nextBtn.position = {x: this.bird.position.x + distFromCenter, y: this.bird.position.y * 1.008};    
