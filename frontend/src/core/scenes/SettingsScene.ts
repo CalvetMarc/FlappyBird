@@ -51,6 +51,8 @@ export class SettingsScene implements IScene {
     this.closeBtn.onStart();
 
     await TweenManager.I.fadeTo([this.containerUi], 1, 500, 100).finished;
+
+    this.closeBtn.enableInput();
   }
 
   public onUpdate(dt: number): void {}

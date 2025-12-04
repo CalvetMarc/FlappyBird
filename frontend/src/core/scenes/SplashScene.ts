@@ -118,7 +118,7 @@ export class SplashScene implements IScene {
     this.hint = AssetsManager.I.getText("press something to start", "vcrBase", (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.04);
     this.hint.anchor.set(0.5);
     this.hint.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.53);
-    this.hint.style.fill = 0x888888;
+    this.hint.style.fill = 0x666666;
     this.containerGame.addChild(this.hint);
 
     const baseOpacity = 0.5;

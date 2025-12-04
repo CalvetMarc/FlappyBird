@@ -61,7 +61,7 @@ export class MainMenuScene implements IScene {
     this.startLogoFloat();   
 
     this.containerUi.alpha = 0;
-    this.playEnter = true;
+    this.playEnter  = true;
   }
 
   public async onEnter(): Promise<void> {
@@ -76,15 +76,22 @@ export class MainMenuScene implements IScene {
     this.preloadRanking = false;
     this.editableField.refreshVisuals();
 
-    this.playBtn.onStart();
     this.settingsBtn.onStart();
+    this.playBtn.onStart();
     this.rankingBtn.onStart();
     this.nextBtn.onStart();
     this.prevBtn.onStart();
     
-    await Promise.all([TweenManager.I.fadeTo([this.containerUi], 1, 500, 100), TweenManager.I.fadeHtmlTo([this.htmlInput], 1, 500, 100).finished]);
+    await Promise.all([TweenManager.I.fadeTo([this.containerUi], 1, 500, 100), TweenManager.I.fadeHtmlTo([this.htmlInput], 1, 500, 100).finished]);    
+
     this.logo.removeFromParent();
     this.containerUi.addChild(this.logo);
+
+    this.settingsBtn.enableInput();
+    this.playBtn.enableInput();
+    this.rankingBtn.enableInput();
+    this.nextBtn.enableInput();
+    this.prevBtn.enableInput();
   }
 
   public onUpdate(dt: number): void {}

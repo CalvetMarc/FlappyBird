@@ -13,6 +13,7 @@ export class Button extends Container {
   private initScale: number;
   private iconIsOneFrame: boolean;
   private soundName: string;
+  private enabled: boolean;
 
   constructor(buttonScale: number, iconAssetName: string, callback: () => void, soundName: string = "click", iconTintHex: number = 0xffffff, iconIsOneFrame: boolean = false, iconRotationRadians: number = 0, iconScale: number = 0.6) {
     super();
@@ -51,6 +52,7 @@ export class Button extends Container {
     this.iconName = iconAssetName;
     this.iconIsOneFrame = iconIsOneFrame;
     this.soundName = soundName;
+    this.enabled = false;
 
     if (debug) {
       this.debugBounds();
@@ -58,6 +60,8 @@ export class Button extends Container {
   }
 
   public onStart(): void{
+    this.enabled = false;
+
     const localPos = this.toLocal(GameManager.I.mousePosition);
     const inside: boolean = this.bgSprite.containsPoint(localPos);
 
@@ -65,6 +69,10 @@ export class Button extends Container {
       GameManager.I.gameApp.view.style.cursor = "pointer";
       this.onPointerOver();
     }
+  }
+
+  public enableInput(){
+    this.enabled = true;
   }
 
   public freeResources(): void{
@@ -81,6 +89,8 @@ export class Button extends Container {
   }
 
   private onPointerDown() {
+    if(!this.enabled) return;
+
     this.scale.set(this.initScale * 0.9);
 
     if (!this.iconIsOneFrame) {
@@ -96,6 +106,8 @@ export class Button extends Container {
   }
 
   private onPointerUp(callback: () => void) {
+    if(!this.enabled) return;
+
     this.scale.set(this.initScale);
 
     if (!this.iconIsOneFrame) {
@@ -103,12 +115,16 @@ export class Button extends Container {
     }
 
     this.iconSprite.position = { x: 0, y: -3.5 };
-    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);    
+    this.bgSprite = AssetsManager.I.getSprite("button", 0, this.bgSprite);   
+    
+    this.enabled = false;
 
     setTimeout(() => callback(), 40);
   }
 
   private onPointerUpOutside() {
+    if(!this.enabled) return;
+
     this.scale.set(this.initScale);
 
     if (!this.iconIsOneFrame) {
