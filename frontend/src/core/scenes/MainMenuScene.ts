@@ -119,8 +119,8 @@ export class MainMenuScene implements IScene {
     if(this.preloadRanking){      
       const rankingPromise = getRanking();
 
-      TweenManager.I.fadeTo([this.containerUi], 0, 500).finished;
-      TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished;
+      TweenManager.I.fadeTo([this.containerUi], 0, 500);
+      TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0);
 
       await new Promise<void>(resolve => setTimeout(resolve, 300));
 
