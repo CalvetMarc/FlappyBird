@@ -18,6 +18,7 @@ export class BitmapTextPool extends Pool<BitmapText> {
         bt.visible = false;
         bt.alpha = 1;
         bt.scale.set(1);
+        bt.rotation = 0;
       },
       bt => {
         bt.visible = true;
