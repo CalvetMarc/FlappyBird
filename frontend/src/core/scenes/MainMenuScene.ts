@@ -128,7 +128,7 @@ export class MainMenuScene implements IScene {
       loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
       loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);      
       AssetsManager.I.saveResourceReference("loader", loader);
-      this.containerUi.addChild(loader);
+      this.containerGame.addChild(loader);
 
       await new Promise<void>(resolve => setTimeout(resolve, 200));
 
