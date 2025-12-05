@@ -14,11 +14,13 @@ export class BitmapTextPool extends Pool<BitmapText> {
         bt.removeChildren();
         bt.removeAllListeners();
         bt.tint = 0xFFFFFF;
+        bt.style.fill = 0xFFFFFF;
         bt.text = "";
         bt.visible = false;
         bt.alpha = 1;
         bt.scale.set(1);
         bt.rotation = 0;
+        bt.position.set(0);
       },
       bt => {
         bt.visible = true;
@@ -31,6 +33,7 @@ export class BitmapTextPool extends Pool<BitmapText> {
     bt.style.fontFamily = font;
     bt.style.fontSize = size;
     bt.text = text;
+    bt.tint = 0xFFFFFF;
     return bt;
   }
 }

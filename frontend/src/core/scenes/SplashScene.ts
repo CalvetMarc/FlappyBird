@@ -35,6 +35,7 @@ export class SplashScene implements IScene {
     this.authorParent = new Container();
 
     this.isIos = GameManager.I.isIOS();
+    this.isIos = true;
   }
 
   public async onInit(): Promise<void> {
@@ -53,8 +54,9 @@ export class SplashScene implements IScene {
 
   public async onEnter(): Promise<void> {
     if(this.isIos){
-      TweenManager.I.moveTo([this.iosPopup], (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5,  (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.95, 300);
-      TweenManager.I.scaleTo([this.iosPopup], 1,  1, 300);
+      TweenManager.I.moveTo([this.iosPopup], (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5,  (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.95, 
+        (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.55);
+      TweenManager.I.scaleTo([this.iosPopup], 1,  1, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.55);
     }
   }
   public onUpdate(dt: number): void {}
@@ -65,8 +67,9 @@ export class SplashScene implements IScene {
     this.hint.alpha = 1;
 
     if(this.isIos){
-      TweenManager.I.moveTo([this.iosPopup], (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5,  (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 1.2, 800, 0);
-      TweenManager.I.scaleTo([this.iosPopup], 0.2,  0.2, 800, 0);
+      TweenManager.I.moveTo([this.iosPopup], (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5,  (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 1.2, 
+        (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 1.1, 0);
+      TweenManager.I.scaleTo([this.iosPopup], 0.2,  0.2, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 1.1, 0);
     }
 
     await new Promise(resolve => setTimeout(resolve, 300));
