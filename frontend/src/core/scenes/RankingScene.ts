@@ -59,13 +59,17 @@ export class RankingScene implements IScene {
     //const rankingInfo = await getRanking();
     this.fillRankingEntries(this.normalizeRanking(GameManager.I.lastLoadedRankingInfo));
     
-    await TweenManager.I.fadeTo([this.containerUi], 1, 500).finished;  
+    TweenManager.I.fadeTo([this.containerUi], 1, 500);  
+
+    await new Promise<void>(resolve => setTimeout(resolve, 200));
     
     if(loader){
       loader.removeFromParent();
       loader.freeResources();
       AssetsManager.I.removeResourceReference("loader");
     }
+
+    await new Promise<void>(resolve => setTimeout(resolve, 300));
 
     this.closeBtn.enableInput();
   }

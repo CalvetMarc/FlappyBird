@@ -122,7 +122,7 @@ export class MainMenuScene implements IScene {
       TweenManager.I.fadeTo([this.containerUi], 0, 500);
       TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0);
 
-      await new Promise<void>(resolve => setTimeout(resolve, 300));
+      await new Promise<void>(resolve => setTimeout(resolve, 150));
 
       const loader = new Loading(12, 6, 40);
       loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
@@ -130,7 +130,7 @@ export class MainMenuScene implements IScene {
       AssetsManager.I.saveResourceReference("loader", loader);
       this.containerGame.addChild(loader);
 
-      await new Promise<void>(resolve => setTimeout(resolve, 200));
+      await new Promise<void>(resolve => setTimeout(resolve, 350));
 
       const rankingInfo = await rankingPromise;
       GameManager.I.lastLoadedRankingInfo = rankingInfo;      
