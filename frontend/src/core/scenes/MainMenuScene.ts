@@ -125,8 +125,8 @@ export class MainMenuScene implements IScene {
       const [_, rankingInfo] = await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, getRanking(), TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
       GameManager.I.lastLoadedRankingInfo = rankingInfo;
 
-      //loader.freeResources();
-      //loader.removeFromParent();
+      loader.freeResources();
+      loader.removeFromParent();
     }
     else{
       await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);

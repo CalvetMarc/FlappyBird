@@ -45,6 +45,7 @@ export class Loading extends Container {
   }
 
   public freeResources(): void {
+    TweenManager.I.KillTween(this.spinTweenID);
     this.circles.forEach(element => {
       element.circle.destroy();
     });
