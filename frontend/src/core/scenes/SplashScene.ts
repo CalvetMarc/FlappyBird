@@ -35,7 +35,6 @@ export class SplashScene implements IScene {
     this.authorParent = new Container();
 
     this.isIos = GameManager.I.isIOS();
-    this.isIos = true;
   }
 
   public async onInit(): Promise<void> {
