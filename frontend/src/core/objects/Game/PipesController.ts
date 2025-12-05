@@ -198,7 +198,7 @@ export class PipesController implements IGameObject{
       colorToSpawn = this.lastPipesColor === pipeColors[0] ? pipeColors[1] : pipeColors[0];
     }
     else if(this.scored < 70){
-      colorToSpawn = this.lastPipesColor === pipeColors[2] ? "bluePipe" : pipeColors[2];
+      colorToSpawn = this.lastPipesColor === pipeColors[2] ? pipeColors[3] : pipeColors[2];
     }
     else if(this.scored < 85){
       colorToSpawn = this.lastPipesColor === pipeColors[0] ? pipeColors[2] : pipeColors[0];
