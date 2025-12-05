@@ -11,6 +11,7 @@ import { LayoutManager } from "../managers/LayoutManager";
 import { getRanking } from "../../SessionManager";
 import { EditableField } from "../objects/UI/EditableField";
 import { sound } from "@pixi/sound";
+import { Loading } from "../objects/UI/Loading";
 
 export class MainMenuScene implements IScene {
   private playBtn!: Button;
@@ -116,8 +117,16 @@ export class MainMenuScene implements IScene {
     }
 
     if(this.preloadRanking){      
+      const loader = new Loading(12, 6, 40);
+      loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
+      loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);
+      
+      this.containerUi.addChild(loader);
       const [_, rankingInfo] = await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, getRanking(), TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
       GameManager.I.lastLoadedRankingInfo = rankingInfo;
+
+      loader.removeFromParent();
+      loader.freeResources();
     }
     else{
       await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);

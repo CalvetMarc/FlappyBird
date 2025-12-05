@@ -8,6 +8,7 @@ import { UniqueId } from "../objects/IdProvider";
 import { GameManager } from "../managers/GameManager";
 import { SceneManager } from "../managers/SceneManager";
 import { sound } from "@pixi/sound";
+import { Loading } from "../objects/UI/Loading";
 
 export class SplashScene implements IScene {
   
@@ -30,7 +31,7 @@ export class SplashScene implements IScene {
   public async onInit(): Promise<void> {
     this.createLogo();
     this.createAuthor();
-    this.createHint();
+    this.createHint();    
 
     GameManager.I.gameApp.stage.eventMode = "static";
     GameManager.I.gameApp.stage.on("pointerdown", this.interactForContinue);
