@@ -117,14 +117,17 @@ export class MainMenuScene implements IScene {
     }
 
     if(this.preloadRanking){      
+      const rankingPromise = getRanking();
+
+      await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
+      
       const loader = new Loading(12, 6, 40);
       loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
-      loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);
-      
+      loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);      
       AssetsManager.I.saveResourceReference("loader", loader);
-
       this.containerUi.addChild(loader);
-      const [_, rankingInfo] = await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, getRanking(), TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
+
+      const rankingInfo = await rankingPromise;
       GameManager.I.lastLoadedRankingInfo = rankingInfo;      
     }
     else{
