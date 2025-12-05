@@ -15,19 +15,24 @@ interface Obstacle {
   endX: number;
 }
 
+const pipeColors: string[] = ["greenPipe", "orangePipe", "redPipe", "bluePipe"]
+
 export class PipesController implements IGameObject{  
   private gamePipes: Obstacle[] = [];
 
-  private pipeSpeed = 0.25;
-  private pipeInterval = 2000;
-  private pipeTimer = 0;
-  private maxPipeTiles = 15;
-  private minTilesPerPipe = 2;
-  private upGapSlots = 3;
-  private downGapSlots = 2;
-  private nextToScoreIdx = -1;
+  private pipeSpeed: number = 0.25;
+  private pipeInterval: number = 2000;
+  private pipeTimer: number = 0;
+  private maxPipeTiles: number = 15;
+  private minTilesPerPipe: number = 2;
+  private upGapSlots: number = 3;
+  private downGapSlots: number = 2;
+  private nextToScoreIdx: number = -1;
+  private scored: number = 0;
 
   private move!: boolean;
+
+  private lastPipesColor: string = "";
 
   public container :Container;
 
@@ -44,7 +49,7 @@ export class PipesController implements IGameObject{
 
     this.CreateObstacle();
     this.move = true;
-
+    this.scored = 0;
   }  
 
   public onUpdate(dt: Milliseconds): void {   
@@ -126,10 +131,13 @@ export class PipesController implements IGameObject{
     if(this.nextToScoreIdx === -1) return;
 
     this.gamePipes[this.nextToScoreIdx].scored = true;
+    this.scored++;
   }
 
   private CreateObstacle() {
-    const pipeTileSize = AssetsManager.I.getTextureSize("greenPipe");
+    const selectedPipe: string = this.getPipeName();
+
+    const pipeTileSize = AssetsManager.I.getTextureSize(selectedPipe);
     const aspectRelationPipeTile = pipeTileSize.width / pipeTileSize.height;
     
     const groundTilesBounds: Bounds = GameManager.I.appBackground.groundBounds;
@@ -137,22 +145,21 @@ export class PipesController implements IGameObject{
     const pipeTileWidth = pipeTileHeight * aspectRelationPipeTile;
 
     const gapSlot = this.randomInteger(this.minTilesPerPipe + this.upGapSlots - 1, (this.maxPipeTiles) - (this.minTilesPerPipe + this.downGapSlots));
-    //console.log(gapSlot);
     const startX =  LayoutManager.I.layoutVirtualSize.width;
 
     const upPipe: Sprite[] = [];
     const downPipe: Sprite[] = [];
 
-    upPipe.push(this.makePipe("greenPipe", 4, startX, pipeTileHeight * (gapSlot - this.upGapSlots), pipeTileWidth, pipeTileHeight));
-    upPipe.push(this.makePipe("greenPipe", 3, startX, pipeTileHeight * (gapSlot - (this.upGapSlots + 1)), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe(selectedPipe, 4, startX, pipeTileHeight * (gapSlot - this.upGapSlots), pipeTileWidth, pipeTileHeight));
+    upPipe.push(this.makePipe(selectedPipe, 3, startX, pipeTileHeight * (gapSlot - (this.upGapSlots + 1)), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot - 4; i > 0; i--) {
-      upPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i - 1), pipeTileWidth, pipeTileHeight));
+      upPipe.push(this.makePipe(selectedPipe, 2, startX, pipeTileHeight * (i - 1), pipeTileWidth, pipeTileHeight));
     }
 
-    downPipe.push(this.makePipe("greenPipe", 0, startX, pipeTileHeight * (gapSlot + this.downGapSlots), pipeTileWidth, pipeTileHeight));
-    downPipe.push(this.makePipe("greenPipe", 1, startX, pipeTileHeight * (gapSlot + (this.downGapSlots + 1)), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe(selectedPipe, 0, startX, pipeTileHeight * (gapSlot + this.downGapSlots), pipeTileWidth, pipeTileHeight));
+    downPipe.push(this.makePipe(selectedPipe, 1, startX, pipeTileHeight * (gapSlot + (this.downGapSlots + 1)), pipeTileWidth, pipeTileHeight));
     for (let i = gapSlot + 3; i < this.maxPipeTiles - 1; i++) {
-      downPipe.push(this.makePipe("greenPipe", 2, startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
+      downPipe.push(this.makePipe(selectedPipe, 2, startX, pipeTileHeight * (i + 1), pipeTileWidth, pipeTileHeight));
     }
 
     this.gamePipes.push({ upPipe, downPipe, gap: gapSlot, scored: false, startX: startX, endX: LayoutManager.I.layoutBounds.minX });
@@ -169,5 +176,41 @@ export class PipesController implements IGameObject{
 
   private randomInteger(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  private getPipeName(): string{
+
+    let colorToSpawn: string = "";
+
+    if(this.scored < 10){
+      colorToSpawn = pipeColors[0];
+    }
+    else if(this.scored < 20){
+      colorToSpawn = pipeColors[1];
+    }
+    else if(this.scored < 30){
+      colorToSpawn = pipeColors[2];
+    }
+    else if(this.scored < 40){
+      colorToSpawn = pipeColors[3];
+    }
+    else if(this.scored < 55){
+      colorToSpawn = this.lastPipesColor === pipeColors[0] ? pipeColors[1] : pipeColors[0];
+    }
+    else if(this.scored < 70){
+      colorToSpawn = this.lastPipesColor === pipeColors[2] ? "bluePipe" : pipeColors[2];
+    }
+    else if(this.scored < 85){
+      colorToSpawn = this.lastPipesColor === pipeColors[0] ? pipeColors[2] : pipeColors[0];
+    }
+    else if(this.scored < 100){
+      colorToSpawn = this.lastPipesColor === pipeColors[3] ? pipeColors[1] : pipeColors[3];
+    }
+    else{
+      return pipeColors[Math.floor(Math.random() * (pipeColors.length))];
+    }
+
+    this.lastPipesColor = colorToSpawn;
+    return colorToSpawn;
   }
 }
