@@ -101,14 +101,16 @@ export class GameScene implements IScene {
   public async onExit(): Promise<void> {
     const sendPromise =  sendScore(GameManager.I.sessionData);
 
-    TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500)
+    TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500);
 
-    await new Promise<void>(resolve => setTimeout(resolve, 150));
+    await new Promise<void>(resolve => setTimeout(resolve, 950));
+
     const loader = new Loading(12, 6, 40);
     loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
     loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);      
     AssetsManager.I.saveResourceReference("loader", loader);
     this.containerGame.parent!.addChild(loader);
+
     await new Promise<void>(resolve => setTimeout(resolve, 350));
 
     const didEnter = await sendPromise;
