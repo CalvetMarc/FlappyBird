@@ -34,7 +34,7 @@ export class RankingScene implements IScene {
     this.containerUi.sortableChildren = true;
   }
 
-  public async onInit(): Promise<void> {
+  public async onInit(): Promise<void> {  
     this.createPanelBg();
     this.createLabels();
     this.createButton();  
@@ -42,12 +42,16 @@ export class RankingScene implements IScene {
 
   /** Called when the scene becomes active */
   public async onEnter(): Promise<void> {
+    const loader = AssetsManager.I.getResourceFromReference("loader");
+    if(loader){
+      this.containerGame.addChild(loader);
+    }
+
     if(GameManager.I.settings.audioEnabled){
       setTimeout(() => {
         sound.play("ranking");
       }, 300);
     }
-    this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
 
     this.closeBtn.onStart();
@@ -55,7 +59,12 @@ export class RankingScene implements IScene {
     //const rankingInfo = await getRanking();
     this.fillRankingEntries(this.normalizeRanking(GameManager.I.lastLoadedRankingInfo));
 
-    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 500).finished;  
+    if(loader){
+      loader.removeFromParent();
+      loader.freeResources();
+    }
+
+    await TweenManager.I.fadeTo([this.containerUi], 1, 500).finished;  
 
     this.closeBtn.enableInput();
   }
@@ -67,7 +76,7 @@ export class RankingScene implements IScene {
 
   /** Called before scene is removed or pooled */
   public async onExit(): Promise<void> {    
-    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 500).finished; 
+    await TweenManager.I.fadeTo([this.containerUi], 0, 500).finished; 
   }
 
   public async onDestroy(): Promise<void> {

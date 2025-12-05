@@ -121,12 +121,11 @@ export class MainMenuScene implements IScene {
       loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
       loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);
       
+      AssetsManager.I.saveResourceReference("loader", loader);
+
       this.containerUi.addChild(loader);
       const [_, rankingInfo] = await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, getRanking(), TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
-      GameManager.I.lastLoadedRankingInfo = rankingInfo;
-
-      loader.freeResources();
-      loader.removeFromParent();
+      GameManager.I.lastLoadedRankingInfo = rankingInfo;      
     }
     else{
       await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);
@@ -147,15 +146,21 @@ export class MainMenuScene implements IScene {
 
     this.logo.removeFromParent();
     AssetsManager.I.releaseSprite(this.logo);
-    AssetsManager.I.removeSpriteReference("logo");
+    AssetsManager.I.removeResourceReference("logo");
 
     this.bird.removeFromParent();
     GameManager.I.gameApp.stage.addChild(this.bird);
-    AssetsManager.I.saveSpriteReference("player", this.bird);
+    AssetsManager.I.saveResourceReference("player", this.bird);
+
+    const loader = AssetsManager.I.getResourceFromReference("loader");
+    if(loader){
+      loader.removeFromParent();
+    }
+
   }
 
   private createLogo() {
-    this.logo = AssetsManager.I.getSpriteFromReference("logo");
+    this.logo = AssetsManager.I.getResourceFromReference("logo");
 
     if(this.logo){
       this.logo.removeFromParent();

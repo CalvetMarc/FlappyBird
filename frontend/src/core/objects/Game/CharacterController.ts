@@ -86,7 +86,7 @@ export class CharacterController implements IGameObject{
 
     this.bird.removeFromParent();
     AssetsManager.I.releaseSprite(this.bird);
-    AssetsManager.I.removeSpriteReference("player");
+    AssetsManager.I.removeResourceReference("player");
   }
 
   public get birdBounds(): Bounds {
@@ -132,7 +132,7 @@ export class CharacterController implements IGameObject{
   }
 
   private loadBird() {
-    this.bird = AssetsManager.I.getSpriteFromReference("player");
+    this.bird = AssetsManager.I.getResourceFromReference("player");
     if(this.bird){
       this.bird.removeFromParent();
     }

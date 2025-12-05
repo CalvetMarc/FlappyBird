@@ -1,5 +1,5 @@
 import { SingletonBase } from "../abstractions/SingletonBase";
-import { Sprite, Texture, Assets, Rectangle, Size, BitmapText } from "pixi.js";
+import { Sprite, Texture, Assets, Rectangle, Size, BitmapText, ViewContainer } from "pixi.js";
 import { sound } from "@pixi/sound";
 
 import { manifest } from "../../assets";
@@ -9,7 +9,7 @@ import { BitmapTextPool } from "../objects/BitmapTextPool";
 export class AssetsManager extends SingletonBase<AssetsManager> {
   private textures: Map<string, Texture[]> = new Map();
   private spritePool: SpritePool;
-  private spritesHolder: Map<string, Sprite> = new Map();;
+  private resourcesHolder: Map<string, ViewContainer> = new Map();;
   private textPool: BitmapTextPool;
 
   private constructor() {
@@ -129,20 +129,20 @@ public async start(): Promise<void> {
       this.spritePool.release(sprite);
   }
 
-  public saveSpriteReference(key: string, value: Sprite): void{
-    if(this.spritesHolder.has(key)) return;
+  public saveResourceReference(key: string, value: Sprite): void{
+    if(this.resourcesHolder.has(key)) return;
 
-    this.spritesHolder.set(key, value);
+    this.resourcesHolder.set(key, value);
   }
 
-  public getSpriteFromReference(key: string): Sprite | undefined{
-    return this.spritesHolder.get(key)
+  public getResourceFromReference(key: string): ViewContainer | undefined{
+    return this.resourcesHolder.get(key)
   }
 
-  public removeSpriteReference(key: string): void{
-    if(!this.spritesHolder.has(key)) return;
+  public removeResourceReference(key: string): void{
+    if(!this.resourcesHolder.has(key)) return;
 
-    this.spritesHolder.delete(key);
+    this.resourcesHolder.delete(key);
   }
 
   // ---------- BITMAP TEXT ----------

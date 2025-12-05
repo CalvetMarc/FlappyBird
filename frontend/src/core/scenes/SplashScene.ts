@@ -84,7 +84,7 @@ export class SplashScene implements IScene {
 
     this.logo.anchor.set(0.5);
     this.logo.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.2);
-    AssetsManager.I.saveSpriteReference("logo", this.logo);
+    AssetsManager.I.saveResourceReference("logo", this.logo);
     
     this.containerUi.addChild(this.logo);
   } 
