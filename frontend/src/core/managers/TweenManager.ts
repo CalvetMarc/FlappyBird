@@ -239,5 +239,29 @@ export class TweenManager extends SingletonBase<TweenManager> {
 
   }
 
+  public scaleTo(targetObject: ViewContainer[], finalScaleX: number, finalScaleY: number, duration: number, waitTime: number = 0, onComplete?: () => void): CreatedTween {
+
+    const startScales = targetObject.map(obj => ({ x: obj.scale.x, y: obj.scale.y }));
+
+    return TweenManager.I.AddTween(<Tween<ViewContainer[]>>{
+      waitTime: ms(waitTime),
+      duration: ms(duration),
+      context: targetObject,
+
+      tweenFunction: function (elapsed) {
+        const t = TweenManager.easeOutCubic(elapsed, this.duration);
+
+        this.context.forEach((obj, i) => {
+          const start = startScales[i];
+          obj.scale.set(
+            start.x + (finalScaleX - start.x) * t,
+            start.y + (finalScaleY - start.y) * t
+          );
+        });
+      },
+
+      onComplete
+    });
+  }
 
 }

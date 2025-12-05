@@ -108,6 +108,17 @@ export class GameManager extends SingletonBase<GameManager> {
     });
   }
 
+  public isIOS(): boolean {
+    const ua = navigator.userAgent || "";
+
+    if (/iPhone|iPad|iPod/i.test(ua)) return true;
+
+    if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return true;
+
+    return false;
+  }
+
+
   public get gameApp(): Application {
     return this.app;
   }

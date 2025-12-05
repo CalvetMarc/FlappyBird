@@ -56,7 +56,6 @@ export class RankingScene implements IScene {
 
     this.closeBtn.onStart();
 
-    //const rankingInfo = await getRanking();
     this.fillRankingEntries(this.normalizeRanking(GameManager.I.lastLoadedRankingInfo));
     
     TweenManager.I.fadeTo([this.containerUi], 1, 500);  
