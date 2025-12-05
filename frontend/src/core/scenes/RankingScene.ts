@@ -61,7 +61,7 @@ export class RankingScene implements IScene {
     
     TweenManager.I.fadeTo([this.containerUi], 1, 500);  
 
-    await new Promise<void>(resolve => setTimeout(resolve, 200));
+    await new Promise<void>(resolve => setTimeout(resolve, 150));
     
     if(loader){
       loader.removeFromParent();

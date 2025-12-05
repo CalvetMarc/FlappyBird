@@ -42,11 +42,15 @@ export class GameOverScene implements IScene {
     this.createLabels();
     this.createButtons();  
 
-    this.containerGame.alpha = 0;
     this.containerUi.alpha = 0;
   }
 
   public async onEnter(): Promise<void> {
+    const loader = AssetsManager.I.getResourceFromReference("loader");
+    if(loader){
+      this.containerGame.addChild(loader);
+    }
+
     if(GameManager.I.settings.audioEnabled){
       setTimeout(() => {
         sound.play("finish");
@@ -57,7 +61,14 @@ export class GameOverScene implements IScene {
     this.restartBtn.onStart();
 
     this.birdPreview = false;    
-    await TweenManager.I.fadeTo([this.containerGame, this.containerUi], 1, 350).finished;   
+    TweenManager.I.fadeTo([this.containerUi], 1, 350);   
+    await new Promise<void>(resolve => setTimeout(resolve, 150));
+    if(loader){
+      loader.removeFromParent();
+      loader.freeResources();
+      AssetsManager.I.removeResourceReference("loader");
+    }
+    await new Promise<void>(resolve => setTimeout(resolve, 200));
 
     this.exitBtn.enableInput();
     this.restartBtn.enableInput();

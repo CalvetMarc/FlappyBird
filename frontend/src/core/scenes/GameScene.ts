@@ -10,6 +10,7 @@ import { LayoutManager } from "../managers/LayoutManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { sendScore } from "../../SessionManager";
 import { sound } from "@pixi/sound";
+import { Loading } from "../objects/UI/Loading";
 
 export class GameScene implements IScene {
   private scoreText!: BitmapText; 
@@ -98,7 +99,19 @@ export class GameScene implements IScene {
   }
 
   public async onExit(): Promise<void> {
-    const [_, didEnter] = await Promise.all([TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500).finished, sendScore(GameManager.I.sessionData)]);
+    const sendPromise =  sendScore(GameManager.I.sessionData);
+
+    TweenManager.I.fadeTo([this.containerGame, this.containerUi], 0, 800, 500)
+
+    await new Promise<void>(resolve => setTimeout(resolve, 150));
+    const loader = new Loading(12, 6, 40);
+    loader.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.5);
+    loader.scale.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.002);      
+    AssetsManager.I.saveResourceReference("loader", loader);
+    this.containerGame.parent!.addChild(loader);
+    await new Promise<void>(resolve => setTimeout(resolve, 350));
+
+    const didEnter = await sendPromise;
     GameManager.I.lastEnteredRanking = didEnter;
     this.characterController.detectInputs = false;
   }
@@ -108,6 +121,11 @@ export class GameScene implements IScene {
     AssetsManager.I.releaseText(this.scoreText);
     this.pipesController.onDestroy();
     this.characterController.onDestroy();
+
+    const loader = AssetsManager.I.getResourceFromReference("loader");
+    if(loader){
+      loader.removeFromParent();
+    }
   }
 
   private async createScoreText() {
