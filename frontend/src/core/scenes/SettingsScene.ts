@@ -132,14 +132,14 @@ export class SettingsScene implements IScene {
     this.audioToggle.position.set(-15, 0);
     this.audioToggle.scale.set(0.95);
 
-    this.dayCycleToggle = new Toggle("Day Cycle", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.dayCycleEnabled != GameManager.I.settings.dayCycleEnabled }, GameManager.I.settings.dayCycleEnabled);
+    this.dayCycleToggle = new Toggle("Day Cycle", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.dayCycleEnabled = !GameManager.I.settings.dayCycleEnabled }, GameManager.I.settings.dayCycleEnabled);
     this.bgSprite.addChild(this.dayCycleToggle);
     this.dayCycleToggle.rotation = -Math.PI * 0.5;
     this.dayCycleToggle.position.set(3, 0);
     this.dayCycleToggle.scale.set(0.95);
 
 
-    this.speedProgToggle = new Toggle("Speed Ramp", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.speedRampEnabled != GameManager.I.settings.speedRampEnabled }, GameManager.I.settings.speedRampEnabled);
+    this.speedProgToggle = new Toggle("Speed Ramp", "bigTick", "bigCross", 1, 7, () => { GameManager.I.settings.speedRampEnabled = !GameManager.I.settings.speedRampEnabled }, GameManager.I.settings.speedRampEnabled);
     this.bgSprite.addChild(this.speedProgToggle);
     this.speedProgToggle.rotation = -Math.PI * 0.5;
     this.speedProgToggle.position.set(21, 0);
