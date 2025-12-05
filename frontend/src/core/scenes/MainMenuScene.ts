@@ -99,7 +99,8 @@ export class MainMenuScene implements IScene {
 
 
   public async onExit(): Promise<void> {
-    this.htmlInput.value === "" ? "Guest" : this.htmlInput.value;
+    if(this.htmlInput.value.length <= 0)
+      this.htmlInput.value = "Guest";
     
     this.playEnter = false;
     if(GameManager.I.settings.audioEnabled && !this.birdFadeOf){
