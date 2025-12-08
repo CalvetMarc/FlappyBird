@@ -7,17 +7,29 @@ import { Milliseconds } from "../../time/TimeUnits";
 
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
+import { GameManager } from "../../managers/GameManager";
+import { Event } from "../../abstractions/events.";
 
 const scrollSpeed = 0.37;
 const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
 
+const BACKGROUND_KEYS: string[] = [
+  "bgNoon",
+  "bgAfternoon",
+  "bgNight",
+  "bgEvening",
+  "bgMorning",
+];
+
+const DAY_CYCLE_DURATION = 60; 
 
 export class BackgroundController implements IGameObject {
-  private background?: Sprite;
+  private backgrounds: Map<string, Sprite> = new Map();
   private groundPieces: Sprite[] = [];
+  private currentBackground: string = "bgNoon";
 
   private scrolling = false;
-
+  private elapsedSec: number = 0;
   public container: Container;
 
   public constructor() {
@@ -32,12 +44,42 @@ export class BackgroundController implements IGameObject {
     this.createGroundPieces();
     this.container.sortableChildren = true;
     this.setScrolling(false);
+
+    window.addEventListener(Event.DAY_CYCLE_CHANGE, this.updateCycle);
   }  
 
   public onUpdate(dt: Milliseconds) {
-    if (!this.scrolling) return;
-
+    
     const delta = (dt / 1000);
+    this.elapsedSec += delta;
+
+    if (GameManager.I.settings.dayCycleEnabled) {
+
+      const phase = ((this.elapsedSec % DAY_CYCLE_DURATION) + DAY_CYCLE_DURATION) % DAY_CYCLE_DURATION; 
+      const segment = DAY_CYCLE_DURATION / BACKGROUND_KEYS.length; 
+
+      const currentIndex = Math.floor(phase / segment);
+      const nextIndex = (currentIndex + 1) % BACKGROUND_KEYS.length;
+      const localT = (phase - currentIndex * segment) / segment;
+
+      for (let i = 0; i < BACKGROUND_KEYS.length; i++) {
+        const key = BACKGROUND_KEYS[i];
+        const sprite = this.backgrounds.get(key);
+        if (!sprite) continue;
+
+        if (i === currentIndex) {
+          sprite.alpha = 1 - localT;
+          sprite.zIndex = LAYERS.BACKGROUND - 1;
+        } else if (i === nextIndex) {
+          sprite.alpha = localT;
+          sprite.zIndex = LAYERS.BACKGROUND;
+        } else {
+          sprite.alpha = 0;
+        }
+      }
+    }
+    
+    if (!this.scrolling) return;
 
     for (const piece of this.groundPieces) {
       piece.x -= delta * scrollSpeed * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
@@ -52,42 +94,66 @@ export class BackgroundController implements IGameObject {
       this.container.removeChild(firstSlice);
       this.groundPieces.shift();
 
-      const newPiece = this.createRandomPiece(new Rectangle(lastSlice.x + lastSlice.width, lastSlice.y, lastSlice.width, lastSlice.height));
+      const newPiece = this.createRandomPiece(
+        new Rectangle(
+          lastSlice.x + lastSlice.width,
+          lastSlice.y,
+          lastSlice.width,
+          lastSlice.height
+        )
+      );
+
       this.groundPieces.push(newPiece);
       this.container.addChild(newPiece);
     }
   }
 
   public async onDestroy(): Promise<void> {
+    window.removeEventListener(Event.DAY_CYCLE_CHANGE, this.updateCycle);
+
+    this.backgrounds.forEach((value, key) => {
+      AssetsManager.I.releaseSprite(value);
+    });
+
+    this.backgrounds.clear();
+
     this.container.destroy({
       children: true,
       texture: true,
       textureSource: true,
     });
+
     this.groundPieces = [];
-    this.background = undefined;
   } 
 
   public setScrolling(scrolling: boolean) {
     this.scrolling = scrolling;
   } 
 
-  public get groundBounds(): Bounds | undefined{
-    if(this.groundPieces.length <= 0) return undefined;
+  public get groundBounds(): Bounds | undefined {
+    if (this.groundPieces.length <= 0) return undefined;
 
-    return new Bounds(this.groundPieces[0].x, this.groundPieces[0].y, this.groundPieces[0].x + (this.groundPieces[0].width * this.groundPieces.length), this.groundPieces[0].y + this.groundPieces[0].height);
+    return new Bounds(
+      this.groundPieces[0].x,
+      this.groundPieces[0].y,
+      this.groundPieces[0].x + (this.groundPieces[0].width * this.groundPieces.length),
+      this.groundPieces[0].y + this.groundPieces[0].height
+    );
   }
 
   private createBackground() {
     const targetHeight = LayoutManager.I.layoutVirtualSize.height * 0.85;
     const targetWidth = targetHeight;
 
-    this.background = AssetsManager.I.getSprite("bgNoon") as Sprite;
-    this.background.width = targetWidth;
-    this.background.height = targetHeight;
-    this.background.zIndex = LAYERS.BACKGROUND;    
-        
-    this.container.addChild(this.background);    
+    for (const key of BACKGROUND_KEYS) {
+      const currentBG: Sprite = AssetsManager.I.getSprite(key);
+      currentBG.width = targetWidth;
+      currentBG.height = targetHeight;
+      currentBG.zIndex = LAYERS.BACKGROUND; 
+      currentBG.alpha = key === "bgNoon" ? 1 : 0; 
+      this.backgrounds.set(key, currentBG);
+      this.container.addChild(currentBG);        
+    }    
   }
 
   private createGroundPieces() {    
@@ -125,9 +191,19 @@ export class BackgroundController implements IGameObject {
 
     const piece = AssetsManager.I.getSprite("groundDay", index);
     piece.position.set(pieceRectangle.x, pieceRectangle.y);
-    piece.scale.set(pieceRectangle.width  / piece.texture.width, pieceRectangle.height / piece.texture.height);
+    piece.scale.set(
+      pieceRectangle.width  / piece.texture.width,
+      pieceRectangle.height / piece.texture.height
+    );
     piece.zIndex = LAYERS.GROUND;
     return piece;
   }   
-  
+
+  public updateCycle = (): void => {
+    if(!GameManager.I.settings.dayCycleEnabled){
+      for (const key of BACKGROUND_KEYS) {
+        this.backgrounds.get(key)!.alpha = key === "bgNoon" ? 1 : 0;
+      }  
+    }
+  }
 }
