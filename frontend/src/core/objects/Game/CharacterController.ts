@@ -49,11 +49,10 @@ export class CharacterController implements IGameObject{
 
     if (!this.bird) return;
 
-    if(this.canSwoosh && this.elapsed - this.lastInputTime >= 0.9){
+    if(GameManager.I.settings.audioEnabled && this.canSwoosh && this.elapsed - this.lastInputTime >= 0.9){
       sound.play("swoosh");
       this.canSwoosh = false;
     }
-
     this.frameTimer += dt;
     if (!this.isDead && this.frameTimer >= this.frameInterval) {
       this.frameTimer = 0;

@@ -11,6 +11,7 @@ import { AssetsManager } from "../managers/AssetsManager";
 import { sendScore } from "../../SessionManager";
 import { sound } from "@pixi/sound";
 import { Loading } from "../objects/UI/Loading";
+import { Event } from "../abstractions/events";
 
 export class GameScene implements IScene {
   private scoreText!: BitmapText; 
@@ -19,6 +20,9 @@ export class GameScene implements IScene {
   private characterController!: CharacterController;
 
   private elapsedTime: number;
+
+  private difficultyTimer: number = 0;
+  private readonly difficultyIntervalMS = 5000; 
   
   public containerGame: Container;
   public containerUi: Container;
@@ -62,11 +66,20 @@ export class GameScene implements IScene {
   public onUpdate(dt: Milliseconds): void {
     if(this.characterController.isAlive){
       this.elapsedTime += dt / 1000;
+
+      if(GameManager.I.settings.speedRampEnabled){
+        this.difficultyTimer += dt;
+
+        if(this.difficultyTimer >= this.difficultyIntervalMS){
+          this.difficultyTimer = 0;
+          window.dispatchEvent(new CustomEvent(Event.DIFFICULTY_INCREASE));
+        }
+      }      
     }
 
     this.characterController.onUpdate(dt);
     this.pipesController.onUpdate(dt);    
-    
+
     const birdBounds = this.characterController.birdBounds;
 
     const groundBounds: Bounds = GameManager.I.backgroundController.groundBounds;

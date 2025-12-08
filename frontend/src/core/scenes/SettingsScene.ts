@@ -9,7 +9,7 @@ import { Toggle } from "../objects/UI/Toggle"
 import { Button } from "../objects/UI/Button";
 import { LayoutManager } from "../managers/LayoutManager";
 import { sound } from "@pixi/sound";
-import { Event } from "../abstractions/events.";
+import { Event } from "../abstractions/events";
 
 export class SettingsScene implements IScene {
   private titleText!: BitmapText;

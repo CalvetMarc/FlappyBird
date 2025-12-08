@@ -1,6 +1,5 @@
-import { Container, Sprite, Texture, Rectangle, Assets, Graphics, Size, ObservablePoint, Point, Bounds } from "pixi.js";
+import { Container, Sprite, Rectangle, Size, Bounds } from "pixi.js";
 import { LAYERS } from "../../abstractions/IScene";
-import { SingletonBase } from "../../abstractions/SingletonBase";
 import { IGameObject } from "../../abstractions/IGameObject"; 
 
 import { Milliseconds } from "../../time/TimeUnits";
@@ -8,9 +7,8 @@ import { Milliseconds } from "../../time/TimeUnits";
 import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { GameManager } from "../../managers/GameManager";
-import { Event } from "../../abstractions/events.";
+import { Event } from "../../abstractions/events";
 
-const scrollSpeed = 0.37;
 const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
 
 const BACKGROUND_KEYS: string[] = [
@@ -26,7 +24,10 @@ const DAY_CYCLE_DURATION = 60;
 export class BackgroundController implements IGameObject {
   private backgrounds: Map<string, Sprite> = new Map();
   private groundPieces: Sprite[] = [];
-  private currentBackground: string = "bgNoon";
+
+  private readonly difficultySpeedIncrease = 0.0592;
+  private readonly baseScrollSpeed: number = 0.37;
+  private currentScrollSpeed: number;
 
   private scrolling = false;
   private elapsedSec: number = 0;
@@ -34,6 +35,7 @@ export class BackgroundController implements IGameObject {
 
   public constructor() {
     this.container = new Container();
+    this.currentScrollSpeed = this.baseScrollSpeed;
     this.onCreate();
   }
     
@@ -44,7 +46,8 @@ export class BackgroundController implements IGameObject {
     this.createGroundPieces();
     this.container.sortableChildren = true;
     this.setScrolling(false);
-
+    
+    window.addEventListener(Event.DIFFICULTY_INCREASE, this.increaseDifficulty);
     window.addEventListener(Event.DAY_CYCLE_CHANGE, this.updateCycle);
   }  
 
@@ -82,7 +85,7 @@ export class BackgroundController implements IGameObject {
     if (!this.scrolling) return;
 
     for (const piece of this.groundPieces) {
-      piece.x -= delta * scrollSpeed * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
+      piece.x -= delta * this.currentScrollSpeed * (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x);
     }
 
     const firstSlice = this.groundPieces[0];
@@ -110,6 +113,7 @@ export class BackgroundController implements IGameObject {
 
   public async onDestroy(): Promise<void> {
     window.removeEventListener(Event.DAY_CYCLE_CHANGE, this.updateCycle);
+    window.removeEventListener(Event.DIFFICULTY_INCREASE, this.increaseDifficulty);
 
     this.backgrounds.forEach((value, key) => {
       AssetsManager.I.releaseSprite(value);
@@ -128,6 +132,9 @@ export class BackgroundController implements IGameObject {
 
   public setScrolling(scrolling: boolean) {
     this.scrolling = scrolling;
+    if(scrolling){
+      this.currentScrollSpeed = this.baseScrollSpeed;
+    }
   } 
 
   public get groundBounds(): Bounds | undefined {
@@ -199,7 +206,11 @@ export class BackgroundController implements IGameObject {
     return piece;
   }   
 
-  public updateCycle = (): void => {
+  private increaseDifficulty = () => {
+    this.currentScrollSpeed += this.difficultySpeedIncrease;
+  }
+
+  private updateCycle = (): void => {
     if(!GameManager.I.settings.dayCycleEnabled){
       for (const key of BACKGROUND_KEYS) {
         this.backgrounds.get(key)!.alpha = key === "bgNoon" ? 1 : 0;
