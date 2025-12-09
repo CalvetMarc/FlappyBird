@@ -1,7 +1,13 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions";
 import { CosmosClient } from "@azure/cosmos";
-import crypto from "node:crypto";
+import * as crypto from "crypto";           
 import { addOneMonth } from "../resetUtils";
+
+const SECRET = process.env.SECRET!;   
+
+function sha256(text: string): string {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
 
 const postRanking: AzureFunction = async (context: Context, req: HttpRequest) => {
   try {
@@ -15,7 +21,34 @@ const postRanking: AzureFunction = async (context: Context, req: HttpRequest) =>
     const body = req.body;
     if (!body) throw new Error("Missing request body");
 
-    const { name, lastScore, lastGameTime } = body;
+    const { name, lastScore, lastGameTime, ts, hash } = body;
+
+    const message = `${lastScore}|${ts}|${SECRET}`;
+    const expected = sha256(message);
+
+    if (expected !== hash) {
+      context.res = {
+        status: 400,
+        body: { enterRanking: false, reason: "Invalid signature" }
+      };
+      return;
+    }
+
+    if (Date.now() - ts > 10000) {
+      context.res = {
+        status: 400,
+        body: { enterRanking: false, reason: "Expired signature" }
+      };
+      return;
+    }
+
+    if (lastScore <= 0 || lastScore > 2000000) {
+      context.res = {
+        status: 400,
+        body: { enterRanking: false, reason: "Impossible score" }
+      };
+      return;
+    }
 
     const { resources: resets } = await container.items
       .query("SELECT * FROM c WHERE c.type = 'reset'")
