@@ -178,9 +178,7 @@ export class RankingScene implements IScene {
       const textureSize: Size = AssetsManager.I.getTextureSize("textPage");    
 
       const betweenMask = new Graphics();
-      betweenMask
-        .rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52)
-        .fill(0xffffff);
+      betweenMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52).fill(0xffffff);
 
       for (let i = 0; i < 5; i++) {
         const sprite = AssetsManager.I.getSprite("textPage");
@@ -198,14 +196,10 @@ export class RankingScene implements IScene {
 
         if (i === 0) {
           currentMask = new Graphics();
-          currentMask
-            .rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65)
-            .fill(0xffffff);
+          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65).fill(0xffffff);
         } else if (i === 4) {
           currentMask = new Graphics();
-          currentMask
-            .rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7)
-            .fill(0xffffff);
+          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7).fill(0xffffff);
         } else {
           currentMask = betweenMask.clone(false);
         }
@@ -229,16 +223,7 @@ export class RankingScene implements IScene {
       const sprite = this.boardBgs[i];
       for (let j = 0; j < 2; j++) {
         const pos = i * 2 + (j + 1);
-        this.ranking[pos - 1].fillEntry(
-          sprite,
-          j + 1,
-          pos,
-          rakingInfo[pos - 1],
-          4,
-          [3, 3, 3],
-          0xAAAA00,
-          [0x707070, 0xFF0000, 0x0000FF]
-        );
+        this.ranking[pos - 1].fillEntry(sprite, j + 1, pos, rakingInfo[pos - 1], 4, [3, 3, 3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
         this.ranking[pos - 1].zIndex = 100000;        
       }
     }
@@ -247,32 +232,18 @@ export class RankingScene implements IScene {
   private normalizeRanking(list: SessionInfo[]): SessionInfo[] {
     const result = [...list];
     while (result.length < 10) {
-      result.push({
-        name: "-----",
-        lastScore: -1,
-        lastGameTime: -1
-      });
+      result.push({ name: "-----", lastScore: -1, lastGameTime: -1 });
     }
     return result;
   }
 
   private createButton() {
-    this.closeBtn = new Button(
-      2 / this.bgSprite.scale.x,
-      "cross",
-      () => SceneManager.I.fire("menu"),
-      "exit1",
-      true,
-      0x0c0807
-    );
+    this.closeBtn = new Button(2 / this.bgSprite.scale.x, "cross", () => SceneManager.I.fire("menu"), "exit1", true, 0x0c0807);
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
     this.bgSprite.addChild(this.closeBtn);
   }  
 
-  // -------------------------------------------------------------------------
-  // CONVERTEIX text → segons
-  // -------------------------------------------------------------------------
   private parseTime(str: string): number {
     if (!str) return 0;
 
@@ -297,37 +268,39 @@ export class RankingScene implements IScene {
     return total;
   }
 
-  // -------------------------------------------------------------------------
-  // FORMAT seconds → text
-  // -------------------------------------------------------------------------
   private formatTime(seconds: number): string {
     let ms = seconds * 1000;
 
-    const sec = 1000;
-    const min = sec * 60;
-    const hour = min * 60;
-    const day = hour * 24;
-    const month = day * 30;
+    const SEC = 1000;
+    const MIN = SEC * 60;
+    const HOUR = MIN * 60;
+    const DAY = HOUR * 24;
+    const MONTH = DAY * 30;
 
-    const months = Math.floor(ms / month); ms -= months * month;
-    const days = Math.floor(ms / day); ms -= days * day;
-    const hours = Math.floor(ms / hour); ms -= hours * hour;
-    const minutes = Math.floor(ms / min); ms -= minutes * min;
-    const secs = Math.floor(ms / sec);
-
-    // ---- MODE 1: més de 24 hores ----
+    const months = Math.floor(ms / MONTH); ms -= months * MONTH;
+    const days = Math.floor(ms / DAY); ms -= days * DAY;
+    const hours = Math.floor(ms / HOUR); ms -= hours * HOUR;
+    const minutes = Math.floor(ms / MIN); ms -= minutes * MIN;
+    const secs = Math.floor(ms / SEC);
+    
     if (seconds > 24 * 3600) {
-      let parts: string[] = [];
 
-      if (months > 0) parts.push(`${months} mo`);
-      if (days > 0) parts.push(`${days} d`);
-      if (hours > 0) parts.push(`${hours} h`);
+      const units = [
+        { val: months, label: "mo" },
+        { val: days, label: "d" },
+        { val: hours, label: "h" }
+      ];
+
+      let firstIndex = units.findIndex(u => u.val > 0);
+      if (firstIndex === -1) firstIndex = 2;
+
+      const parts = units.slice(firstIndex).map(u => `${u.val} ${u.label}`);
 
       return parts.join(" ");
     }
 
-    // ---- MODE 2: menys de 24 hores ----
     return `${hours} h ${minutes} min ${secs} s`;
   }
+
 
 }
