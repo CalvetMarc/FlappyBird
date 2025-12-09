@@ -137,7 +137,9 @@ export class MainMenuScene implements IScene {
       await new Promise<void>(resolve => setTimeout(resolve, 350));
 
       const rankingInfo = await rankingPromise;
-      GameManager.I.lastLoadedRankingInfo = rankingInfo;      
+
+      GameManager.I.lastLoadedRankingInfo = rankingInfo.ranking;
+      GameManager.I.nextResetIn = rankingInfo.resetIn;    
     }
     else{
       await Promise.all([TweenManager.I.fadeTo([this.containerUi], 0, 500).finished, TweenManager.I.fadeHtmlTo([this.htmlInput], 0, 500, 0).finished]);

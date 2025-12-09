@@ -2,13 +2,11 @@ import { Container, Sprite, BitmapText, Size, Graphics } from "pixi.js";
 import { IScene } from "../abstractions/IScene";
 import { SceneManager } from "../managers/SceneManager";
 import { Button } from "../objects/UI/Button";
-import { DataField } from "../objects/UI/DataField";
 import { GameManager, SessionInfo } from "../managers/GameManager";
-import { Tween, TweenManager } from "../managers/TweenManager";
+import { TweenManager } from "../managers/TweenManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { RankingField } from "../objects/UI/RankingField";
-import { getRanking } from "../../SessionManager";
 import { sound } from "@pixi/sound";
 
 const isTest: boolean = true;
@@ -26,6 +24,9 @@ export class RankingScene implements IScene {
 
   public containerGame: Container;
   public containerUi: Container;
+
+  private resetSecondsLeft: number = 0;
+  private resetCounterTimer: number = 0;
   
   public constructor() {
     this.containerGame = new Container();
@@ -41,45 +42,55 @@ export class RankingScene implements IScene {
     this.createButton();  
   }
 
-  /** Called when the scene becomes active */
   public async onEnter(): Promise<void> {
     const loader = AssetsManager.I.getResourceFromReference("loader");
-    if(loader){
-      this.containerGame.addChild(loader);
+    if (loader) this.containerGame.addChild(loader);
+
+    if (GameManager.I.settings.audioEnabled) {
+      setTimeout(() => sound.play("ranking"), 300);
     }
 
-    if(GameManager.I.settings.audioEnabled){
-      setTimeout(() => {
-        sound.play("ranking");
-      }, 300);
-    }
     this.containerUi.alpha = 0;
-
     this.closeBtn.onStart();
+
+    this.resetSecondsLeft = this.parseTime(GameManager.I.nextResetIn);
+
+    this.resetsInText.text = "Reset: " + this.formatTime(this.resetSecondsLeft);
 
     this.fillRankingEntries(this.normalizeRanking(GameManager.I.lastLoadedRankingInfo));
     
-    TweenManager.I.fadeTo([this.containerUi], 1, 500);  
+    TweenManager.I.fadeTo([this.containerUi], 1, 500);
 
-    await new Promise<void>(resolve => setTimeout(resolve, 150));
-    
-    if(loader){
+    await new Promise(r => setTimeout(r, 150));
+
+    if (loader) {
       loader.removeFromParent();
       loader.freeResources();
       AssetsManager.I.removeResourceReference("loader");
     }
 
-    await new Promise<void>(resolve => setTimeout(resolve, 300));
-
+    await new Promise(r => setTimeout(r, 300));
     this.closeBtn.enableInput();
   }
 
-  /** Called every frame */
   public onUpdate(dt: number): void {
-    
+
+    this.resetCounterTimer += dt / 1000;
+
+    if (this.resetCounterTimer >= 1) {
+      this.resetCounterTimer = 0;
+
+      if (this.resetSecondsLeft <= 0) {
+        this.resetsInText.text = "Reset: 0 s";
+        return;
+      }
+
+      this.resetSecondsLeft--;
+
+      this.resetsInText.text = "Reset: " + this.formatTime(this.resetSecondsLeft);
+    }
   }
 
-  /** Called before scene is removed or pooled */
   public async onExit(): Promise<void> {    
     await TweenManager.I.fadeTo([this.containerUi], 0, 500).finished; 
   }
@@ -89,12 +100,10 @@ export class RankingScene implements IScene {
     this.closeBtn.removeFromParent();
     this.closeBtn.removeChildren();
 
-    for(const field of this.ranking){
-      field.freeResources();
-    }
+    for (const field of this.ranking) field.freeResources();
     this.ranking = [];
 
-    for(const bg of this.boardBgs){
+    for (const bg of this.boardBgs) {
       bg.removeFromParent();
       bg.removeChildren();
       AssetsManager.I.releaseSprite(bg);
@@ -117,7 +126,7 @@ export class RankingScene implements IScene {
     AssetsManager.I.releaseText(this.resetsInText);
   }
 
-  private createPanelBg(): void{
+  private createPanelBg(): void {
     const textureBgSize: Size = AssetsManager.I.getTextureSize("bigPanelOrange");
     const aspectRelationBg: number = textureBgSize.width / textureBgSize.height;
     this.bgSprite = AssetsManager.I.getSprite("bigPanelOrange");
@@ -127,7 +136,10 @@ export class RankingScene implements IScene {
     this.bgSprite.rotation = Math.PI * 0.5;
     this.bgSprite.anchor.set(0.5);
     this.bgSprite.zIndex = 5;
-    this.bgSprite.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x)* 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.43);
+    this.bgSprite.position.set(
+      (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5,
+      (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 0.43
+    );
 
     const textureTitleBgSize: Size = AssetsManager.I.getTextureSize("title1up");
     const aspectRelationTitleBg: number = textureTitleBgSize.height / textureTitleBgSize.width;
@@ -148,7 +160,7 @@ export class RankingScene implements IScene {
     this.titleText.position.set(0.5, -3);
     this.titleText.tint = 0xC00000;
 
-    this.resetsInText = AssetsManager.I.getText("Resets in: 24h", "vcrBase", 3.5);
+    this.resetsInText = AssetsManager.I.getText("Reset: --", "vcrBase", 3);
     this.resetsInText.rotation = -Math.PI * 0.5;
     this.resetsInText.anchor.set(0.5);
     this.resetsInText.zIndex = 6;
@@ -161,73 +173,78 @@ export class RankingScene implements IScene {
     this.containerUi.addChild(this.bgSprite);
   }
 
-  private createLabels(){
-    if(isTest){
+  private createLabels() {
+    if (isTest) {
       const textureSize: Size = AssetsManager.I.getTextureSize("textPage");    
 
       const betweenMask = new Graphics();
-      betweenMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52).fill(0xffffff);
+      betweenMask
+        .rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52)
+        .fill(0xffffff);
 
-      for(let i = 0; i < 5; i++){
+      for (let i = 0; i < 5; i++) {
         const sprite = AssetsManager.I.getSprite("textPage");
         this.bgSprite.addChild(sprite);
 
         sprite.anchor = 0.5;
         sprite.rotation = -Math.PI * 0.5;
 
-        let startY = i !== 4 ? -15 + i * 11 : - 8 + i * 7.9;
+        let startY = i !== 4 ? -15 + i * 11 : -8 + i * 7.9;
         sprite.position.set(startY, 0); 
 
         sprite.scale.set(0.85, 0.7);
 
         let currentMask: Graphics;
 
-        if(i === 0){
+        if (i === 0) {
           currentMask = new Graphics();
-          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65).fill(0xffffff);
-        } 
-        else if(i === 4){
+          currentMask
+            .rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65)
+            .fill(0xffffff);
+        } else if (i === 4) {
           currentMask = new Graphics();
-          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7).fill(0xffffff);
-        }
-        else{
+          currentMask
+            .rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7)
+            .fill(0xffffff);
+        } else {
           currentMask = betweenMask.clone(false);
         }
 
         sprite.addChild(currentMask);
         sprite.mask = currentMask;
 
-        this.boardBgs.push(sprite)
+        this.boardBgs.push(sprite);
 
-        for(let j = 0; j < 2; j++){
+        for (let j = 0; j < 2; j++) {
           const rankingField = new RankingField();          
           this.ranking.push(rankingField);   
         }
-
       }
 
     }
-    else{
-
-    }
-
   }
 
-  private fillRankingEntries(rakingInfo: SessionInfo[]){
-
-    for(let i = 0; i < 5; i++){
+  private fillRankingEntries(rakingInfo: SessionInfo[]) {
+    for (let i = 0; i < 5; i++) {
       const sprite = this.boardBgs[i];
-      for(let j = 0; j < 2; j++){
+      for (let j = 0; j < 2; j++) {
         const pos = i * 2 + (j + 1);
-        this.ranking[pos - 1].fillEntry(sprite, j + 1, pos, rakingInfo[pos - 1], 4, [3,3,3], 0xAAAA00, [0x707070, 0xFF0000, 0x0000FF]);
+        this.ranking[pos - 1].fillEntry(
+          sprite,
+          j + 1,
+          pos,
+          rakingInfo[pos - 1],
+          4,
+          [3, 3, 3],
+          0xAAAA00,
+          [0x707070, 0xFF0000, 0x0000FF]
+        );
         this.ranking[pos - 1].zIndex = 100000;        
       }
-
     }
-
   }
 
-  private normalizeRanking(list: SessionInfo[]) : SessionInfo[]{
+  private normalizeRanking(list: SessionInfo[]): SessionInfo[] {
     const result = [...list];
     while (result.length < 10) {
       result.push({
@@ -236,18 +253,81 @@ export class RankingScene implements IScene {
         lastGameTime: -1
       });
     }
-
     return result;
   }
 
-
-
   private createButton() {
-    this.closeBtn = new Button(2 / this.bgSprite.scale.x, "cross", () => SceneManager.I.fire("menu"), "exit1", true, 0x0c0807);
+    this.closeBtn = new Button(
+      2 / this.bgSprite.scale.x,
+      "cross",
+      () => SceneManager.I.fire("menu"),
+      "exit1",
+      true,
+      0x0c0807
+    );
     this.closeBtn.position.x = 40;
     this.closeBtn.rotation = -Math.PI * 0.5;
-
     this.bgSprite.addChild(this.closeBtn);
   }  
- 
+
+  // -------------------------------------------------------------------------
+  // CONVERTEIX text → segons
+  // -------------------------------------------------------------------------
+  private parseTime(str: string): number {
+    if (!str) return 0;
+
+    let total = 0;
+
+    const regex = /(\d+)\s*(mo|d|h|min|s)/g;
+    let match;
+
+    while ((match = regex.exec(str)) !== null) {
+      const value = parseInt(match[1]);
+      const unit = match[2];
+
+      switch (unit) {
+        case "mo": total += value * 30 * 24 * 3600; break;
+        case "d": total += value * 24 * 3600; break;
+        case "h": total += value * 3600; break;
+        case "min": total += value * 60; break;
+        case "s": total += value; break;
+      }
+    }
+
+    return total;
+  }
+
+  // -------------------------------------------------------------------------
+  // FORMAT seconds → text
+  // -------------------------------------------------------------------------
+  private formatTime(seconds: number): string {
+    let ms = seconds * 1000;
+
+    const sec = 1000;
+    const min = sec * 60;
+    const hour = min * 60;
+    const day = hour * 24;
+    const month = day * 30;
+
+    const months = Math.floor(ms / month); ms -= months * month;
+    const days = Math.floor(ms / day); ms -= days * day;
+    const hours = Math.floor(ms / hour); ms -= hours * hour;
+    const minutes = Math.floor(ms / min); ms -= minutes * min;
+    const secs = Math.floor(ms / sec);
+
+    // ---- MODE 1: més de 24 hores ----
+    if (seconds > 24 * 3600) {
+      let parts: string[] = [];
+
+      if (months > 0) parts.push(`${months} mo`);
+      if (days > 0) parts.push(`${days} d`);
+      if (hours > 0) parts.push(`${hours} h`);
+
+      return parts.join(" ");
+    }
+
+    // ---- MODE 2: menys de 24 hores ----
+    return `${hours} h ${minutes} min ${secs} s`;
+  }
+
 }

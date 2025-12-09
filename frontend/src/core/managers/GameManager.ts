@@ -21,6 +21,7 @@ export type GameSettings = {
 export class GameManager extends SingletonBase<GameManager> { 
   public lastEnteredRanking: boolean;
   public lastLoadedRankingInfo: SessionInfo[] = [];
+  public nextResetIn: string = "";
   public mousePos: Point;
   public sessionData: SessionInfo;
   public settings: GameSettings;
