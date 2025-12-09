@@ -24,8 +24,6 @@ export async function getRanking(): Promise<RankingResponse> {
 
   const json = await res.json();
 
-  console.log(json);
-
   if (!json || !Array.isArray(json.ranking)) {
     return { resetIn: "0 s", ranking: [] };
   }
