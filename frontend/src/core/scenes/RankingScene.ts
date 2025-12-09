@@ -4,7 +4,7 @@ import { SceneManager } from "../managers/SceneManager";
 import { Button } from "../objects/UI/Button";
 import { DataField } from "../objects/UI/DataField";
 import { GameManager, SessionInfo } from "../managers/GameManager";
-import { TweenManager } from "../managers/TweenManager";
+import { Tween, TweenManager } from "../managers/TweenManager";
 import { AssetsManager } from "../managers/AssetsManager";
 import { LayoutManager } from "../managers/LayoutManager";
 import { RankingField } from "../objects/UI/RankingField";
@@ -16,13 +16,14 @@ const isTest: boolean = true;
 export class RankingScene implements IScene {
   
   private titleText!: BitmapText;
+  private resetsInText!: BitmapText;
   private bgSprite!: Sprite;
   private titleBgSprite!: Sprite;
   private closeBtn!: Button;
 
   private boardBgs: Sprite[] = [];
-  private ranking: RankingField[] = [];
-  
+  private ranking: RankingField[] = [];  
+
   public containerGame: Container;
   public containerUi: Container;
   
@@ -105,12 +106,15 @@ export class RankingScene implements IScene {
 
     this.bgSprite.removeFromParent();
     this.bgSprite.removeChildren();
-    AssetsManager.I.releaseSprite(this.bgSprite);
-   
+    AssetsManager.I.releaseSprite(this.bgSprite);   
 
     this.titleBgSprite.removeFromParent();
     this.titleBgSprite.removeChildren();
     AssetsManager.I.releaseSprite(this.titleBgSprite);
+    
+    this.resetsInText.removeFromParent();
+    this.resetsInText.removeChildren();
+    AssetsManager.I.releaseText(this.resetsInText);
   }
 
   private createPanelBg(): void{
@@ -143,9 +147,17 @@ export class RankingScene implements IScene {
     this.titleText.zIndex = 6;
     this.titleText.position.set(0.5, -3);
     this.titleText.tint = 0xC00000;
+
+    this.resetsInText = AssetsManager.I.getText("Resets in: 24h", "vcrBase", 3.5);
+    this.resetsInText.rotation = -Math.PI * 0.5;
+    this.resetsInText.anchor.set(0.5);
+    this.resetsInText.zIndex = 6;
+    this.resetsInText.position.set(-30, 0);
+    this.resetsInText.tint = 0xA95C68;    
     
     this.titleBgSprite.addChild(this.titleText);
     this.bgSprite.addChild(this.titleBgSprite);    
+    this.bgSprite.addChild(this.resetsInText);
     this.containerUi.addChild(this.bgSprite);
   }
 

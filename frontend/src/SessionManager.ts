@@ -12,6 +12,7 @@ export async function sendScore(data: SessionInfo): Promise<boolean> {
 }
 
 export async function getRanking(): Promise<SessionInfo[]> {
+  
   const res = await fetch("/api/getRanking", {
     method: "GET",
     headers: { "Content-Type": "application/json" }

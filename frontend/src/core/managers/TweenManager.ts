@@ -264,4 +264,41 @@ export class TweenManager extends SingletonBase<TweenManager> {
     });
   }
 
+  public colorTo(targetObjects: ViewContainer[], finalColor: number, duration: number, waitTime: number = 0, onComplete?: () => void): CreatedTween {
+
+    const startColors = targetObjects.map(obj => obj.tint);
+
+    const toRGB = (color: number) => ({
+        r: (color >> 16) & 0xFF,
+        g: (color >> 8) & 0xFF,
+        b: color & 0xFF
+    });
+
+    const finalRGB = toRGB(finalColor);
+    const startRGB = startColors.map(c => toRGB(c));
+
+    return TweenManager.I.AddTween(<Tween<ViewContainer[]>>{
+        waitTime: ms(waitTime),
+        duration: ms(duration),
+        context: targetObjects,
+
+        tweenFunction: function (elapsed) {
+            const t = TweenManager.easeInOutCubic(elapsed, this.duration);
+
+            this.context.forEach((obj, i) => {
+                const s = startRGB[i];
+
+                const r = Math.round(s.r + (finalRGB.r - s.r) * t);
+                const g = Math.round(s.g + (finalRGB.g - s.g) * t);
+                const b = Math.round(s.b + (finalRGB.b - s.b) * t);
+
+                obj.tint = (r << 16) | (g << 8) | b;
+            });
+        },
+
+        onComplete
+    });
+  }
+
+
 }
