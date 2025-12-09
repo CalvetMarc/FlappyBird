@@ -24,11 +24,11 @@ export function formatTimeDiff(target: Date) {
 
   let parts: string[] = [];
 
-  if (months > 0) parts.push(`${months} mo`);
-  if (days > 0) parts.push(`${days} d`);
-  if (hours > 0) parts.push(`${hours} h`);
-  if (minutes > 0) parts.push(`${minutes} min`);
-  if (seconds > 0) parts.push(`${seconds} s`);
+  parts.push(`${months} mo`);
+  parts.push(`${days} d`);
+  parts.push(`${hours} h`);
+  parts.push(`${minutes} min`);
+  parts.push(`${seconds} s`);
 
   return parts.join(" ");
 }
