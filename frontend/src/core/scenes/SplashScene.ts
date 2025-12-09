@@ -179,27 +179,27 @@ export class SplashScene implements IScene {
   private createIosWarning() {
     this.iosPopup = new Container();
 
-    const width = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.65;
+    const width = (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.55;
 
-    const popup = new Graphics().roundRect(-width * 0.5, -width * 0.5 * 0.08, width, width * 0.08, 15).fill(0x27323A);
+    const popup = new Graphics().roundRect(-width * 0.5, -width * 0.5 * 0.12, width, width * 0.12, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.028).fill(0x27323A);
 
     this.iosPopup.addChild(popup);
 
     this.iosPopup.position.set((LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.5, (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y) * 1.2);
 
-    const infoCircle = new Graphics().circle(0, 0, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.014).fill(0xDCD6BD);
+    const infoCircle = new Graphics().circle(0, 0, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x) * 0.018).fill(0xDCD6BD);
 
-    infoCircle.position.set(-width * 0.435, 0);
+    infoCircle.position.set(-width * 0.41, 0);
     this.iosPopup.addChild(infoCircle);
 
-    const infoText: BitmapText = AssetsManager.I.getText("i", "Trebuchet MS", width * 0.045);
+    const infoText: BitmapText = AssetsManager.I.getText("i", "Trebuchet MS", width * 0.058);
     infoText.anchor = 0.5;
     infoText.position = infoCircle.position;
     infoText.tint = 0x27323A;
 
-    const infoMessage: BitmapText = AssetsManager.I.getText("Disable Silent Mode / Mute Switch to hear the game!", "Trebuchet MS", width * 0.035);
+    const infoMessage: BitmapText = AssetsManager.I.getText("Disable Silent Mode to hear the game!", "Trebuchet MS", width * 0.045);
     infoMessage.anchor = 0.5;
-    infoMessage.position.x = width * 0.035;
+    infoMessage.position.x = width * 0.055;
     infoMessage.tint = 0xDCD6BD;
 
     this.iosPopup.addChild(infoText);
