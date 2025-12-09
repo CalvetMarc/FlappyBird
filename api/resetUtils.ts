@@ -24,8 +24,8 @@ export function formatTimeDiff(target: Date) {
 
   let parts: string[] = [];
 
-  if (months > 0) parts.push(`${months} mesos`);
-  if (days > 0) parts.push(`${days} dies`);
+  if (months > 0) parts.push(`${months} mo`);
+  if (days > 0) parts.push(`${days} d`);
   if (hours > 0) parts.push(`${hours} h`);
   if (minutes > 0) parts.push(`${minutes} min`);
   if (seconds > 0) parts.push(`${seconds} s`);
