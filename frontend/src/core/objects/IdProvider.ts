@@ -1,7 +1,5 @@
-// 🔢 Tipatge segur per IDs únics
 export type UniqueId = number & { readonly brand: unique symbol };
 
-// 🧠 Petit helper per convertir qualsevol número a tipus segur
 function toUniqueId(value: number): UniqueId {
   return value as UniqueId;
 }
@@ -24,7 +22,7 @@ export class IdProvider {
 
   public release(id: UniqueId): void {
     const numericId = id as number;
-    if (this.freeIds.includes(numericId)) return; // Evita duplicats
+    if (this.freeIds.includes(numericId)) return; 
     this.freeIds.push(numericId);
     this.lastReleased = numericId;
   }

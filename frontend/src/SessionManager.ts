@@ -6,10 +6,18 @@ export interface RankingResponse {
 }
 
 export async function sendScore(data: SessionInfo): Promise<boolean> {
+  const { ts, hash } = await ScoreSigner.sign(data.lastScore);
+
+  const payload = {
+    ...data,
+    ts,
+    hash
+  };
+
   const res = await fetch("/api/postRanking", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(payload)
   });
 
   const json = await res.json();
@@ -39,3 +47,5 @@ export async function getRanking(): Promise<RankingResponse> {
     ranking
   };
 }
+
+export const ScoreSigner=(()=>{function x(s:string,k:string){return s.split("").map((c,i)=>String.fromCharCode(c.charCodeAt(0)^k.charCodeAt(i%k.length))).join("")}const p=["G34+emYx","H3wPCDQ9","Jig/Cz8/","ORZzczU="],k="PIXIGAME",h=atob(p.join(""));const SECRET=x(h,k);return{sign:async(score:number)=>{const ts=Date.now(),msg=`${score}|${ts}|${SECRET}`,enc=new TextEncoder().encode(msg),digest=await crypto.subtle.digest("SHA-256",enc),hash=Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");return{score,ts,hash}}}})();

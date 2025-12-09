@@ -8,7 +8,6 @@ export class EventCatcher extends Graphics {
     super();
     this.onDownCallback = onDown;
 
-    // quadre transparent que cobreix tot
     this.rect(0, 0, (LayoutManager.I.layoutCurrentSize.width / LayoutManager.I.layoutScale.x), (LayoutManager.I.layoutCurrentSize.height / LayoutManager.I.layoutScale.y)).fill(0x000000);
     this.alpha = 0;
 

@@ -9,19 +9,17 @@ import { LayoutManager } from "../managers/LayoutManager";
 import { RankingField } from "../objects/UI/RankingField";
 import { sound } from "@pixi/sound";
 
-const isTest: boolean = true;
-
 export class RankingScene implements IScene {
   
   private titleText!: BitmapText;
   private resetsInText!: BitmapText;
   private bgSprite!: Sprite;
   private titleBgSprite!: Sprite;
-  private closeBtn!: Button;
-
+  private closeBtn!: Button;  
+  
   private boardBgs: Sprite[] = [];
   private ranking: RankingField[] = [];  
-
+  
   public containerGame: Container;
   public containerUi: Container;
 
@@ -174,48 +172,46 @@ export class RankingScene implements IScene {
   }
 
   private createLabels() {
-    if (isTest) {
-      const textureSize: Size = AssetsManager.I.getTextureSize("textPage");    
+    const textureSize: Size = AssetsManager.I.getTextureSize("textPage");    
 
-      const betweenMask = new Graphics();
-      betweenMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52).fill(0xffffff);
+    const betweenMask = new Graphics();
+    betweenMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.45, textureSize.width, textureSize.height * 0.52).fill(0xffffff);
 
-      for (let i = 0; i < 5; i++) {
-        const sprite = AssetsManager.I.getSprite("textPage");
-        this.bgSprite.addChild(sprite);
+    for (let i = 0; i < 5; i++) {
+      const sprite = AssetsManager.I.getSprite("textPage");
+      this.bgSprite.addChild(sprite);
 
-        sprite.anchor = 0.5;
-        sprite.rotation = -Math.PI * 0.5;
+      sprite.anchor = 0.5;
+      sprite.rotation = -Math.PI * 0.5;
 
-        let startY = i !== 4 ? -15 + i * 11 : -8 + i * 7.9;
-        sprite.position.set(startY, 0); 
+      let startY = i !== 4 ? -15 + i * 11 : -8 + i * 7.9;
+      sprite.position.set(startY, 0); 
 
-        sprite.scale.set(0.85, 0.7);
+      sprite.scale.set(0.85, 0.7);
 
-        let currentMask: Graphics;
+      let currentMask: Graphics;
 
-        if (i === 0) {
-          currentMask = new Graphics();
-          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65).fill(0xffffff);
-        } else if (i === 4) {
-          currentMask = new Graphics();
-          currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7).fill(0xffffff);
-        } else {
-          currentMask = betweenMask.clone(false);
-        }
-
-        sprite.addChild(currentMask);
-        sprite.mask = currentMask;
-
-        this.boardBgs.push(sprite);
-
-        for (let j = 0; j < 2; j++) {
-          const rankingField = new RankingField();          
-          this.ranking.push(rankingField);   
-        }
+      if (i === 0) {
+        currentMask = new Graphics();
+        currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.5, textureSize.width, textureSize.height * 0.65).fill(0xffffff);
+      } else if (i === 4) {
+        currentMask = new Graphics();
+        currentMask.rect(-textureSize.width * 0.5, -textureSize.height * 0.2, textureSize.width, textureSize.height * 0.7).fill(0xffffff);
+      } else {
+        currentMask = betweenMask.clone(false);
       }
 
+      sprite.addChild(currentMask);
+      sprite.mask = currentMask;
+
+      this.boardBgs.push(sprite);
+
+      for (let j = 0; j < 2; j++) {
+        const rankingField = new RankingField();          
+        this.ranking.push(rankingField);   
+      }
     }
+
   }
 
   private fillRankingEntries(rakingInfo: SessionInfo[]) {

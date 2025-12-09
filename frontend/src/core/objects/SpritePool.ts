@@ -10,7 +10,6 @@ export class SpritePool extends Pool<Sprite> {
         sprite.removeChildren();
         sprite.removeAllListeners();
 
-        // Visual state
         sprite.visible = false;
         sprite.alpha = 1;
         sprite.position.set(0, 0);
@@ -21,18 +20,15 @@ export class SpritePool extends Pool<Sprite> {
         sprite.tint = 0xFFFFFF;
         sprite.zIndex = 0;
 
-        // Interaction
         sprite.eventMode = "auto";
         sprite.cursor = "auto";
         sprite.interactive = false; 
         sprite.hitArea = null;
 
-        // Texture
         sprite.texture = Texture.EMPTY;
         sprite.width = 0;
         sprite.height = 0;
 
-        // Filters and mask
         if (sprite.filters) {
           for (const f of sprite.filters) {
             f.destroy?.();

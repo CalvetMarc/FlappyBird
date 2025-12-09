@@ -1,4 +1,3 @@
-// Permet importar imatges amb import backgroundUrl from "...png"
 declare module "*.png" {
   const value: string;
   export default value;

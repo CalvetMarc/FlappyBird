@@ -8,6 +8,7 @@ import { LayoutManager } from "../../managers/LayoutManager";
 import { AssetsManager } from "../../managers/AssetsManager";
 import { GameManager } from "../../managers/GameManager";
 import { Event } from "../../abstractions/events";
+import { BlurFilter } from "pixi.js";
 
 const groundTileSpawnProbabilities = [0.3, 0.25, 0.25, 0.2];
 
@@ -22,6 +23,8 @@ const BACKGROUND_KEYS: string[] = [
 const DAY_CYCLE_DURATION = 60; 
 
 export class BackgroundController implements IGameObject {
+  private backgroundHolder: Container;
+
   private backgrounds: Map<string, Sprite> = new Map();
   private groundPieces: Sprite[] = [];
 
@@ -35,6 +38,7 @@ export class BackgroundController implements IGameObject {
 
   public constructor() {
     this.container = new Container();
+    this.backgroundHolder = new Container();
     this.currentScrollSpeed = this.baseScrollSpeed;
     this.onCreate();
   }
@@ -152,6 +156,9 @@ export class BackgroundController implements IGameObject {
     const targetHeight = LayoutManager.I.layoutVirtualSize.height * 0.85;
     const targetWidth = targetHeight;
 
+    const blur = new BlurFilter();
+    blur.strength = 3; 
+
     for (const key of BACKGROUND_KEYS) {
       const currentBG: Sprite = AssetsManager.I.getSprite(key);
       currentBG.width = targetWidth;
@@ -159,8 +166,13 @@ export class BackgroundController implements IGameObject {
       currentBG.zIndex = LAYERS.BACKGROUND; 
       currentBG.alpha = key === "bgNoon" ? 1 : 0; 
       this.backgrounds.set(key, currentBG);
-      this.container.addChild(currentBG);        
+      this.container.addChild(currentBG);          
+
+      this.backgrounds.set(key, currentBG);
+      this.backgroundHolder.addChild(currentBG);      
     }    
+    this.backgroundHolder.filters = [blur];
+    this.container.addChild(this.backgroundHolder);
   }
 
   private createGroundPieces() {    
