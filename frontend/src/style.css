@@ -8,3 +8,11 @@
 body {
   font-family: 'Minecraft';
 }
+
+.ad-zone {
+  position: absolute;
+  display: none;     
+  overflow: hidden;
+  z-index: 9999; 
+  pointer-events: auto;
+}

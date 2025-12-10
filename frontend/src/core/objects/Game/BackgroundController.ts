@@ -157,7 +157,7 @@ export class BackgroundController implements IGameObject {
     const targetWidth = targetHeight;
 
     const blur = new BlurFilter();
-    blur.strength = 3; 
+    blur.strength = 4; 
 
     for (const key of BACKGROUND_KEYS) {
       const currentBG: Sprite = AssetsManager.I.getSprite(key);

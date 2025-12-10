@@ -16,6 +16,8 @@ export class LayoutManager extends SingletonBase<LayoutManager> {
   private _gameTop = 0;
   private _gameBottom = 0;
 
+  private _adScale = 0.9;
+
   private _initialGameSize = {width: 0, height: 0};
 
   private _gameMask!: Graphics;
@@ -68,6 +70,7 @@ export class LayoutManager extends SingletonBase<LayoutManager> {
         this._uiContainer.scale.set(this._gameWidth / this._initialGameSize.width, this._gameHeight / this._initialGameSize.height);
     }
 
+    this.updateAdZones();
   }
 
   private redrawMask(): void {
@@ -78,8 +81,82 @@ export class LayoutManager extends SingletonBase<LayoutManager> {
       this._gameWidth,
       this._gameHeight
     ).fill(0xffffff);
+  }  
+
+  private updateAdZones() {
+    const bounds = LayoutManager.I.layoutBounds;
+
+    const adLeft   = document.getElementById("ad-left")!;
+    const adRight  = document.getElementById("ad-right")!;
+    const adTop    = document.getElementById("ad-top")!;
+    const adBottom = document.getElementById("ad-bottom")!;
+
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+
+    const leftSpace   = bounds.minX;
+    const rightSpace  = screenW - bounds.maxX;
+    const topSpace    = bounds.minY;
+    const bottomSpace = screenH - bounds.maxY;
+
+    const MIN = 60; 
+
+    [adLeft, adRight, adTop, adBottom].forEach(z => z.style.display = "none");
+
+    if (leftSpace > MIN) {
+      const w = leftSpace * this._adScale;
+      const offset = (leftSpace - w) / 2;
+
+      Object.assign(adLeft.style, {
+        display: "block",
+        top: "0px",
+        left: offset + "px",
+        width: w + "px",
+        height: screenH + "px"
+      });
+    }
+
+    if (rightSpace > MIN) {
+      const w = rightSpace * this._adScale;
+      const offset = (rightSpace - w) / 2;
+
+      Object.assign(adRight.style, {
+        display: "block",
+        top: "0px",
+        right: offset + "px",
+        width: w + "px",
+        height: screenH + "px"
+      });
+    }
+
+    if (topSpace > MIN) {
+      const h = topSpace * this._adScale;
+      const offset = (topSpace - h) / 2;
+
+      Object.assign(adTop.style, {
+        display: "block",
+        top: offset + "px",
+        left: "0px",
+        width: screenW + "px",
+        height: h + "px"
+      });
+    }
+
+    if (bottomSpace > MIN) {
+      const h = bottomSpace * this._adScale;
+      const offset = (bottomSpace - h) / 2;
+
+      Object.assign(adBottom.style, {
+        display: "block",
+        bottom: offset + "px",
+        left: "0px",
+        width: screenW + "px",
+        height: h + "px"
+      });
+    }
   }
-  
+
+
   public async start(): Promise<void> {
     const stage = GameManager.I.gameApp.stage;
 
