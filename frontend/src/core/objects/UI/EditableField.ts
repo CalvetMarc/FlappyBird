@@ -27,6 +27,7 @@ export class EditableField extends Container {
     this.onInputHandler = () => {
       htmlInput.value = htmlInput.value.slice(0, maxTextSize);
       GameManager.I.sessionData.name = htmlInput.value;
+      localStorage.setItem("flappy_username", htmlInput.value);
       this.repositionEvent();
     };
 

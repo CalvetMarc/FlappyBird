@@ -32,7 +32,8 @@ export class GameManager extends SingletonBase<GameManager> {
     super();
     this.lastEnteredRanking = false;
     this.mousePos = new Point(NaN, NaN);
-    this.sessionData = { lastScore: 0, lastGameTime: 0, name: "Guest" };
+    const savedName = localStorage.getItem("flappy_username") || "Guest";
+    this.sessionData = { lastScore: 0, lastGameTime: 0, name: savedName };
     this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
   }
 
