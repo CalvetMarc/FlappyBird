@@ -34,7 +34,11 @@ export class GameManager extends SingletonBase<GameManager> {
     this.mousePos = new Point(NaN, NaN);
     const savedName = localStorage.getItem("flappy_username") || "Guest";
     this.sessionData = { lastScore: 0, lastGameTime: 0, name: savedName };
-    this.settings = { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
+
+    const savedSettings = localStorage.getItem("flappy_settings");
+    this.settings = savedSettings
+      ? JSON.parse(savedSettings)
+      : { audioEnabled: true, dayCycleEnabled: true, speedRampEnabled: false };
   }
 
   public async start(): Promise<void> {
